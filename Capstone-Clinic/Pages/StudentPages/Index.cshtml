@@ -1,0 +1,54 @@
+@page
+@model Capstone_Clinic.Pages.StudentPages.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Student[0].StudentNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Student[0].FullName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Student[0].Course)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Student[0].YearLevel)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Student) {
+        <tr>
+            <td>
+                @Html.DisplayFor(model => item.StudentNumber)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.FullName)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.Course)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.YearLevel)
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.StudentId">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.StudentId">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.StudentId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
