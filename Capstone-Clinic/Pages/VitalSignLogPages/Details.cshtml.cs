@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Capstone_Clinic.Models;
 using Capstone_Clinic.Data;
 
-namespace Capstone_Clinic.Pages.StudentPages;
+namespace Capstone_Clinic.Pages.VitalSignLogPages;
 
 public class DetailsModel : PageModel
 {
@@ -14,7 +14,7 @@ public class DetailsModel : PageModel
         _context = context;
     }
 
-    public Capstone_Clinic.Models.Student Student { get; set; } = default!;
+    public VitalSignLog VitalSignLog { get; set; } = default!;
 
     public async Task<IActionResult> OnGetAsync(int? id)
     {
@@ -23,14 +23,14 @@ public class DetailsModel : PageModel
             return NotFound();
         }
 
-        var student = await _context.Students.FirstOrDefaultAsync(m => m.StudentId == id);
-        if (student is null)
+        var vitalsignlog = await _context.VitalSignLogs.FirstOrDefaultAsync(m => m.VitalSignLogId == id);
+        if (vitalsignlog is null)
         {
             return NotFound();
         }
         else
         {
-            Student = student;
+            VitalSignLog = vitalsignlog;
         }
 
         return Page();

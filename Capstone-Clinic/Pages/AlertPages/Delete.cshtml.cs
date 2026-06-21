@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Capstone_Clinic.Models;
 using Capstone_Clinic.Data;
 
-namespace Capstone_Clinic.Pages.StudentPages;
+namespace Capstone_Clinic.Pages.AlertPages;
 
 public class DeleteModel : PageModel
 {
@@ -16,7 +16,7 @@ public class DeleteModel : PageModel
     }
 
     [BindProperty]
-    public Capstone_Clinic.Models.Student Student { get; set; } = default!;
+    public Alert Alert { get; set; } = default!;
 
     public async Task<IActionResult> OnGetAsync(int? id)
     {
@@ -25,14 +25,14 @@ public class DeleteModel : PageModel
             return NotFound();
         }
 
-        var student = await _context.Students.FirstOrDefaultAsync(m => m.StudentId == id);
-        if (student is null)
+        var alert = await _context.Alerts.FirstOrDefaultAsync(m => m.AlertId == id);
+        if (alert is null)
         {
             return NotFound();
         }
         else
         {
-            Student = student;
+            Alert = alert;
         }
 
         return Page();
@@ -45,11 +45,11 @@ public class DeleteModel : PageModel
             return NotFound();
         }
 
-        var student = await _context.Students.FindAsync(id);
-        if (student != null)
+        var alert = await _context.Alerts.FindAsync(id);
+        if (alert != null)
         {
-            Student = student;
-            _context.Students.Remove(Student);
+            Alert = alert;
+            _context.Alerts.Remove(Alert);
             await _context.SaveChangesAsync();
         }
 

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Capstone_Clinic.Models;
 using Capstone_Clinic.Data;
 
-namespace Capstone_Clinic.Pages.StudentPages;
+namespace Capstone_Clinic.Pages.VitalSignLogPages;
 
 public class EditModel : PageModel
 {
@@ -16,7 +16,7 @@ public class EditModel : PageModel
     }
 
     [BindProperty]
-    public Capstone_Clinic.Models.Student Student { get; set; } = default!;
+    public VitalSignLog VitalSignLog { get; set; } = default!;
 
     public async Task<IActionResult> OnGetAsync(int? id)
     {
@@ -25,14 +25,12 @@ public class EditModel : PageModel
             return NotFound();
         }
 
-        var student = await _context.Students.FirstOrDefaultAsync(m => m.StudentId == id);
-
-        if (student == null)
+        var vitalsignlog = await _context.VitalSignLogs.FirstOrDefaultAsync(m => m.VitalSignLogId == id);
+        if (vitalsignlog is null)
         {
             return NotFound();
         }
-
-        Student = student;
+        VitalSignLog = vitalsignlog;
         return Page();
     }
 
@@ -45,7 +43,7 @@ public class EditModel : PageModel
             return Page();
         }
 
-        _context.Attach(Student).State = EntityState.Modified;
+        _context.Attach(VitalSignLog).State = EntityState.Modified;
 
         try
         {
@@ -53,7 +51,7 @@ public class EditModel : PageModel
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!StudentExists(Student.StudentId))
+            if (!VitalSignLogExists(VitalSignLog.VitalSignLogId))
             {
                 return NotFound();
             }
@@ -66,8 +64,8 @@ public class EditModel : PageModel
         return RedirectToPage("./Index");
     }
 
-    private bool StudentExists(int id)
+    private bool VitalSignLogExists(int id)
     {
-        return _context.Students.Any(e => e.StudentId == id);
+        return _context.VitalSignLogs.Any(e => e.VitalSignLogId == id);
     }
 }

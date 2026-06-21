@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Capstone_Clinic.Models;
 using Capstone_Clinic.Data;
 
-namespace Capstone_Clinic.Pages.StudentPages;
+namespace Capstone_Clinic.Pages.VitalSignLogPages;
 
 public class DeleteModel : PageModel
 {
@@ -16,7 +16,7 @@ public class DeleteModel : PageModel
     }
 
     [BindProperty]
-    public Capstone_Clinic.Models.Student Student { get; set; } = default!;
+    public VitalSignLog VitalSignLog { get; set; } = default!;
 
     public async Task<IActionResult> OnGetAsync(int? id)
     {
@@ -25,14 +25,14 @@ public class DeleteModel : PageModel
             return NotFound();
         }
 
-        var student = await _context.Students.FirstOrDefaultAsync(m => m.StudentId == id);
-        if (student is null)
+        var vitalsignlog = await _context.VitalSignLogs.FirstOrDefaultAsync(m => m.VitalSignLogId == id);
+        if (vitalsignlog is null)
         {
             return NotFound();
         }
         else
         {
-            Student = student;
+            VitalSignLog = vitalsignlog;
         }
 
         return Page();
@@ -45,11 +45,11 @@ public class DeleteModel : PageModel
             return NotFound();
         }
 
-        var student = await _context.Students.FindAsync(id);
-        if (student != null)
+        var vitalsignlog = await _context.VitalSignLogs.FindAsync(id);
+        if (vitalsignlog != null)
         {
-            Student = student;
-            _context.Students.Remove(Student);
+            VitalSignLog = vitalsignlog;
+            _context.VitalSignLogs.Remove(VitalSignLog);
             await _context.SaveChangesAsync();
         }
 

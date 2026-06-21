@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Capstone_Clinic.Models;
 using Capstone_Clinic.Data;
 
-namespace Capstone_Clinic.Pages.StudentPages;
+namespace Capstone_Clinic.Pages.AlertPages;
 
 public class EditModel : PageModel
 {
@@ -16,7 +16,7 @@ public class EditModel : PageModel
     }
 
     [BindProperty]
-    public Capstone_Clinic.Models.Student Student { get; set; } = default!;
+    public Alert Alert { get; set; } = default!;
 
     public async Task<IActionResult> OnGetAsync(int? id)
     {
@@ -25,14 +25,12 @@ public class EditModel : PageModel
             return NotFound();
         }
 
-        var student = await _context.Students.FirstOrDefaultAsync(m => m.StudentId == id);
-
-        if (student == null)
+        var alert = await _context.Alerts.FirstOrDefaultAsync(m => m.AlertId == id);
+        if (alert is null)
         {
             return NotFound();
         }
-
-        Student = student;
+        Alert = alert;
         return Page();
     }
 
@@ -45,7 +43,7 @@ public class EditModel : PageModel
             return Page();
         }
 
-        _context.Attach(Student).State = EntityState.Modified;
+        _context.Attach(Alert).State = EntityState.Modified;
 
         try
         {
@@ -53,7 +51,7 @@ public class EditModel : PageModel
         }
         catch (DbUpdateConcurrencyException)
         {
-            if (!StudentExists(Student.StudentId))
+            if (!AlertExists(Alert.AlertId))
             {
                 return NotFound();
             }
@@ -66,8 +64,8 @@ public class EditModel : PageModel
         return RedirectToPage("./Index");
     }
 
-    private bool StudentExists(int id)
+    private bool AlertExists(int id)
     {
-        return _context.Students.Any(e => e.StudentId == id);
+        return _context.Alerts.Any(e => e.AlertId == id);
     }
 }

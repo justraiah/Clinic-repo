@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Capstone_Clinic.Models;
 using Capstone_Clinic.Data;
 
-namespace Capstone_Clinic.Pages.StudentPages;
+namespace Capstone_Clinic.Pages.MedicalRecordPages;
 
 public class DetailsModel : PageModel
 {
@@ -14,7 +14,7 @@ public class DetailsModel : PageModel
         _context = context;
     }
 
-    public Capstone_Clinic.Models.Student Student { get; set; } = default!;
+    public MedicalRecord MedicalRecord { get; set; } = default!;
 
     public async Task<IActionResult> OnGetAsync(int? id)
     {
@@ -23,14 +23,14 @@ public class DetailsModel : PageModel
             return NotFound();
         }
 
-        var student = await _context.Students.FirstOrDefaultAsync(m => m.StudentId == id);
-        if (student is null)
+        var medicalrecord = await _context.MedicalRecords.FirstOrDefaultAsync(m => m.MedicalRecordId == id);
+        if (medicalrecord is null)
         {
             return NotFound();
         }
         else
         {
-            Student = student;
+            MedicalRecord = medicalrecord;
         }
 
         return Page();

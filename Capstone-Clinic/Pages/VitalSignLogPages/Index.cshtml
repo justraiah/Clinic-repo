@@ -1,0 +1,78 @@
+@page
+@model Capstone_Clinic.Pages.VitalSignLogPages.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.VitalSignLog[0].MedicalRecordId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.VitalSignLog[0].Temperature)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.VitalSignLog[0].HeartRate)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.VitalSignLog[0].OxygenSaturation)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.VitalSignLog[0].SystolicBP)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.VitalSignLog[0].DiastolicBP)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.VitalSignLog[0].RecordedAt)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.VitalSignLog[0].StaffId)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.VitalSignLog) {
+        <tr>
+            <td>
+                @Html.DisplayFor(model => item.MedicalRecordId)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.Temperature)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.HeartRate)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.OxygenSaturation)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.SystolicBP)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.DiastolicBP)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.RecordedAt)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.StaffId)
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.VitalSignLogId">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.VitalSignLogId">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.VitalSignLogId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>

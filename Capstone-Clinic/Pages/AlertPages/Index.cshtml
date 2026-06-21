@@ -1,0 +1,60 @@
+@page
+@model Capstone_Clinic.Pages.AlertPages.IndexModel
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Alert[0].VitalLogId)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Alert[0].AlertType)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Alert[0].AlertMessage)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Alert[0].Status)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Alert[0].CreatedAt)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model.Alert) {
+        <tr>
+            <td>
+                @Html.DisplayFor(model => item.VitalLogId)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.AlertType)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.AlertMessage)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.Status)
+            </td>
+            <td>
+                @Html.DisplayFor(model => item.CreatedAt)
+            </td>
+            <td>
+                <a asp-page="./Edit" asp-route-id="@item.AlertId">Edit</a> |
+                <a asp-page="./Details" asp-route-id="@item.AlertId">Details</a> |
+                <a asp-page="./Delete" asp-route-id="@item.AlertId">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
