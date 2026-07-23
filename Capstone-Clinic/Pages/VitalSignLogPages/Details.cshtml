@@ -7,61 +7,62 @@
 
 <h1>Details</h1>
 
-<div>
-    <h4>VitalSignLog</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.VitalSignLog.MedicalRecordId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.VitalSignLog.MedicalRecordId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.VitalSignLog.Temperature)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.VitalSignLog.Temperature)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.VitalSignLog.HeartRate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.VitalSignLog.HeartRate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.VitalSignLog.OxygenSaturation)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.VitalSignLog.OxygenSaturation)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.VitalSignLog.SystolicBP)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.VitalSignLog.SystolicBP)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.VitalSignLog.DiastolicBP)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.VitalSignLog.DiastolicBP)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.VitalSignLog.RecordedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.VitalSignLog.RecordedAt)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.VitalSignLog.StaffId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.VitalSignLog.StaffId)
-        </dd>
-    </dl>
+<div class="card shadow-sm">
+    <div class="card-header bg-primary text-white">
+        <h4 class="mb-0">Vital Sign Details</h4>
+    </div>
+
+    <div class="card-body">
+
+        <dl class="row">
+
+            <dt class="col-sm-4">Medical Record ID</dt>
+            <dd class="col-sm-8">@Model.VitalSignLog.MedicalRecordId</dd>
+
+            <dt class="col-sm-4">Temperature</dt>
+            <dd class="col-sm-8">
+                @($"{Model.VitalSignLog.Temperature:F1} °C")
+            </dd>
+
+            <dt class="col-sm-4">Heart Rate</dt>
+            <dd class="col-sm-8">
+                @($"{Model.VitalSignLog.HeartRate} BPM")
+            </dd>
+
+            <dt class="col-sm-4">SpO₂</dt>
+            <dd class="col-sm-8">
+                @($"{Model.VitalSignLog.OxygenSaturation}%")
+            </dd>
+
+            <dt class="col-sm-4">Blood Pressure</dt>
+            <dd class="col-sm-8">
+                @($"{Model.VitalSignLog.SystolicBP}/{Model.VitalSignLog.DiastolicBP} mmHg")
+            </dd>
+
+            <dt class="col-sm-4">Recorded At</dt>
+            <dd class="col-sm-8">
+                @Model.VitalSignLog.RecordedAt.ToString("MMMM dd, yyyy hh:mm tt")
+            </dd>
+
+            <dt class="col-sm-4">Recorded By</dt>
+            <dd class="col-sm-8">
+                Staff #@Model.VitalSignLog.StaffId
+            </dd>
+
+        </dl>
+
+    </div>
 </div>
-<div>
-    <a asp-page="./Edit" asp-route-id="@Model.VitalSignLog.VitalSignLogId">Edit</a> |
-    <a asp-page="./Index">Back to List</a>
+
+<div class="mt-3">
+    <a asp-page="./Edit"
+       asp-route-id="@Model.VitalSignLog.VitalSignLogId"
+       class="btn btn-warning">
+        Edit
+    </a>
+
+    <a asp-page="./Index"
+       class="btn btn-secondary">
+        Back
+    </a>
 </div>

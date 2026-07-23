@@ -5,58 +5,106 @@
     ViewData["Title"] = "Edit";
 }
 
-<h1>Edit</h1>
+<h1>Edit Vital Signs</h1>
 
-<h4>VitalSignLog</h4>
+<p class="text-muted">
+    Update the recorded vital sign information.
+</p>
 <hr />
+
 <div class="row">
     <div class="col-md-4">
         <form method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
             <input type="hidden" asp-for="VitalSignLog.VitalSignLogId" />
-            <div class="form-group">
-                <label asp-for="VitalSignLog.MedicalRecordId" class="control-label"></label>
-                <input asp-for="VitalSignLog.MedicalRecordId" class="form-control" />
-                <span asp-validation-for="VitalSignLog.MedicalRecordId" class="text-danger"></span>
+            <input type="hidden" asp-for="VitalSignLog.StaffId" />
+
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="VitalSignLog.MedicalRecordId" class="form-label">
+                    Medical Record ID
+                </label>
+
+                <input asp-for="VitalSignLog.MedicalRecordId"
+                       class="form-control"
+                       readonly />
             </div>
-            <div class="form-group">
-                <label asp-for="VitalSignLog.Temperature" class="control-label"></label>
-                <input asp-for="VitalSignLog.Temperature" class="form-control" />
-                <span asp-validation-for="VitalSignLog.Temperature" class="text-danger"></span>
+
+            <div class="mb-3">
+                <label class="form-label">
+                    Temperature (°C)
+                </label>
+
+                <input asp-for="VitalSignLog.Temperature"
+                       class="form-control"
+                       min="30"
+                       max="45"
+                       step="0.1" />
             </div>
-            <div class="form-group">
-                <label asp-for="VitalSignLog.HeartRate" class="control-label"></label>
-                <input asp-for="VitalSignLog.HeartRate" class="form-control" />
-                <span asp-validation-for="VitalSignLog.HeartRate" class="text-danger"></span>
+
+            <div class="mb-3">
+                <label class="form-label">
+                    Heart Rate (BPM)
+                </label>
+
+                <input asp-for="VitalSignLog.HeartRate"
+                       class="form-control"
+                       min="20"
+                       max="250" />
             </div>
-            <div class="form-group">
-                <label asp-for="VitalSignLog.OxygenSaturation" class="control-label"></label>
-                <input asp-for="VitalSignLog.OxygenSaturation" class="form-control" />
-                <span asp-validation-for="VitalSignLog.OxygenSaturation" class="text-danger"></span>
+
+            <div class="mb-3">
+                <label class="form-label">
+                    SpO₂ (%)
+                </label>
+
+                <input asp-for="VitalSignLog.OxygenSaturation"
+                       class="form-control"
+                       min="0"
+                       max="100" />
             </div>
-            <div class="form-group">
-                <label asp-for="VitalSignLog.SystolicBP" class="control-label"></label>
-                <input asp-for="VitalSignLog.SystolicBP" class="form-control" />
-                <span asp-validation-for="VitalSignLog.SystolicBP" class="text-danger"></span>
+
+            <label class="form-label">
+                Blood Pressure
+            </label>
+
+            <div class="row mb-3">
+
+                <div class="col">
+                    <input asp-for="VitalSignLog.SystolicBP"
+                           class="form-control"
+                           placeholder="Systolic" />
+                </div>
+
+                <div class="col">
+                    <input asp-for="VitalSignLog.DiastolicBP"
+                           class="form-control"
+                           placeholder="Diastolic" />
+                </div>
+
             </div>
-            <div class="form-group">
-                <label asp-for="VitalSignLog.DiastolicBP" class="control-label"></label>
-                <input asp-for="VitalSignLog.DiastolicBP" class="form-control" />
-                <span asp-validation-for="VitalSignLog.DiastolicBP" class="text-danger"></span>
+
+            <div class="mb-3">
+                <label class="form-label">
+                    Recorded At
+                </label>
+
+                <input asp-for="VitalSignLog.RecordedAt"
+                       class="form-control"
+                       readonly />
             </div>
-            <div class="form-group">
-                <label asp-for="VitalSignLog.RecordedAt" class="control-label"></label>
-                <input asp-for="VitalSignLog.RecordedAt" class="form-control" />
-                <span asp-validation-for="VitalSignLog.RecordedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="VitalSignLog.StaffId" class="control-label"></label>
-                <input asp-for="VitalSignLog.StaffId" class="form-control" />
-                <span asp-validation-for="VitalSignLog.StaffId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
+
+            <button type="submit"
+                    class="btn btn-warning">
+                Update Vital Signs
+            </button>
+
+            <a asp-page="./Index"
+               class="btn btn-secondary">
+                Cancel
+            </a>
+
         </form>
     </div>
 </div>
