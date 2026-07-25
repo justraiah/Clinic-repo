@@ -5,39 +5,46 @@
     ViewData["Title"] = "Create";
 }
 
-<h1>Record Vital Signs</h1>
-
 <p class="text-muted">
-    Enter the student's vital sign measurements below.
+    Record the student's vital signs. Heart Rate and SpO₂ can be captured from the sensor, while Temperature and Blood Pressure are entered manually.
 </p>
 
 <hr />
-<div class="row">
-    <div class="col-md-4">
-        <form method="post">
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+
+        <div class="card shadow">
+
+            <div class="card-header bg-primary text-white">
+                <h4 class="mb-0">
+                    Record Student Vital Signs
+                </h4>
+            </div>
+
+            <div class="card-body">
+
+                <form method="post">
+            <h5 class="mb-3 text-primary">
+                📡 Sensor Readings
+            </h5>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
             <div class="mb-3">
                 <label asp-for="VitalSignLog.MedicalRecordId" class="form-label">
-                    Student ID
+                    Student
                 </label>
                 <input asp-for="VitalSignLog.MedicalRecordId" class="form-control" />
                 <span asp-validation-for="VitalSignLog.MedicalRecordId" class="text-danger"></span>
             </div>
 
             <div class="mb-3">
-                <label asp-for="VitalSignLog.Temperature" class="form-label">
-                    Temperature (°C)
-                </label>
-                <input asp-for="VitalSignLog.Temperature" class="form-control" />
-                <span asp-validation-for="VitalSignLog.Temperature" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
                 <label asp-for="VitalSignLog.HeartRate" class="form-label">
                     Heart Rate (BPM)
                 </label>
-                <input asp-for="VitalSignLog.HeartRate" class="form-control" />
+                <input asp-for="VitalSignLog.HeartRate"
+                       class="form-control"
+                       readonly
+                       placeholder="Press 'Read Sensor'" />
                 <span asp-validation-for="VitalSignLog.HeartRate" class="text-danger"></span>
             </div>
 
@@ -45,8 +52,37 @@
                 <label asp-for="VitalSignLog.OxygenSaturation" class="form-label">
                     SpO₂ (%)
                 </label>
-                <input asp-for="VitalSignLog.OxygenSaturation" class="form-control" />
+                <input asp-for="VitalSignLog.OxygenSaturation"
+                       class="form-control"
+                       readonly
+                       placeholder="Press 'Read Sensor'" />
                 <span asp-validation-for="VitalSignLog.OxygenSaturation" class="text-danger"></span>
+            </div>
+
+            <div class="mb-4">
+                <button type="button"
+                        class="btn btn-outline-primary w-100"
+                        disabled>
+                    📡 Read Sensor (Coming Soon)
+                </button>
+            </div>
+
+            <hr />
+
+            <h5 class="mb-3 text-success">
+                ✍️ Manual Measurements
+            </h5>
+
+            <div class="mb-3">
+                <label asp-for="VitalSignLog.Temperature" class="form-label">
+                    Temperature (°C)
+                </label>
+
+                <input asp-for="VitalSignLog.Temperature"
+                       class="form-control" />
+
+                <span asp-validation-for="VitalSignLog.Temperature"
+                      class="text-danger"></span>
             </div>
 
             <label class="form-label">
@@ -72,20 +108,21 @@
             <div class="mb-3">
                 <input type="hidden" asp-for="VitalSignLog.StaffId" value="1" />
             </div>
-            <button type="submit" class="btn btn-success">
-                Save Vital Signs
+            <button type="submit" class="btn btn-success px-4">
+                💾 Save Vital Signs
             </button>
 
-            <a asp-page="./Index" class="btn btn-secondary">
+            <a asp-page="./Index" class="btn btn-outline-secondary ms-2">
                 Cancel
             </a>
 
-        </form>
-    </div>
-</div>
+                </form>
 
-<div>
-    <a asp-page="./Index">Back to List</a>
+            </div>
+
+        </div>
+
+    </div>
 </div>
 
 @section Scripts {
