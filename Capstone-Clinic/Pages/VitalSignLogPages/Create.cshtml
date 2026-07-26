@@ -29,13 +29,22 @@
             </h5>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-            <div class="mb-3">
-                <label asp-for="VitalSignLog.MedicalRecordId" class="form-label">
-                    Student
-                </label>
-                <input asp-for="VitalSignLog.MedicalRecordId" class="form-control" />
-                <span asp-validation-for="VitalSignLog.MedicalRecordId" class="text-danger"></span>
-            </div>
+                    <div class="mb-3">
+                        <label asp-for="SelectedStudentId" class="form-label">
+                            Student
+                        </label>
+
+                        <select asp-for="SelectedStudentId"
+                                asp-items="Model.StudentList"
+                                class="form-select">
+
+                            <option value="">-- Select Student --</option>
+
+                        </select>
+
+                        <span asp-validation-for="SelectedStudentId"
+                              class="text-danger"></span>
+                    </div>
 
             <div class="mb-3">
                 <label asp-for="VitalSignLog.HeartRate" class="form-label">

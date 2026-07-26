@@ -20,10 +20,16 @@ public class CreateModel : PageModel
     public IActionResult OnGet()
     {
         StudentList = new SelectList(
-            _context.MedicalRecords.ToList(),
-            "MedicalRecordId",
-            "MedicalRecordId"
-        );
+    _context.Students
+        .Select(s => new
+        {
+            s.StudentId,
+            Display = s.StudentNumber + " - " + s.FullName
+        })
+        .ToList(),
+    "StudentId",
+    "Display"
+);
 
         VitalSignLog = new VitalSignLog
         {
@@ -35,6 +41,8 @@ public class CreateModel : PageModel
 
     [BindProperty]
     public VitalSignLog VitalSignLog { get; set; } = default!;
+    [BindProperty]
+    public int SelectedStudentId { get; set; }
     public SelectList StudentList { get; set; } = default!;
 
     // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD.
@@ -42,14 +50,49 @@ public class CreateModel : PageModel
     {
         if (!ModelState.IsValid)
         {
+            StudentList = new SelectList(
+                _context.Students
+                    .Select(s => new
+                    {
+                        s.StudentId,
+                        Display = s.StudentNumber + " - " + s.FullName
+                    })
+                    .ToList(),
+                "StudentId",
+                "Display"
+            );
+
             return Page();
         }
 
+        var medicalRecord = await _context.MedicalRecords
+            .FirstOrDefaultAsync(m => m.StudentId == SelectedStudentId);
+
+        if (medicalRecord == null)
+        {
+            ModelState.AddModelError("", "No medical record found for the selected student.");
+
+            StudentList = new SelectList(
+                _context.Students
+                    .Select(s => new
+                    {
+                        s.StudentId,
+                        Display = s.StudentNumber + " - " + s.FullName
+                    })
+                    .ToList(),
+                "StudentId",
+                "Display"
+            );
+
+            return Page();
+        }
+
+        VitalSignLog.MedicalRecordId = medicalRecord.MedicalRecordId;
         VitalSignLog.StaffId = 1;
         VitalSignLog.RecordedAt = DateTime.Now;
 
-        await _context.SaveChangesAsync();
         _context.VitalSignLogs.Add(VitalSignLog);
+        await _context.SaveChangesAsync();
 
         return RedirectToPage("./Index");
     }
