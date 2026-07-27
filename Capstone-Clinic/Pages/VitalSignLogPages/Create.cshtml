@@ -29,22 +29,62 @@
             </h5>
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                    <div class="mb-3">
-                        <label asp-for="SelectedStudentId" class="form-label">
-                            Student
-                        </label>
+                    @if (!string.IsNullOrEmpty(Model.StudentName))
+                    {
+                        <div class="card border-primary mb-4">
 
-                        <select asp-for="SelectedStudentId"
-                                asp-items="Model.StudentList"
-                                class="form-select">
+                            <div class="card-header bg-primary text-white">
+                                👤 Student Information
+                            </div>
 
-                            <option value="">-- Select Student --</option>
+                            <div class="card-body">
 
-                        </select>
+                                <div class="mb-3">
+                                    <label class="form-label fw-semibold">
+                                        Student Number
+                                    </label>
 
-                        <span asp-validation-for="SelectedStudentId"
-                              class="text-danger"></span>
-                    </div>
+                                    <input class="form-control"
+                                           value="@Model.StudentNumber"
+                                           readonly />
+                                </div>
+
+                                <div class="mb-0">
+                                    <label class="form-label fw-semibold">
+                                        Student Name
+                                    </label>
+
+                                    <input class="form-control"
+                                           value="@Model.StudentName"
+                                           readonly />
+                                </div>
+
+                                <input type="hidden"
+                                       asp-for="VitalSignLog.MedicalRecordId" />
+
+                            </div>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="mb-3">
+                            <label asp-for="SelectedStudentId" class="form-label">
+                                Student
+                            </label>
+
+                            <select asp-for="SelectedStudentId"
+                                    asp-items="Model.StudentList"
+                                    class="form-select">
+
+                                <option value="">-- Select Student --</option>
+
+                            </select>
+
+                            <span asp-validation-for="SelectedStudentId"
+                                  class="text-danger"></span>
+                        </div>
+                    }
 
             <div class="mb-3">
                 <label asp-for="VitalSignLog.HeartRate" class="form-label">
@@ -94,23 +134,37 @@
                       class="text-danger"></span>
             </div>
 
-            <label class="form-label">
-                Blood Pressure (mmHg)
-            </label>
+                    <div class="row mb-3">
 
-            <div class="row mb-3">
-                <div class="col">
-                    <input asp-for="VitalSignLog.SystolicBP"
-                           class="form-control"
-                           placeholder="Systolic" />
-                </div>
+                        <div class="col-md-6">
+                            <label asp-for="VitalSignLog.SystolicBP"
+                                   class="form-label fw-semibold">
+                                Systolic Pressure (mmHg)
+                            </label>
 
-                <div class="col">
-                    <input asp-for="VitalSignLog.DiastolicBP"
-                           class="form-control"
-                           placeholder="Diastolic" />
-                </div>
-            </div>
+                            <input asp-for="VitalSignLog.SystolicBP"
+                                   class="form-control"
+                                   placeholder="e.g. 120" />
+
+                            <span asp-validation-for="VitalSignLog.SystolicBP"
+                                  class="text-danger"></span>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label asp-for="VitalSignLog.DiastolicBP"
+                                   class="form-label fw-semibold">
+                                Diastolic Pressure (mmHg)
+                            </label>
+
+                            <input asp-for="VitalSignLog.DiastolicBP"
+                                   class="form-control"
+                                   placeholder="e.g. 80" />
+
+                            <span asp-validation-for="VitalSignLog.DiastolicBP"
+                                  class="text-danger"></span>
+                        </div>
+
+                    </div>
 
 
 

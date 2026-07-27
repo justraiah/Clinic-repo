@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Capstone_Clinic.Models;
 using Capstone_Clinic.Data;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Capstone_Clinic.Helpers;
 
 namespace Capstone_Clinic.Pages.VitalSignLogPages;
 
@@ -17,19 +18,50 @@ public class CreateModel : PageModel
         _context = context;
     }
 
-    public IActionResult OnGet()
+    public string StudentNumber { get; set; } = "";
+
+    public string StudentName { get; set; } = "";
+
+    public IActionResult OnGet(int? medicalRecordId)
     {
-        StudentList = new SelectList(
-    _context.Students
-        .Select(s => new
+        if (medicalRecordId.HasValue)
         {
-            s.StudentId,
-            Display = s.StudentNumber + " - " + s.FullName
-        })
-        .ToList(),
-    "StudentId",
-    "Display"
-);
+            VitalSignLog = new VitalSignLog
+            {
+                MedicalRecordId = medicalRecordId.Value,
+                RecordedAt = DateTime.Now
+            };
+
+            var medicalRecord = _context.MedicalRecords
+                .FirstOrDefault(m => m.MedicalRecordId == medicalRecordId.Value);
+
+            if (medicalRecord != null)
+            {
+                var student = _context.Students
+                    .FirstOrDefault(s => s.StudentId == medicalRecord.StudentId);
+
+                if (student != null)
+                {
+                    StudentNumber = student.StudentNumber;
+                    StudentName = student.FullName;
+                }
+            }
+
+            return Page();
+        }
+
+        // Fallback if opened directly
+        StudentList = new SelectList(
+            _context.Students
+                .Select(s => new
+                {
+                    s.StudentId,
+                    Display = s.StudentNumber + " - " + s.FullName
+                })
+                .ToList(),
+            "StudentId",
+            "Display"
+        );
 
         VitalSignLog = new VitalSignLog
         {
@@ -65,12 +97,9 @@ public class CreateModel : PageModel
             return Page();
         }
 
-        var medicalRecord = await _context.MedicalRecords
-            .FirstOrDefaultAsync(m => m.StudentId == SelectedStudentId);
-
-        if (medicalRecord == null)
+        if (VitalSignLog.MedicalRecordId == 0)
         {
-            ModelState.AddModelError("", "No medical record found for the selected student.");
+            ModelState.AddModelError("", "Medical Record not found.");
 
             StudentList = new SelectList(
                 _context.Students
@@ -86,11 +115,9 @@ public class CreateModel : PageModel
 
             return Page();
         }
-
-        VitalSignLog.MedicalRecordId = medicalRecord.MedicalRecordId;
         VitalSignLog.StaffId = 1;
         VitalSignLog.RecordedAt = DateTime.Now;
-
+        VitalSignEvaluator.Evaluate(VitalSignLog);
         _context.VitalSignLogs.Add(VitalSignLog);
         await _context.SaveChangesAsync();
 

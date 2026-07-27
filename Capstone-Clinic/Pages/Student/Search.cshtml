@@ -1,4 +1,130 @@
 ﻿@page
 @model Capstone_Clinic.Pages.Student.SearchModel
 @{
+    ViewData["Title"] = "Student Lookup";
 }
+
+<div class="container mt-4">
+
+    <div class="card shadow">
+
+        <div class="card-header bg-primary text-white">
+            <h4 class="mb-0">🔍 Student Lookup</h4>
+        </div>
+
+        <div class="card-body">
+
+            <p class="text-muted">
+                Search a student using their Student Number.
+            </p>
+
+            <form method="post">
+
+                <div class="row">
+
+                    <div class="col-md-9">
+                        <input asp-for="SearchStudentNumber"
+                               class="form-control"
+                               placeholder="Enter Student Number (e.g. 26-00001)" />
+                    </div>
+
+                    <div class="col-md-3">
+                        <button class="btn btn-primary w-100">
+                            Search
+                        </button>
+                    </div>
+
+                </div>
+
+            </form>
+
+            <hr />
+
+            @if (Model.Student != null)
+            {
+                <h5 class="text-success">
+                    Student Information
+                </h5>
+
+                <table class="table table-bordered">
+
+                    <tr>
+                        <th width="220">Student Number</th>
+                        <td>@Model.Student.StudentNumber</td>
+                    </tr>
+
+                    <tr>
+                        <th>Full Name</th>
+                        <td>@Model.Student.FullName</td>
+                    </tr>
+
+                    <tr>
+                        <th>Course</th>
+                        <td>@Model.Student.Course</td>
+                    </tr>
+
+                    <tr>
+                        <th>Year Level</th>
+                        <td>@Model.Student.YearLevel</td>
+                    </tr>
+
+                </table>
+
+                <div class="mt-4">
+
+                    <h5 class="mt-4 text-primary">
+                        📋 Clinic Actions
+                    </h5>
+
+                    <div class="d-grid gap-2">
+
+                        @if (Model.HasMedicalRecord)
+                        {
+                            <a class="btn btn-success"
+                               asp-page="/MedicalRecordPages/Details"
+                               asp-route-id="@Model.MedicalRecordId">
+                                📄 Open Medical Record
+                            </a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-primary"
+                               asp-page="/MedicalRecordPages/Create"
+                               asp-route-studentId="@Model.Student.StudentId">
+                                ➕ Create Medical Record
+                            </a>
+                        }
+
+                        <button class="btn btn-outline-primary" disabled>
+                            ❤️ Record Vital Signs (Coming Soon)
+                        </button>
+
+                        <button class="btn btn-outline-secondary" disabled>
+                            🩺 Consultation (Coming Soon)
+                        </button>
+
+                        <button class="btn btn-outline-secondary" disabled>
+                            📜 Visit History (Coming Soon)
+                        </button>
+
+                        <button class="btn btn-outline-warning" disabled>
+                            ⚠ Alerts (Coming Soon)
+                        </button>
+
+                    </div>
+
+                </div>
+            }
+
+            @if (Model.StudentNotFound)
+            {
+                <div class="alert alert-danger mt-3">
+                    Student not found.
+                </div>
+            }
+
+        </div>
+
+    </div>
+
+</div>

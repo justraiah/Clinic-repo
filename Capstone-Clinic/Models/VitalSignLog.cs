@@ -19,5 +19,8 @@
         public DateTime RecordedAt { get; set; }
 
         public int StaffId { get; set; }
+        public string Status { get; set; } = "Normal";
+
+        public string Remarks { get; set; } = "";
     }
 }

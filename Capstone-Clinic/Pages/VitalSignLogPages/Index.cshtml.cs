@@ -14,27 +14,53 @@ public class IndexModel : PageModel
     }
 
     public List<VitalSignDisplayModel> VitalSigns { get; set; } = new();
+    public int? MedicalRecordId { get; set; }
 
-    public async Task OnGetAsync()
+    public string StudentName { get; set; } = "";
+    public async Task OnGetAsync (int? medicalRecordId) 
     {
-        VitalSigns = await (
-            from v in _context.VitalSignLogs
-            join m in _context.MedicalRecords
-                on v.MedicalRecordId equals m.MedicalRecordId
-            join s in _context.Students
-                on m.StudentId equals s.StudentId
-            select new VitalSignDisplayModel
-            {
-                VitalSignLogId = v.VitalSignLogId,
-                Student = s.StudentNumber + " - " + s.FullName,
-                Temperature = v.Temperature,
-                HeartRate = v.HeartRate,
-                OxygenSaturation = v.OxygenSaturation,
-                SystolicBP = v.SystolicBP,
-                DiastolicBP = v.DiastolicBP,
-                RecordedAt = v.RecordedAt,
-                StaffId = v.StaffId
-            }).ToListAsync();
+        MedicalRecordId = medicalRecordId;
+        var query =
+    from v in _context.VitalSignLogs
+    join m in _context.MedicalRecords
+        on v.MedicalRecordId equals m.MedicalRecordId
+    join s in _context.Students
+        on m.StudentId equals s.StudentId
+    select new
+    {
+        Vital = v,
+        Student = s
+    };
+        if (medicalRecordId.HasValue)
+        {
+            query = query.Where(x => x.Vital.MedicalRecordId == medicalRecordId.Value);
+
+            var student = await _context.MedicalRecords
+                .Where(m => m.MedicalRecordId == medicalRecordId.Value)
+                .Join(_context.Students,
+                      m => m.StudentId,
+                      s => s.StudentId,
+                      (m, s) => s.FullName)
+                .FirstOrDefaultAsync();
+
+            StudentName = student ?? "";
+        }
+        VitalSigns = await query
+    .Select(x => new VitalSignDisplayModel
+    {
+        VitalSignLogId = x.Vital.VitalSignLogId,
+        Student = x.Student.StudentNumber + " - " + x.Student.FullName,
+        Temperature = x.Vital.Temperature,
+        HeartRate = x.Vital.HeartRate,
+        OxygenSaturation = x.Vital.OxygenSaturation,
+        SystolicBP = x.Vital.SystolicBP,
+        DiastolicBP = x.Vital.DiastolicBP,
+        RecordedAt = x.Vital.RecordedAt,
+        StaffId = x.Vital.StaffId,
+        Status = x.Vital.Status,
+        Remarks = x.Vital.Remarks
+    })
+    .ToListAsync();
     }
 
     public class VitalSignDisplayModel
@@ -56,5 +82,8 @@ public class IndexModel : PageModel
         public DateTime RecordedAt { get; set; }
 
         public int StaffId { get; set; }
+        public string Status { get; set; } = "";
+
+        public string Remarks { get; set; } = "";
     }
 }

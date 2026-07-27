@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Capstone_Clinic.Models;
 using Capstone_Clinic.Data;
+using Capstone_Clinic.Helpers;
 
 namespace Capstone_Clinic.Pages.VitalSignLogPages;
 
@@ -42,6 +43,7 @@ public class EditModel : PageModel
         {
             return Page();
         }
+        VitalSignEvaluator.Evaluate(VitalSignLog);
 
         _context.Attach(VitalSignLog).State = EntityState.Modified;
 
