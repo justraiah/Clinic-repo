@@ -15,6 +15,7 @@
         public int SystolicBP { get; set; }
 
         public int DiastolicBP { get; set; }
+        public string VisitReason { get; set; } = "";
 
         public DateTime RecordedAt { get; set; }
 

@@ -15,6 +15,11 @@ public class DetailsModel : PageModel
     }
 
     public Alert Alert { get; set; } = default!;
+    public VitalSignLog VitalSign { get; set; } = default!;
+
+    public MedicalRecord MedicalRecord { get; set; } = default!;
+
+    public Capstone_Clinic.Models.Student Student { get; set; } = default!;
 
     public async Task<IActionResult> OnGetAsync(int? id)
     {
@@ -31,6 +36,18 @@ public class DetailsModel : PageModel
         else
         {
             Alert = alert;
+
+            VitalSign = await _context.VitalSignLogs
+                .FirstOrDefaultAsync(v => v.VitalSignLogId == Alert.VitalLogId)
+                ?? new VitalSignLog();
+
+            MedicalRecord = await _context.MedicalRecords
+                .FirstOrDefaultAsync(m => m.MedicalRecordId == VitalSign.MedicalRecordId)
+                ?? new MedicalRecord();
+
+            Student = await _context.Students
+                .FirstOrDefaultAsync(s => s.StudentId == MedicalRecord.StudentId)
+                ?? new Capstone_Clinic.Models.Student();
         }
 
         return Page();

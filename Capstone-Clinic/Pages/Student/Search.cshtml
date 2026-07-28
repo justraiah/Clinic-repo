@@ -42,9 +42,19 @@
 
             @if (Model.Student != null)
             {
-                <h5 class="text-success">
-                    Student Information
-                </h5>
+                <div class="d-flex justify-content-between align-items-center mb-3">
+
+                    <h5 class="text-success mb-0">
+                        Student Information
+                    </h5>
+
+                    <a asp-page="/StudentPages/Edit"
+                       asp-route-id="@Model.Student.StudentId"
+                       class="btn btn-sm btn-outline-primary">
+                        ✏️ Edit Student
+                    </a>
+
+                </div>
 
                 <table class="table table-bordered">
 
@@ -66,6 +76,42 @@
                     <tr>
                         <th>Year Level</th>
                         <td>@Model.Student.YearLevel</td>
+                    </tr>
+                    <tr>
+                        <th>Medical Requirements</th>
+
+                        <td>
+
+                            @if (Model.Student.MedicalRequirementStatus == "Complete")
+                            {
+                                <span class="badge bg-success">
+                                    🟢 Complete
+                                </span>
+                            }
+                            else if (Model.Student.MedicalRequirementStatus == "Pending Review")
+                            {
+                                <span class="badge bg-warning text-dark">
+                                    🟡 Pending Review
+                                </span>
+                            }
+                            else if (Model.Student.MedicalRequirementStatus == "Incomplete")
+                            {
+                                <span class="badge bg-danger">
+                                    🟠 Incomplete
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-secondary">
+                                    ⚪ Not Submitted
+                                </span>
+                            }
+
+                            <div class="form-text">
+                                This status does not restrict clinic services.
+                            </div>
+
+                        </td>
                     </tr>
 
                 </table>
@@ -118,8 +164,22 @@
 
             @if (Model.StudentNotFound)
             {
-                <div class="alert alert-danger mt-3">
-                    Student not found.
+                <div class="alert alert-warning mt-3">
+
+                    <h5 class="mb-2">
+                        ⚠️ Student Not Found
+                    </h5>
+
+                    <p class="mb-3">
+                        No student was found using that Student Number.
+                        You can register the student and continue with clinic care.
+                    </p>
+
+                    <a asp-page="/StudentPages/Create"
+                       class="btn btn-primary">
+                        ➕ Add New Student
+                    </a>
+
                 </div>
             }
 

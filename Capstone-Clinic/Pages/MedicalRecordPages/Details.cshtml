@@ -27,6 +27,72 @@
             Last Visit:
             @Model.MedicalRecord.VisitDate.ToString("MMMM dd, yyyy")
         </small>
+        <div class="row mt-4 mb-4">
+
+            <div class="col-md-4">
+                <div class="card border-danger shadow-sm">
+                    <div class="card-body text-center">
+
+                        <h2 class="text-danger">
+                            @Model.CriticalVisits
+                        </h2>
+
+                        <h6>Critical Visits</h6>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card border-warning shadow-sm">
+                    <div class="card-body text-center">
+
+                        <h2 class="text-warning">
+                            @Model.TotalVisits
+                        </h2>
+
+                        <h6>Total Vital Records</h6>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card border-success shadow-sm">
+                    <div class="card-body text-center">
+
+                        @if (Model.LatestStatus == "Critical")
+                        {
+                            <h2 class="text-danger">
+                                🔴 Critical
+                            </h2>
+                        }
+                        else if (Model.LatestStatus == "Warning")
+                        {
+                            <h2 class="text-warning">
+                                🟡 Warning
+                            </h2>
+                        }
+                        else if (Model.LatestStatus == "Normal")
+                        {
+                            <h2 class="text-success">
+                                🟢 Normal
+                            </h2>
+                        }
+                        else
+                        {
+                            <h2 class="text-secondary">
+                                No Records
+                            </h2>
+                        }
+
+                        <h6>Latest Status</h6>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
 
     <div class="d-flex flex-wrap gap-3">
 

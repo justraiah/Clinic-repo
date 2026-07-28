@@ -15,6 +15,11 @@ public class DetailsModel : PageModel
     }
 
     public MedicalRecord MedicalRecord { get; set; } = default!;
+    public int TotalVisits { get; set; }
+
+    public int CriticalVisits { get; set; }
+
+    public string LatestStatus { get; set; } = "";
 
     public Capstone_Clinic.Models.Student Student { get; set; } = default!;
     public List<VitalSignLog> RecentVitalSigns { get; set; } = new();
@@ -44,8 +49,22 @@ public class DetailsModel : PageModel
     .OrderByDescending(v => v.RecordedAt)
     .Take(5)
     .ToListAsync();
+            TotalVisits = await _context.VitalSignLogs
+    .CountAsync(v => v.MedicalRecordId == MedicalRecord.MedicalRecordId);
+
+            CriticalVisits = await _context.VitalSignLogs
+                .CountAsync(v =>
+                    v.MedicalRecordId == MedicalRecord.MedicalRecordId &&
+                    v.Status == "Critical");
+
+            LatestStatus = await _context.VitalSignLogs
+                .Where(v => v.MedicalRecordId == MedicalRecord.MedicalRecordId)
+                .OrderByDescending(v => v.RecordedAt)
+                .Select(v => v.Status)
+                .FirstOrDefaultAsync() ?? "No Records";
         }
 
         return Page();
     }
 }
+

@@ -101,16 +101,13 @@
             </button>
 
             <a asp-page="./Index"
+               asp-route-medicalRecordId="@Model.VitalSignLog.MedicalRecordId"
                class="btn btn-secondary">
                 Cancel
             </a>
 
         </form>
     </div>
-</div>
-
-<div>
-    <a asp-page="./Index">Back to List</a>
 </div>
 
 @section Scripts {

@@ -17,9 +17,12 @@ public class DeleteModel : PageModel
 
     [BindProperty]
     public VitalSignLog VitalSignLog { get; set; } = default!;
+    [BindProperty(SupportsGet = true)]
+    public int? MedicalRecordId { get; set; }
 
-    public async Task<IActionResult> OnGetAsync(int? id)
+    public async Task<IActionResult> OnGetAsync(int? id, int? medicalRecordId)
     {
+        MedicalRecordId = medicalRecordId;
         if (id == null)
         {
             return NotFound();
@@ -38,8 +41,11 @@ public class DeleteModel : PageModel
         return Page();
     }
 
-    public async Task<IActionResult> OnPostAsync(int? id)
+    public async Task<IActionResult> OnPostAsync(
+    int? id,
+    int? medicalRecordId)
     {
+        MedicalRecordId = medicalRecordId;
         if (id == null)
         {
             return NotFound();
@@ -51,6 +57,14 @@ public class DeleteModel : PageModel
             VitalSignLog = vitalsignlog;
             _context.VitalSignLogs.Remove(VitalSignLog);
             await _context.SaveChangesAsync();
+        }
+
+        if (MedicalRecordId.HasValue)
+        {
+            return RedirectToPage(
+                "./Index",
+                new { medicalRecordId = MedicalRecordId }
+            );
         }
 
         return RedirectToPage("./Index");

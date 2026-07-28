@@ -7,61 +7,93 @@
 
 <h1>Details</h1>
 
-<div class="card shadow-sm">
-    <div class="card-header bg-primary text-white">
-        <h4 class="mb-0">Vital Sign Details</h4>
+<div class="card-body">
+
+    <div class="mb-4">
+        <h5 class="text-primary">👤 Student</h5>
+        <p class="fs-5 mb-0">@Model.StudentName</p>
     </div>
 
-    <div class="card-body">
+    <hr />
 
-        <dl class="row">
+    <div class="row">
 
-            <dt class="col-sm-4">Medical Record ID</dt>
-            <dd class="col-sm-8">@Model.VitalSignLog.MedicalRecordId</dd>
+        <div class="col-md-6 mb-3">
+            <strong>🩺 Visit Reason</strong><br />
+            @(string.IsNullOrWhiteSpace(Model.VitalSignLog.VisitReason)
+                ? "—"
+                : Model.VitalSignLog.VisitReason)
+        </div>
 
-            <dt class="col-sm-4">Temperature</dt>
-            <dd class="col-sm-8">
-                @($"{Model.VitalSignLog.Temperature:F1} °C")
-            </dd>
+        <div class="col-md-6 mb-3">
+            <strong>📊 Status</strong><br />
 
-            <dt class="col-sm-4">Heart Rate</dt>
-            <dd class="col-sm-8">
-                @($"{Model.VitalSignLog.HeartRate} BPM")
-            </dd>
+            @if (Model.VitalSignLog.Status == "Critical")
+            {
+                <span class="badge bg-danger">🔴 Critical</span>
+            }
+            else if (Model.VitalSignLog.Status == "Warning")
+            {
+                <span class="badge bg-warning text-dark">🟡 Warning</span>
+            }
+            else
+            {
+                <span class="badge bg-success">🟢 Normal</span>
+            }
 
-            <dt class="col-sm-4">SpO₂</dt>
-            <dd class="col-sm-8">
-                @($"{Model.VitalSignLog.OxygenSaturation}%")
-            </dd>
+        </div>
 
-            <dt class="col-sm-4">Blood Pressure</dt>
-            <dd class="col-sm-8">
-                @($"{Model.VitalSignLog.SystolicBP}/{Model.VitalSignLog.DiastolicBP} mmHg")
-            </dd>
+        <div class="col-md-6 mb-3">
+            <strong>🌡 Temperature</strong><br />
+            @($"{Model.VitalSignLog.Temperature:F1} °C")
+        </div>
 
-            <dt class="col-sm-4">Recorded At</dt>
-            <dd class="col-sm-8">
-                @Model.VitalSignLog.RecordedAt.ToString("MMMM dd, yyyy hh:mm tt")
-            </dd>
+        <div class="col-md-6 mb-3">
+            <strong>❤️ Heart Rate</strong><br />
+            @($"{Model.VitalSignLog.HeartRate} BPM")
+        </div>
 
-            <dt class="col-sm-4">Recorded By</dt>
-            <dd class="col-sm-8">
-                Staff #@Model.VitalSignLog.StaffId
-            </dd>
+        <div class="col-md-6 mb-3">
+            <strong>🫁 SpO₂</strong><br />
+            @($"{Model.VitalSignLog.OxygenSaturation}%")
+        </div>
 
-        </dl>
+        <div class="col-md-6 mb-3">
+            <strong>🩸 Blood Pressure</strong><br />
+            @($"{Model.VitalSignLog.SystolicBP}/{Model.VitalSignLog.DiastolicBP} mmHg")
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <strong>📝 Remarks</strong><br />
+            @(string.IsNullOrWhiteSpace(Model.VitalSignLog.Remarks)
+                ? "—"
+                : Model.VitalSignLog.Remarks)
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <strong>📅 Recorded At</strong><br />
+            @Model.VitalSignLog.RecordedAt.ToString("MMMM dd, yyyy hh:mm tt")
+        </div>
+
+        <div class="col-md-6 mb-3">
+            <strong>👨‍⚕️ Recorded By</strong><br />
+            Staff #@Model.VitalSignLog.StaffId
+        </div>
 
     </div>
+
 </div>
 
 <div class="mt-3">
     <a asp-page="./Edit"
        asp-route-id="@Model.VitalSignLog.VitalSignLogId"
+       asp-route-medicalRecordId="@Model.MedicalRecordId"
        class="btn btn-warning">
         Edit
     </a>
 
     <a asp-page="./Index"
+       asp-route-medicalRecordId="@Model.MedicalRecordId"
        class="btn btn-secondary">
         Back
     </a>

@@ -63,12 +63,16 @@
             <input type="hidden"
                    asp-for="VitalSignLog.VitalSignLogId" />
 
+            <input type="hidden"
+                   asp-for="MedicalRecordId" />
+
             <button type="submit"
                     class="btn btn-danger">
                 Delete Record
             </button>
 
             <a asp-page="./Index"
+               asp-route-medicalRecordId="@Model.MedicalRecordId"
                class="btn btn-secondary">
                 Cancel
             </a>

@@ -17,6 +17,13 @@ public class IndexModel : PageModel
     public int? MedicalRecordId { get; set; }
 
     public string StudentName { get; set; } = "";
+    public int TotalVisits { get; set; }
+
+    public int CriticalVisits { get; set; }
+
+    public string LatestStatus { get; set; } = "";
+
+    public DateTime? LastVisitDate { get; set; }
     public async Task OnGetAsync (int? medicalRecordId) 
     {
         MedicalRecordId = medicalRecordId;
@@ -58,9 +65,23 @@ public class IndexModel : PageModel
         RecordedAt = x.Vital.RecordedAt,
         StaffId = x.Vital.StaffId,
         Status = x.Vital.Status,
-        Remarks = x.Vital.Remarks
+        Remarks = x.Vital.Remarks,
+        VisitReason = x.Vital.VisitReason
     })
     .ToListAsync();
+        TotalVisits = VitalSigns.Count;
+
+        CriticalVisits = VitalSigns.Count(v => v.Status == "Critical");
+
+        if (VitalSigns.Any())
+        {
+            var latest = VitalSigns
+                .OrderByDescending(v => v.RecordedAt)
+                .First();
+
+            LatestStatus = latest.Status;
+            LastVisitDate = latest.RecordedAt;
+        }
     }
 
     public class VitalSignDisplayModel
@@ -85,5 +106,6 @@ public class IndexModel : PageModel
         public string Status { get; set; } = "";
 
         public string Remarks { get; set; } = "";
+        public string VisitReason { get; set; } = "";
     }
 }

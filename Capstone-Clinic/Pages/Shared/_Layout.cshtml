@@ -1,5 +1,8 @@
 ﻿<!DOCTYPE html>
 <html lang="en">
+@{
+    var currentPage = ViewContext.RouteData.Values["page"]?.ToString();
+}
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -10,21 +13,52 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom shadow-sm sticky-top">
             <div class="container">
-                <a class="navbar-brand" asp-area="" asp-page="/Index">Capstone_Clinic</a>
+                <a class="navbar-brand fw-bold" asp-page="/Index">
+                    🏥 Clinic Monitoring System
+                </a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
+
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Index">Home</a>
+                            <a class="nav-link @(currentPage == "/Index" ? "active fw-bold text-primary" : "")"
+                               asp-page="/Index">
+                                🏠 Dashboard
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link @(currentPage == "/Student/Search" ? "active fw-bold text-primary" : "")"
+                               asp-page="/Student/Search">
+                                👤 Student Lookup
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link @(currentPage == "/MedicalRecordPages/Index" ? "active fw-bold text-primary" : "")"
+                               asp-page="/MedicalRecordPages/Index">
+                                📄 Medical Records
+                            </a>
+                        </li>
+
+                        <li class="nav-item">
+                            <a class="nav-link @(currentPage!.StartsWith("/VitalSignLogPages") ? "active fw-bold text-primary" : "")"
+                               asp-page="/VitalSignLogPages/Index">
+                                ❤️ Vital Signs
+                            </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-page="/Privacy">Privacy</a>
+                            <a class="nav-link text-dark"
+                               asp-page="/AlertPages/Index">
+                                🚨 Alerts
+                            </a>
                         </li>
+
                     </ul>
                 </div>
             </div>
@@ -38,7 +72,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2026 - Capstone_Clinic - <a asp-area="" asp-page="/Privacy">Privacy</a>
+            &copy; 2026 Clinic Monitoring System
         </div>
     </footer>
 

@@ -122,6 +122,21 @@
                 ✍️ Manual Measurements
             </h5>
 
+                    <div class="form-group mb-3">
+
+                        <label asp-for="VitalSignLog.VisitReason" class="form-label">
+                            Visit Reason
+                        </label>
+
+                        <input asp-for="VitalSignLog.VisitReason"
+                               class="form-control"
+                               placeholder="Example: Fever, Headache, Medical Clearance" />
+
+                        <span asp-validation-for="VitalSignLog.VisitReason"
+                              class="text-danger">
+                        </span>
+
+                    </div>
             <div class="mb-3">
                 <label asp-for="VitalSignLog.Temperature" class="form-label">
                     Temperature (°C)
@@ -175,9 +190,11 @@
                 💾 Save Vital Signs
             </button>
 
-            <a asp-page="./Index" class="btn btn-outline-secondary ms-2">
-                Cancel
-            </a>
+                    <a asp-page="/MedicalRecordPages/Details"
+                       asp-route-id="@Model.VitalSignLog.MedicalRecordId"
+                       class="btn btn-secondary">
+                        Cancel
+                    </a>
 
                 </form>
 

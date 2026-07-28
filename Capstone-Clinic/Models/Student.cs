@@ -11,5 +11,8 @@
         public string Course { get; set; } = "";
 
         public string YearLevel { get; set; } = "";
+
+        // Medical requirements do not restrict clinic services.
+        public string MedicalRequirementStatus { get; set; } = "Not Submitted";
     }
 }

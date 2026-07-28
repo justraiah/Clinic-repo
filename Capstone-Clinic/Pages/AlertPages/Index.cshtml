@@ -1,60 +1,219 @@
 @page
 @model Capstone_Clinic.Pages.AlertPages.IndexModel
+@using Capstone_Clinic.Helpers
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Alerts Dashboard";
 }
 
-<h1>Index</h1>
+<h2 class="mb-3">🚨 Alerts Dashboard</h2>
 
-<p>
-    <a asp-page="Create">Create New</a>
+<p class="text-muted">
+    View all active and historical alerts generated from abnormal vital signs.
 </p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Alert[0].VitalLogId)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Alert[0].AlertType)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Alert[0].AlertMessage)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Alert[0].Status)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Alert[0].CreatedAt)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model.Alert) {
-        <tr>
-            <td>
-                @Html.DisplayFor(model => item.VitalLogId)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.AlertType)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.AlertMessage)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.Status)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.CreatedAt)
-            </td>
-            <td>
-                <a asp-page="./Edit" asp-route-id="@item.AlertId">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.AlertId">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.AlertId">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+
+<div class="card shadow">
+
+    <div class="card-header bg-danger text-white">
+
+        <h5 class="mb-1">
+            🚨 Clinic Alerts
+        </h5>
+
+        <small>
+            Monitoring abnormal patient vital signs in real time.
+        </small>
+
+    </div>
+    <div class="row mb-4">
+
+        <div class="col-md-4">
+            <div class="card border-danger shadow-sm">
+                <div class="card-body text-center">
+                    <h2 class="text-danger">
+                        @Model.CriticalCount
+                    </h2>
+
+                    <h6>🔴 Critical Alerts</h6>
+
+                    <small class="text-muted">
+                        Immediate attention required
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-warning shadow-sm">
+                <div class="card-body text-center">
+                    <h2 class="text-warning">
+                        @Model.WarningCount
+                    </h2>
+
+                    <h6>🟡 Warning Alerts</h6>
+
+                    <small class="text-muted">
+                        Requires monitoring
+                    </small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card border-success shadow-sm">
+                <div class="card-body text-center">
+    <h2 class="text-success">
+        @Model.AcknowledgedCount
+    </h2>
+
+    <h6>✅ Acknowledged</h6>
+
+    <small class="text-muted">
+        Reviewed by clinic staff
+    </small>
+</div>
+            </div>
+        </div>
+
+    </div>
+    <div class="card-body">
+        @if (Model.Alerts.Any()){
+
+        <table class="table table-hover align-middle">
+
+            <thead class="table-light">
+                <tr>
+                    <th>Student</th>
+                    <th>Alert</th>
+                    <th>Severity</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+
+                @foreach (var item in Model.Alerts)
+                {
+                    string rowClass = "";
+
+                    if (item.Severity == "Critical")
+                    {
+                        rowClass = "table-danger";
+                    }
+                    else if (item.Severity == "Warning")
+                    {
+                        rowClass = "table-warning";
+                    }
+
+                    <tr class="@rowClass">
+                        
+
+                        <td>
+                            <strong>@item.StudentNumber</strong><br />
+                            <small>@item.StudentName</small>
+                        </td>
+
+                        <td>
+                            @item.AlertType
+                        </td>
+
+                        <td>
+
+                            @if (item.Severity == "Critical")
+                            {
+                                <span class="badge bg-danger">
+                                    🔴 Critical
+                                </span>
+                            }
+                            else if (item.Severity == "Warning")
+                            {
+                                <span class="badge bg-warning text-dark">
+                                    🟡 Warning
+                                </span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">
+                                    🟢 Normal
+                                </span>
+                            }
+
+                        </td>
+
+                        <td>
+
+                            @if (item.Status == "Active")
+                            {
+                                <span class="badge bg-danger">
+                                    Active
+                                </span>
+                            }
+                            else if (item.Status == "Acknowledged")
+                            {
+                                <span class="badge bg-success">
+                                    Acknowledged
+                                </span>
+                            }   
+                            else
+                            {
+                                <span class="badge bg-secondary">
+                                    @item.Status
+                                </span>
+                            }
+
+                        </td>
+
+                            <td>
+                                @TimeHelper.GetTimeAgo(item.CreatedAt)
+                            </td>
+
+                        <td>
+
+                            <a asp-page="./Details"
+                               asp-route-id="@item.AlertId"
+                               class="btn btn-sm btn-outline-primary">
+                                View
+                            </a>
+
+                            @if (item.Status == "Active")
+                            {
+                                <form method="post"
+                                      asp-page-handler="Acknowledge"
+                                      asp-route-id="@item.AlertId"
+                                      style="display:inline">
+
+                                    <button type="submit"
+                                            class="btn btn-sm btn-success">
+                                        ✓ Acknowledge
+                                    </button>
+
+                                </form>
+                            }
+
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+        }
+        else
+        {
+        <div class="alert alert-success text-center shadow-sm">
+
+                <h5>🎉 System Status: Normal</h5>
+
+                <p class="mb-0">
+                    No active patient alerts at this time.
+                </p>
+
+        </div>
+        }
+
+    </div>
+
+</div>

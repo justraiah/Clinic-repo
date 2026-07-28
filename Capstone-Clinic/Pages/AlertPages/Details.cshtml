@@ -5,45 +5,133 @@
     ViewData["Title"] = "Details";
 }
 
-<h1>Details</h1>
+<h2 class="fw-bold mb-4">
+    🚨 Alert Details
+</h2>
 
-<div>
-    <h4>Alert</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Alert.VitalLogId)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Alert.VitalLogId)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Alert.AlertType)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Alert.AlertType)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Alert.AlertMessage)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Alert.AlertMessage)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Alert.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Alert.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Alert.CreatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Alert.CreatedAt)
-        </dd>
-    </dl>
+<div class="card shadow-sm">
+
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0">
+            Alert Information
+        </h5>
+    </div>
+
+    <div class="card-body">
+
+        <div class="row">
+
+            <div class="col-md-6 mb-3">
+                <strong>👤 Student</strong><br />
+                @Model.Student.StudentNumber - @Model.Student.FullName
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <strong>🩺 Visit Reason</strong><br />
+                @Model.VitalSign.VisitReason
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <strong>🚨 Alert Type</strong><br />
+                @Model.Alert.AlertType
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <strong>📅 Created</strong><br />
+                @Model.Alert.CreatedAt.ToString("MMMM dd, yyyy hh:mm tt")
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <strong>📊 Status</strong><br />
+
+                @if (Model.Alert.Status == "Active")
+                {
+                    <span class="badge bg-danger">
+                        Active
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-success">
+                        Acknowledged
+                    </span>
+                }
+
+            </div>
+
+            <div class="col-md-6 mb-3">
+                <strong>⚠ Severity</strong><br />
+
+                @if (Model.VitalSign.Status == "Critical")
+                {
+                    <span class="badge bg-danger">
+                        🔴 Critical
+                    </span>
+                }
+                else if (Model.VitalSign.Status == "Warning")
+                {
+                    <span class="badge bg-warning text-dark">
+                        🟡 Warning
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-success">
+                        🟢 Normal
+                    </span>
+                }
+
+            </div>
+
+        </div>
+
+        <hr />
+
+        <h5 class="mb-3">
+            ❤️ Recorded Vital Signs
+        </h5>
+
+        <div class="row">
+
+            <div class="col-md-3">
+                <strong>Temperature</strong><br />
+                @($"{Model.VitalSign.Temperature:F1} °C")
+            </div>
+
+            <div class="col-md-3">
+                <strong>Heart Rate</strong><br />
+                @($"{Model.VitalSign.HeartRate} BPM")
+            </div>
+
+            <div class="col-md-3">
+                <strong>SpO₂</strong><br />
+                @($"{Model.VitalSign.OxygenSaturation}%")
+            </div>
+
+            <div class="col-md-3">
+                <strong>Blood Pressure</strong><br />
+                @($"{Model.VitalSign.SystolicBP}/{Model.VitalSign.DiastolicBP}")
+            </div>
+
+        </div>
+
+        <hr />
+
+        <strong>📝 Alert Message</strong>
+
+        <div class="alert alert-warning mt-2 mb-0">
+            @Model.Alert.AlertMessage
+        </div>
+
+    </div>
+
 </div>
-<div>
-    <a asp-page="./Edit" asp-route-id="@Model.Alert.AlertId">Edit</a> |
-    <a asp-page="./Index">Back to List</a>
+
+<div class="mt-4">
+
+    <a asp-page="./Index"
+       class="btn btn-secondary">
+        ← Back to Alerts
+    </a>
+
 </div>

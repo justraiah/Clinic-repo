@@ -63,7 +63,12 @@ public class EditModel : PageModel
             }
         }
 
-        return RedirectToPage("./Index");
+        return RedirectToPage(
+    "/Student/Search",
+    new
+    {
+        studentNumber = Student.StudentNumber
+    });
     }
 
     private bool StudentExists(int id)

@@ -17,6 +17,8 @@ public class EditModel : PageModel
 
     [BindProperty]
     public MedicalRecord MedicalRecord { get; set; } = default!;
+    public string StudentNumber { get; set; } = "";
+    public string StudentName { get; set; } = "";
 
     public async Task<IActionResult> OnGetAsync(int? id)
     {
@@ -31,6 +33,16 @@ public class EditModel : PageModel
             return NotFound();
         }
         MedicalRecord = medicalrecord;
+
+        var student = await _context.Students
+            .FirstOrDefaultAsync(s => s.StudentId == medicalrecord.StudentId);
+
+        if (student != null)
+        {
+            StudentNumber = student.StudentNumber;
+            StudentName = student.FullName;
+        }
+
         return Page();
     }
 

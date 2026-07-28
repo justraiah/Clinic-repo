@@ -15,9 +15,12 @@ public class DetailsModel : PageModel
     }
 
     public VitalSignLog VitalSignLog { get; set; } = default!;
+    public int? MedicalRecordId { get; set; }
+    public string StudentName { get; set; } = "";
 
-    public async Task<IActionResult> OnGetAsync(int? id)
+    public async Task<IActionResult> OnGetAsync(int? id, int? medicalRecordId)
     {
+        MedicalRecordId = medicalRecordId;
         if (id == null)
         {
             return NotFound();
@@ -31,6 +34,13 @@ public class DetailsModel : PageModel
         else
         {
             VitalSignLog = vitalsignlog;
+            StudentName = await _context.MedicalRecords
+    .Where(m => m.MedicalRecordId == VitalSignLog.MedicalRecordId)
+    .Join(_context.Students,
+        m => m.StudentId,
+        s => s.StudentId,
+        (m, s) => s.StudentNumber + " - " + s.FullName)
+    .FirstOrDefaultAsync() ?? "";
         }
 
         return Page();

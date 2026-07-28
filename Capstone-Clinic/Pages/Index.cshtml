@@ -1,10 +1,325 @@
 ﻿@page
 @model IndexModel
-@{
-    ViewData["Title"] = "Home page";
+@functions {
+
+    string GetRelativeTime(DateTime date)
+    {
+        var span = DateTime.Now - date;
+
+        if (span.TotalMinutes < 1)
+            return "Just now";
+
+        if (span.TotalMinutes < 60)
+            return $"{(int)span.TotalMinutes} min ago";
+
+        if (span.TotalHours < 24)
+            return $"{(int)span.TotalHours} hr ago";
+
+        return $"{(int)span.TotalDays} day(s) ago";
+    }
+
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+@{
+    ViewData["Title"] = "Clinic Dashboard";
+}
+
+<div class="container mt-4">
+
+    <div class="mb-4">
+        <h2>🏥 Clinic Monitoring Dashboard</h2>
+        <p class="text-muted">
+            Overview of the clinic monitoring system.
+        </p>
+    </div>
+
+    <div class="row g-4">
+
+        <div class="col-md-3">
+            <a asp-page="/Student/Search" class="text-decoration-none text-dark">
+            <div class="card shadow border-primary dashboard-card">
+                    <div class="card-body text-center">
+
+                        <div class="display-3 text-primary mb-2">
+                            👤
+                        </div>>
+
+                        <h1 class="display-4 text-primary fw-bold mb-1">
+                            @Model.StudentCount
+                        </h1>
+
+                        <h5>Students</h5>
+
+                        <small class="text-muted">
+                            Registered Students
+                        </small>
+
+                    </div>
+            </div>
+            </a>
+        </div>
+
+        <div class="col-md-3">
+            <a asp-page="/MedicalRecordPages/Index" class="text-decoration-none text-dark">
+            <div class="card shadow border-success dashboard-card">
+                    <div class="card-body text-center">
+
+                        <div class="display-3 text-success mb-2">
+                            📄
+                        </div>
+
+                        <h1 class="display-4 text-success fw-bold mb-1">
+                            @Model.MedicalRecordCount
+                        </h1>
+
+                        <h5>Medical Records</h5>
+
+                        <small class="text-muted">
+                            Patient Records
+                        </small>
+
+                    </div>
+            </div>
+            </a>
+        </div>
+
+        <div class="col-md-3">
+            <a asp-page="/VitalSignLogPages/Index" class="text-decoration-none text-dark">
+            <div class="card shadow border-info dashboard-card">
+                    <div class="card-body text-center">
+
+                        <div class="display-3 text-info mb-2">
+                            ❤️
+                        </div>
+
+                        <h1 class="display-4 text-info fw-bold mb-1">
+                            @Model.VitalSignCount
+                        </h1>
+
+                        <h5>Vital Signs</h5>
+
+                        <small class="text-muted">
+                            Measurements Recorded
+                        </small>
+
+                    </div>
+            </div>
+            </a>
+        </div>
+
+        <div class="col-md-3">
+            <a asp-page="/AlertPages/Index" class="text-decoration-none text-dark">
+            <div class="card shadow border-danger dashboard-card">
+                    <div class="card-body text-center">
+
+                        <div class="display-3 text-danger mb-2">
+                            🚨
+                        </div>
+
+                        <h1 class="display-4 text-danger fw-bold mb-1">
+                            @Model.ActiveAlertCount
+                        </h1>
+
+                        <h5>Active Alerts</h5>
+
+                        <small class="text-muted">
+                            Require Immediate Attention
+                        </small>
+
+                    </div>
+            </div>
+            </a>
+        </div>
+
+    </div>
+
+    <hr class="my-5" />
+
+    <h4>⚡ Quick Actions</h4>
+
+    <div class="row g-3 mt-2">
+
+        <div class="col-md-4">
+            <a asp-page="/Student/Search" class="btn btn-primary w-100 p-3">
+                🔍 Student Lookup
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a asp-page="/StudentPages/Create" class="btn btn-success w-100 p-3">
+                👤 Register Student
+            </a>
+        </div>
+
+        <div class="col-md-4">
+            <a asp-page="/MedicalRecordPages/Index" class="btn btn-secondary w-100 p-3">
+                📄 Medical Records
+            </a>
+        </div>
+
+        <div class="col-md-6">
+            <a asp-page="/VitalSignLogPages/Index" class="btn btn-danger w-100 p-3">
+                ❤️ Vital Signs
+            </a>
+        </div>
+
+        <div class="col-md-6">
+            <a asp-page="/AlertPages/Index" class="btn btn-warning w-100 p-3">
+                🚨 Alerts
+            </a>
+        </div>
+
+    </div>
+
+</div>
+
+<hr class="my-5" />
+
+<div class="card shadow border-success">
+
+    <div class="card-header bg-success text-white">
+        <h5 class="mb-0">
+            🟢 System Status
+        </h5>
+    </div>
+
+    <div class="card-body">
+
+        <div class="row">
+
+            <div class="col-md-4">
+
+                <h6>Database</h6>
+
+                <span class="badge bg-success">
+                    ● @Model.DatabaseStatus
+                </span>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <h6>Alert Engine</h6>
+
+                <span class="badge bg-success">
+                    ● @Model.AlertEngineStatus
+                </span>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <h6>IoT Device</h6>
+
+                @if (Model.IoTDeviceStatus == "Connected")
+                {
+                    <span class="badge bg-success">
+                        ● Connected
+                    </span>
+                }
+                else
+                {
+                    <span class="badge bg-secondary">
+                        ● Offline
+                    </span>
+                }
+
+            </div>
+
+        </div>
+
+        <hr />
+
+        <small class="text-muted">
+            Last Updated:
+            <strong>
+                @Model.LastUpdated.ToString("MMM dd, yyyy hh:mm:ss tt")
+            </strong>
+        </small>
+
+    </div>
+
+</div>
+
+<hr class="my-5" />
+
+<h4 class="mb-4">
+    📈 Recent Activity
+</h4>
+
+<div class="card shadow">
+
+    <div class="card-body">
+
+        @if (Model.RecentActivities.Any())
+        {
+            <table class="table table-hover align-middle">
+
+                <thead class="table-light">
+                    <tr>
+                        <th>Student</th>
+                        <th>Activity</th>
+                        <th>Status</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var item in Model.RecentActivities)
+                    {
+                        <tr>
+
+                            <td>
+                                <strong>@item.StudentNumber</strong><br />
+                                <small>@item.StudentName</small>
+                            </td>
+
+                            <td>
+                                🚨 @item.Activity
+                            </td>
+
+                            <td>
+
+                                @if (item.Severity == "Active")
+                                {
+                                    <span class="badge bg-danger">
+                                        Active
+                                    </span>
+                                }
+                                else if (item.Severity == "Acknowledged")
+                                {
+                                    <span class="badge bg-success">
+                                        Acknowledged
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="badge bg-secondary">
+                                        @item.Severity
+                                    </span>
+                                }
+
+                            </td>
+
+                            <td>
+                                @GetRelativeTime(item.Time)
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+        }
+        else
+        {
+            <div class="text-center text-muted py-4">
+                No recent activity.
+            </div>
+        }
+
+    </div>
+
 </div>

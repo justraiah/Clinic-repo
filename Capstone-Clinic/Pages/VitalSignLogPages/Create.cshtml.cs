@@ -117,10 +117,40 @@ public class CreateModel : PageModel
         }
         VitalSignLog.StaffId = 1;
         VitalSignLog.RecordedAt = DateTime.Now;
+
+        // Evaluate the vital-sign readings
         VitalSignEvaluator.Evaluate(VitalSignLog);
+
+        // Save the vital-sign record first
         _context.VitalSignLogs.Add(VitalSignLog);
         await _context.SaveChangesAsync();
 
-        return RedirectToPage("./Index");
+        // Create an alert only for Warning or Critical readings
+        if (VitalSignLog.Status == "Warning" ||
+            VitalSignLog.Status == "Critical")
+        {
+            var firstRemark = VitalSignLog.Remarks
+    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+    .FirstOrDefault()?.Trim() ?? "Abnormal Vital Signs";
+
+            var alert = new Alert
+            {
+                VitalLogId = VitalSignLog.VitalSignLogId,
+
+                AlertType = firstRemark,
+
+                AlertMessage = VitalSignLog.Remarks,
+
+                Status = "Active",
+
+                CreatedAt = DateTime.Now
+            };
+
+            _context.Alerts.Add(alert);
+            await _context.SaveChangesAsync();
+        }
+
+        return RedirectToPage("/MedicalRecordPages/Details",
+    new { id = VitalSignLog.MedicalRecordId });
     }
 }

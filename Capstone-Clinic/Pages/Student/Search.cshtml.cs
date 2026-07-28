@@ -2,7 +2,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Capstone_Clinic.Data;
-using Capstone_Clinic.Models;
 
 namespace Capstone_Clinic.Pages.Student;
 
@@ -26,31 +25,45 @@ public class SearchModel : PageModel
 
     public int MedicalRecordId { get; set; }
 
-    public void OnGet()
+    public async Task OnGetAsync(string? studentNumber)
     {
+        if (!string.IsNullOrWhiteSpace(studentNumber))
+        {
+            SearchStudentNumber = studentNumber;
 
+            await LoadStudentAsync();
+        }
     }
 
     public async Task<IActionResult> OnPostAsync()
     {
+        await LoadStudentAsync();
+
+        return Page();
+    }
+
+    private async Task LoadStudentAsync()
+    {
         Student = await _context.Students
-            .FirstOrDefaultAsync(s => s.StudentNumber == SearchStudentNumber);
+            .FirstOrDefaultAsync(
+                s => s.StudentNumber == SearchStudentNumber
+            );
 
         if (Student == null)
         {
             StudentNotFound = true;
-            return Page();
+            return;
         }
 
         var medicalRecord = await _context.MedicalRecords
-            .FirstOrDefaultAsync(m => m.StudentId == Student.StudentId);
+            .FirstOrDefaultAsync(
+                m => m.StudentId == Student.StudentId
+            );
 
         if (medicalRecord != null)
         {
             HasMedicalRecord = true;
             MedicalRecordId = medicalRecord.MedicalRecordId;
         }
-
-        return Page();
     }
 }

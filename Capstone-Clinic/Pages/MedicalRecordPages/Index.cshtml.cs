@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
 using Capstone_Clinic.Models;
@@ -17,8 +16,23 @@ public class IndexModel : PageModel
 
     public IList<MedicalRecord> MedicalRecord { get; set; } = default!;
 
+    public Dictionary<int, string> StudentDisplay { get; set; } = new();
+
     public async Task OnGetAsync()
     {
-        MedicalRecord = await _context.MedicalRecords.ToListAsync();
+        MedicalRecord = await _context.MedicalRecords
+            .ToListAsync();
+
+        var studentIds = MedicalRecord
+            .Select(m => m.StudentId)
+            .Distinct()
+            .ToList();
+
+        StudentDisplay = await _context.Students
+            .Where(s => studentIds.Contains(s.StudentId))
+            .ToDictionaryAsync(
+                s => s.StudentId,
+                s => s.StudentNumber + " - " + s.FullName
+            );
     }
 }
