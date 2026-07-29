@@ -21,7 +21,10 @@
     <div class="card-body">
 
         <p class="text-danger">
-            <strong>Warning!</strong> This action cannot be undone.
+            < <strong>⚠ Warning!</strong><br />
+
+                You are about to permanently delete this vital sign record.
+                This action cannot be undone.
         </p>
 
         <dl class="row">
@@ -66,16 +69,16 @@
             <input type="hidden"
                    asp-for="MedicalRecordId" />
 
-            <button type="submit"
-                    class="btn btn-danger">
-                Delete Record
-            </button>
+                <button type="submit"
+                        class="btn btn-danger">
+                    🗑 Delete Vital Sign Record
+                </button>
 
-            <a asp-page="./Index"
-               asp-route-medicalRecordId="@Model.MedicalRecordId"
-               class="btn btn-secondary">
-                Cancel
-            </a>
+                <a asp-page="./Index"
+                   asp-route-medicalRecordId="@Model.MedicalRecordId"
+                   class="btn btn-outline-secondary ms-2">
+                    Cancel
+                </a>
 
         </form>
 

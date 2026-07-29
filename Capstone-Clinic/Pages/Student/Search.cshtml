@@ -4,6 +4,20 @@
     ViewData["Title"] = "Student Lookup";
 }
 
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+
+        @TempData["SuccessMessage"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+
+    </div>
+}
+
 <div class="container mt-4">
 
     <div class="card shadow">
@@ -131,31 +145,27 @@
                                asp-route-id="@Model.MedicalRecordId">
                                 📄 Open Medical Record
                             </a>
+
+                            <a class="btn btn-danger"
+                               asp-page="/VitalSignLogPages/Create"
+                               asp-route-medicalRecordId="@Model.MedicalRecordId">
+                                ❤️ Record Vital Signs
+                            </a>
+
+                            <a class="btn btn-info text-white"
+                               asp-page="/VitalSignLogPages/Index"
+                               asp-route-medicalRecordId="@Model.MedicalRecordId">
+                                📈 View Vital History
+                            </a>
                         }
                         else
                         {
                             <a class="btn btn-primary"
                                asp-page="/MedicalRecordPages/Create"
                                asp-route-studentId="@Model.Student.StudentId">
-                                ➕ Create Medical Record
+                                🩺 Start Consultation
                             </a>
                         }
-
-                        <button class="btn btn-outline-primary" disabled>
-                            ❤️ Record Vital Signs (Coming Soon)
-                        </button>
-
-                        <button class="btn btn-outline-secondary" disabled>
-                            🩺 Consultation (Coming Soon)
-                        </button>
-
-                        <button class="btn btn-outline-secondary" disabled>
-                            📜 Visit History (Coming Soon)
-                        </button>
-
-                        <button class="btn btn-outline-warning" disabled>
-                            ⚠ Alerts (Coming Soon)
-                        </button>
 
                     </div>
 

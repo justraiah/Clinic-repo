@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿
+
+<!DOCTYPE html>
 <html lang="en">
 @{
     var currentPage = ViewContext.RouteData.Values["page"]?.ToString();
@@ -25,39 +27,65 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
 
-                        <li class="nav-item">
-                            <a class="nav-link @(currentPage == "/Index" ? "active fw-bold text-primary" : "")"
-                               asp-page="/Index">
-                                🏠 Dashboard
-                            </a>
-                        </li>
+                        @if (User.Identity?.IsAuthenticated == true)
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link @(currentPage == "/Index" ? "active fw-bold text-primary" : "")"
+                                   asp-page="/Index">
+                                    🏠 Dashboard
+                                </a>
+                            </li>
 
-                        <li class="nav-item">
-                            <a class="nav-link @(currentPage == "/Student/Search" ? "active fw-bold text-primary" : "")"
-                               asp-page="/Student/Search">
-                                👤 Student Lookup
-                            </a>
-                        </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(currentPage == "/Student/Search" ? "active fw-bold text-primary" : "")"
+                                   asp-page="/Student/Search">
+                                    👤 Student Lookup
+                                </a>
+                            </li>
 
-                        <li class="nav-item">
-                            <a class="nav-link @(currentPage == "/MedicalRecordPages/Index" ? "active fw-bold text-primary" : "")"
-                               asp-page="/MedicalRecordPages/Index">
-                                📄 Medical Records
-                            </a>
-                        </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(currentPage == "/MedicalRecordPages/Index" ? "active fw-bold text-primary" : "")"
+                                   asp-page="/MedicalRecordPages/Index">
+                                    📄 Medical Records
+                                </a>
+                            </li>
 
-                        <li class="nav-item">
-                            <a class="nav-link @(currentPage!.StartsWith("/VitalSignLogPages") ? "active fw-bold text-primary" : "")"
-                               asp-page="/VitalSignLogPages/Index">
-                                ❤️ Vital Signs
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark"
-                               asp-page="/AlertPages/Index">
-                                🚨 Alerts
-                            </a>
-                        </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(currentPage!.StartsWith("/VitalSignLogPages") ? "active fw-bold text-primary" : "")"
+                                   asp-page="/VitalSignLogPages/Index">
+                                    ❤️ Vital Signs
+                                </a>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link @(currentPage!.StartsWith("/AlertPages") ? "active fw-bold text-primary" : "")"
+                                   asp-page="/AlertPages/Index">
+                                    🚨 Alerts
+                                </a>
+                            </li>
+
+                            <li class="nav-item ms-auto">
+                                <span class="nav-link text-secondary">
+                                    👤 @User.Identity?.Name
+                                </span>
+                            </li>
+
+                            <li class="nav-item">
+                                <a class="nav-link text-danger"
+                                   asp-page="/Logout">
+                                    🚪 Logout
+                                </a>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item ms-auto">
+                                <a class="nav-link text-primary"
+                                   asp-page="/Login">
+                                    🔐 Login
+                                </a>
+                            </li>
+                        }
 
                     </ul>
                 </div>

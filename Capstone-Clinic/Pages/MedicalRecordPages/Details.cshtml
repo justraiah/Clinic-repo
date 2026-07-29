@@ -2,7 +2,22 @@
 @model Capstone_Clinic.Pages.MedicalRecordPages.DetailsModel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Medical Record";
+}
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show mb-4"
+         role="alert">
+
+        @TempData["SuccessMessage"]
+
+        <button type="button"
+                class="btn-close"
+                data-bs-dismiss="alert">
+        </button>
+
+    </div>
 }
 
 <div class="container-xl mt-4">
@@ -94,26 +109,26 @@
 
         </div>
 
-    <div class="d-flex flex-wrap gap-3">
+        <div class="d-flex flex-wrap gap-3 mt-4 mb-4">
 
-    <a asp-page="./Edit"
-       asp-route-id="@Model.MedicalRecord.MedicalRecordId"
-           class="btn btn-warning px-4">
-        ✏ Edit Record
-    </a>
+            <a asp-page="./Edit"
+               asp-route-id="@Model.MedicalRecord.MedicalRecordId"
+               class="btn btn-warning px-4">
+                ✏ Edit Record
+            </a>
 
-    <a asp-page="/VitalSignLogPages/Create"
-       asp-route-medicalRecordId="@Model.MedicalRecord.MedicalRecordId"
-           class="btn btn-success px-4">
-        ❤️ Record Vital Signs
-    </a>
+            <a asp-page="/VitalSignLogPages/Create"
+               asp-route-medicalRecordId="@Model.MedicalRecord.MedicalRecordId"
+               class="btn btn-success px-4">
+                ❤️ Record Vital Signs
+            </a>
 
-    <a asp-page="/Student/Search"
-           class="btn btn-outline-secondary px-4">
-        ← Back to Student Lookup
-    </a>
+            <a asp-page="/Student/Search"
+               class="btn btn-outline-secondary px-4">
+                ← Back to Student Lookup
+            </a>
 
-</div>
+        </div>
 
         <div class="card border-primary mb-4">
 
@@ -128,6 +143,11 @@
                     <div class="col-md-6 mb-3">
                         <strong>Student Number</strong><br />
                         @Model.Student.StudentNumber
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <strong>Age</strong><br />
+                        @Model.StudentAge years old
                     </div>
 
                     <div class="col-md-6 mb-3">
@@ -165,6 +185,7 @@
                                 <th>HR</th>
                                 <th>SpO₂</th>
                                 <th>Blood Pressure</th>
+                                <th>Status</th>
                             </tr>
 
                         </thead>
@@ -194,7 +215,20 @@
                                     <td>
                                         @vital.SystolicBP/@vital.DiastolicBP
                                     </td>
-
+                                    <td>
+                                        @if (vital.Status == "Critical")
+                                        {
+                                            <span class="badge bg-danger">🔴 Critical</span>
+                                        }
+                                        else if (vital.Status == "Warning")
+                                        {
+                                            <span class="badge bg-warning text-dark">🟡 Warning</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-success">🟢 Normal</span>
+                                        }
+                                    </td>
                                 </tr>
                             }
 

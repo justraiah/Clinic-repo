@@ -17,9 +17,9 @@
         </p>
     </div>
 
-    <a asp-page="./Create"
+    <a asp-page="/Student/Search"
        class="btn btn-primary">
-        + Create Medical Record
+        🔍 Student Lookup
     </a>
 
 </div>
@@ -38,11 +38,6 @@
                         <th>Student</th>
                         <th>Visit Date</th>
                         <th>Chief Complaint</th>
-                        <th>Diagnosis</th>
-                        <th>Medications</th>
-                        <th>Allergies</th>
-                        <th>Clinical Notes</th>
-                        <th>Created</th>
                         <th>Updated</th>
                         <th class="text-center">Actions</th>
                     </tr>
@@ -54,7 +49,6 @@
                     @foreach (var item in Model.MedicalRecord)
                     {
                         <tr>
-
                             <td>
                                 <strong>
                                     @(Model.StudentDisplay.ContainsKey(item.StudentId)
@@ -62,47 +56,23 @@
                                         : "Unknown Student")
                                 </strong>
                             </td>
-
                             <td>
                                 @item.VisitDate.ToString("MMM dd, yyyy")
                             </td>
-
                             <td>
                                 @(string.IsNullOrWhiteSpace(item.ChiefComplaint)
                                     ? "—"
                                     : item.ChiefComplaint)
                             </td>
-
                             <td>
-                                @(string.IsNullOrWhiteSpace(item.Diagnosis)
-                                    ? "—"
-                                    : item.Diagnosis)
-                            </td>
-
-                            <td>
-                                @(string.IsNullOrWhiteSpace(item.Medications)
-                                    ? "—"
-                                    : item.Medications)
-                            </td>
-
-                            <td>
-                                @(string.IsNullOrWhiteSpace(item.Allergies)
-                                    ? "None"
-                                    : item.Allergies)
-                            </td>
-
-                            <td>
-                                @(string.IsNullOrWhiteSpace(item.ClinicalNotes)
-                                    ? "—"
-                                    : item.ClinicalNotes)
-                            </td>
-
-                            <td>
-                                @item.CreatedAt.ToString("MMM dd, yyyy")
-                            </td>
-
-                            <td>
-                                @item.UpdatedAt.ToString("MMM dd, yyyy")
+                                @if (item.UpdatedAt == DateTime.MinValue)
+                                {
+                                    <span class="text-muted">Never</span>
+                                }
+                                else
+                                {
+                                    @item.UpdatedAt.ToString("MMM dd, yyyy")
+                                }
                             </td>
 
                             <td class="text-center text-nowrap">

@@ -15,11 +15,42 @@ public class CreateModel : PageModel
         _context = context;
     }
 
-    public IActionResult OnGet()
+    public async Task<IActionResult> OnGetAsync(int? studentId)
     {
+        if (studentId == null)
+        {
+            return RedirectToPage("/Student/Search");
+        }
+
+        Student = await _context.Students
+            .FirstOrDefaultAsync(s => s.StudentId == studentId);
+
+        if (Student == null)
+        {
+            return NotFound();
+        }
+
+        StudentAge = DateTime.Today.Year - Student.DateOfBirth.Year;
+
+        if (Student.DateOfBirth.Date > DateTime.Today.AddYears(-StudentAge))
+        {
+            StudentAge--;
+        }
+
+        MedicalRecord = new MedicalRecord
+        {
+            StudentId = Student.StudentId,
+            VisitDate = DateTime.Today,
+            CreatedAt = DateTime.Now,
+            UpdatedAt = DateTime.Now
+        };
+
         return Page();
     }
 
+    public Capstone_Clinic.Models.Student? Student { get; set; }
+
+    public int StudentAge { get; set; }
     [BindProperty]
     public MedicalRecord MedicalRecord { get; set; } = default!;
 
@@ -30,10 +61,15 @@ public class CreateModel : PageModel
         {
             return Page();
         }
-
+        MedicalRecord.CreatedAt = DateTime.Now;
+        MedicalRecord.UpdatedAt = DateTime.Now;
         _context.MedicalRecords.Add(MedicalRecord);
         await _context.SaveChangesAsync();
 
-        return RedirectToPage("./Index");
+        TempData["SuccessMessage"] = "✅ Consultation saved successfully.";
+
+        return RedirectToPage(
+            "./Details",
+            new { id = MedicalRecord.MedicalRecordId });
     }
 }

@@ -2,76 +2,194 @@
 @model Capstone_Clinic.Pages.MedicalRecordPages.CreateModel
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "New Consultation";
 }
 
-<h1>Create</h1>
+<div class="container-xl mt-4">
 
-<h4>MedicalRecord</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form method="post">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
-                <label asp-for="MedicalRecord.StudentId" class="control-label"></label>
-                <input asp-for="MedicalRecord.StudentId" class="form-control" />
-                <span asp-validation-for="MedicalRecord.StudentId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MedicalRecord.VisitDate" class="control-label"></label>
-                <input asp-for="MedicalRecord.VisitDate" class="form-control" />
-                <span asp-validation-for="MedicalRecord.VisitDate" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MedicalRecord.ChiefComplaint" class="control-label"></label>
-                <input asp-for="MedicalRecord.ChiefComplaint" class="form-control" />
-                <span asp-validation-for="MedicalRecord.ChiefComplaint" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MedicalRecord.Diagnosis" class="control-label"></label>
-                <input asp-for="MedicalRecord.Diagnosis" class="form-control" />
-                <span asp-validation-for="MedicalRecord.Diagnosis" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MedicalRecord.Medications" class="control-label"></label>
-                <input asp-for="MedicalRecord.Medications" class="form-control" />
-                <span asp-validation-for="MedicalRecord.Medications" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MedicalRecord.Allergies" class="control-label"></label>
-                <input asp-for="MedicalRecord.Allergies" class="form-control" />
-                <span asp-validation-for="MedicalRecord.Allergies" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MedicalRecord.ClinicalNotes" class="control-label"></label>
-                <input asp-for="MedicalRecord.ClinicalNotes" class="form-control" />
-                <span asp-validation-for="MedicalRecord.ClinicalNotes" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MedicalRecord.CreatedAt" class="control-label"></label>
-                <input asp-for="MedicalRecord.CreatedAt" class="form-control" />
-                <span asp-validation-for="MedicalRecord.CreatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="MedicalRecord.UpdatedAt" class="control-label"></label>
-                <input asp-for="MedicalRecord.UpdatedAt" class="form-control" />
-                <span asp-validation-for="MedicalRecord.UpdatedAt" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Create" class="btn btn-primary" />
-            </div>
-        </form>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                🩺 New Consultation
+            </h2>
+
+            <p class="text-muted mb-0">
+                Create the student's first medical record.
+            </p>
+
+        </div>
+
+        <a asp-page="/Student/Search"
+           class="btn btn-outline-secondary">
+            ← Back to Student Lookup
+        </a>
+
     </div>
-</div>
 
-<div>
-    <a asp-page="/Student/Search"
-       class="btn btn-secondary">
-        ← Back to Student Lookup
-    </a>
+    <form method="post">
+
+        <input type="hidden" asp-for="MedicalRecord.StudentId" />
+        <input type="hidden" asp-for="MedicalRecord.CreatedAt" />
+        <input type="hidden" asp-for="MedicalRecord.UpdatedAt" />
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3">
+        </div>
+
+        <div class="card border-primary mb-4">
+
+            <div class="card-header bg-primary text-white">
+                👤 Patient Information
+            </div>
+
+            <div class="card-body">
+
+                <div class="row">
+
+                    <div class="col-md-6 mb-3">
+                        <strong>Full Name</strong><br />
+                        @Model.Student?.FullName
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <strong>Student Number</strong><br />
+                        @Model.Student?.StudentNumber
+                    </div>
+
+                    <div class="col-md-6">
+                        <strong>Age</strong><br />
+                        @Model.StudentAge years old
+                    </div>
+
+                    <div class="col-md-6">
+                        <strong>Course / Year Level</strong><br />
+                        @Model.Student?.Course • Year @Model.Student?.YearLevel
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card border-success mb-4">
+
+            <div class="card-header bg-success text-white">
+                🏥 Consultation
+            </div>
+
+            <div class="card-body">
+
+                <div class="mb-3">
+
+                    <label asp-for="MedicalRecord.VisitDate"
+                           class="form-label fw-semibold">
+                    </label>
+
+                    <input asp-for="MedicalRecord.VisitDate"
+                           type="date"
+                           class="form-control" />
+
+                </div>
+
+                <div class="mb-3">
+
+                    <label asp-for="MedicalRecord.ChiefComplaint"
+                           class="form-label fw-semibold">
+                    </label>
+
+                    <textarea asp-for="MedicalRecord.ChiefComplaint"
+                              rows="3"
+                              class="form-control"></textarea>
+
+                </div>
+
+                <div class="mb-0">
+
+                    <label asp-for="MedicalRecord.Diagnosis"
+                           class="form-label fw-semibold">
+                    </label>
+
+                    <textarea asp-for="MedicalRecord.Diagnosis"
+                              rows="3"
+                              class="form-control"></textarea>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card border-warning mb-4">
+
+            <div class="card-header bg-warning">
+                💊 Treatment
+            </div>
+
+            <div class="card-body">
+
+                <div class="mb-3">
+
+                    <label asp-for="MedicalRecord.Medications"
+                           class="form-label fw-semibold">
+                    </label>
+
+                    <textarea asp-for="MedicalRecord.Medications"
+                              rows="3"
+                              class="form-control"></textarea>
+
+                </div>
+
+                <div class="mb-0">
+
+                    <label asp-for="MedicalRecord.Allergies"
+                           class="form-label fw-semibold">
+                    </label>
+
+                    <textarea asp-for="MedicalRecord.Allergies"
+                              rows="2"
+                              class="form-control"></textarea>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <div class="card border-secondary mb-4">
+
+            <div class="card-header bg-secondary text-white">
+                📝 Clinical Notes
+            </div>
+
+            <div class="card-body">
+
+                <textarea asp-for="MedicalRecord.ClinicalNotes"
+                          rows="5"
+                          class="form-control"></textarea>
+
+            </div>
+
+        </div>
+
+        <button type="submit"
+                class="btn btn-primary">
+            💾 Save Consultation
+        </button>
+
+        <a asp-page="/Student/Search"
+           class="btn btn-outline-secondary ms-2">
+            Cancel
+        </a>
+
+    </form>
+
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
 }

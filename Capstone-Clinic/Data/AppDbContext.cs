@@ -17,5 +17,6 @@ namespace Capstone_Clinic.Data
         public DbSet<VitalSignLog> VitalSignLogs { get; set; }
 
         public DbSet<Alert> Alerts { get; set; }
+        public DbSet<Staff> Staffs { get; set; }
     }
 }

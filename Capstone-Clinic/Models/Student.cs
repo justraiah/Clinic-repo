@@ -1,4 +1,6 @@
-﻿namespace Capstone_Clinic.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace Capstone_Clinic.Models
 {
     public class Student
     {
@@ -7,6 +9,9 @@
         public string StudentNumber { get; set; } = "";
 
         public string FullName { get; set; } = "";
+        
+        [DataType(DataType.Date)]
+        public DateTime DateOfBirth { get; set; }
 
         public string Course { get; set; } = "";
 

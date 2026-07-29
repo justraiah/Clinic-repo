@@ -22,6 +22,7 @@ public class DetailsModel : PageModel
     public string LatestStatus { get; set; } = "";
 
     public Capstone_Clinic.Models.Student Student { get; set; } = default!;
+    public int StudentAge { get; set; }
     public List<VitalSignLog> RecentVitalSigns { get; set; } = new();
     public async Task<IActionResult> OnGetAsync(int? id)
     {
@@ -43,6 +44,16 @@ public class DetailsModel : PageModel
             Student = await _context.Students
                 .FirstOrDefaultAsync(s => s.StudentId == MedicalRecord.StudentId)
                 ?? new Capstone_Clinic.Models.Student();
+
+            if (Student.DateOfBirth != default)
+            {
+                StudentAge = DateTime.Today.Year - Student.DateOfBirth.Year;
+
+                if (Student.DateOfBirth.Date > DateTime.Today.AddYears(-StudentAge))
+                {
+                    StudentAge--;
+                }
+            }
 
             RecentVitalSigns = await _context.VitalSignLogs
     .Where(v => v.MedicalRecordId == MedicalRecord.MedicalRecordId)

@@ -56,6 +56,7 @@ public class EditModel : PageModel
         }
 
         _context.Attach(MedicalRecord).State = EntityState.Modified;
+        MedicalRecord.UpdatedAt = DateTime.Now;
 
         try
         {
@@ -73,7 +74,8 @@ public class EditModel : PageModel
             }
         }
 
-        return RedirectToPage("./Index");
+        return RedirectToPage("./Details",
+    new { id = MedicalRecord.MedicalRecordId });
     }
 
     private bool MedicalRecordExists(int id)

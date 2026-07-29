@@ -34,6 +34,9 @@ public class CreateModel : PageModel
         _context.Students.Add(Student);
         await _context.SaveChangesAsync();
 
-        return RedirectToPage("./Index");
+        TempData["SuccessMessage"] = "✅ Student registered successfully.";
+
+        return RedirectToPage("/Student/Search",
+            new { studentNumber = Student.StudentNumber });
     }
 }

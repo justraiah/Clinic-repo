@@ -46,7 +46,12 @@
             <td>
                 <a asp-page="./Edit" asp-route-id="@item.StudentId">Edit</a> |
                 <a asp-page="./Details" asp-route-id="@item.StudentId">Details</a> |
-                <a asp-page="./Delete" asp-route-id="@item.StudentId">Delete</a>
+                    <a asp-page="./Delete"
+                       asp-route-id="@item.StudentId"
+                       class="btn btn-danger btn-sm"
+                       onclick="return confirm('Are you sure you want to delete this student?');">
+                        Delete
+                    </a>
             </td>
         </tr>
 }

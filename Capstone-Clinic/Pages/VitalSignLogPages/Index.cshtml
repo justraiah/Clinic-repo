@@ -18,12 +18,6 @@
                 @Model.StudentName
             </p>
         </div>
-
-        <a asp-page="/Student/Search"
-           class="btn btn-outline-secondary">
-            ← Back to Student Lookup
-        </a>
-
     </div>
 
     <p class="text-secondary">
@@ -93,11 +87,21 @@
 
     </div>
 
-    <a asp-page="/VitalSignLogPages/Create"
-       asp-route-medicalRecordId="@Model.MedicalRecordId"
-       class="btn btn-danger mb-3">
-        ❤️ Record New Vital Signs
-    </a>
+    <div class="d-flex gap-2 mb-3">
+
+        <a asp-page="/VitalSignLogPages/Create"
+           asp-route-medicalRecordId="@Model.MedicalRecordId"
+           class="btn btn-danger">
+            ❤️ Record New Vital Signs
+        </a>
+
+        <a asp-page="/MedicalRecordPages/Details"
+           asp-route-id="@Model.MedicalRecordId"
+           class="btn btn-outline-secondary">
+            ← Back to Medical Record
+        </a>
+
+    </div>
 }
 else
 {
@@ -112,24 +116,52 @@ else
 <div class="table-responsive">
 
     <table class="table table-striped table-hover align-middle">
-    <thead>
-        <tr>
-            @if (Model.MedicalRecordId == null)
-            {
-                <th>
-                    Student
+        <thead class="table-dark">
+
+            <tr>
+
+                @if (Model.MedicalRecordId == null)
+                {
+                    <th class="text-center">
+                        Student
+                    </th>
+                }
+
+                <th class="text-center">
+                    Visit Reason
                 </th>
-            }
-            <th>Visit Reason</th>
-            <th>Temperature</th>
-            <th>Heart Rate</th>
-            <th>SpO₂</th>
-            <th>Blood Pressure</th>
-            <th>Recorded At</th>
-            <th>Status</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
+
+                <th class="text-center">
+                    Temp
+                </th>
+
+                <th class="text-center">
+                    HR
+                </th>
+
+                <th class="text-center">
+                    SpO₂
+                </th>
+
+                <th class="text-center">
+                    BP
+                </th>
+
+                <th class="text-center">
+                    Recorded
+                </th>
+
+                <th class="text-center">
+                    Status
+                </th>
+
+                <th class="text-center">
+                    Actions
+                </th>
+
+            </tr>
+
+        </thead>
     <tbody>
         @foreach (var item in Model.VitalSigns)
         {
@@ -166,11 +198,11 @@ else
             <td class="text-center">
                     @($"{item.SystolicBP}/{item.DiastolicBP} mmHg")
             </td>
-                <td>
+            <td class="text-center">
                     @item.RecordedAt.ToString("MMM dd, yyyy hh:mm tt")
-                </td>
+            </td>
 
-                <td>
+                    <td class="text-center">
                     @if (item.Status == "Normal")
                     {
                         <span class="badge bg-success">
@@ -190,7 +222,7 @@ else
                         </span>
                     }
                 </td>
-                <td>
+                    <td class="text-center">
                     <a class="btn btn-sm btn-info"
                        asp-page="./Details"
                        asp-route-id="@item.VitalSignLogId"

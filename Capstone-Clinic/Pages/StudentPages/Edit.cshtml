@@ -70,6 +70,22 @@
                     </span>
 
                 </div>
+                <div class="col-md-6">
+
+                    <label asp-for="Student.DateOfBirth"
+                           class="form-label">
+                        Date of Birth
+                    </label>
+
+                    <input asp-for="Student.DateOfBirth"
+                           type="date"
+                           class="form-control" />
+
+                    <span asp-validation-for="Student.DateOfBirth"
+                          class="text-danger">
+                    </span>
+
+                </div>
 
                 <div class="col-md-6">
 

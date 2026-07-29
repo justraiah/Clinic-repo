@@ -5,28 +5,33 @@
     ViewData["Title"] = "Edit Medical Record";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="container-xl mt-4">
 
-    <div>
-        <h2 class="fw-bold mb-1">
-            ✏️ Edit Medical Record
-        </h2>
+    <div class="d-flex justify-content-between align-items-center mb-4">
 
-        <p class="text-muted mb-0">
-            Update the student's clinic visit and medical information.
-        </p>
+        <div>
+
+            <h2 class="fw-bold mb-1">
+                ✏️ Edit Consultation
+            </h2>
+
+            <p class="text-muted mb-0">
+                Update the student's consultation details.
+            </p>
+
+        </div>
+
+        <a asp-page="./Details"
+           asp-route-id="@Model.MedicalRecord.MedicalRecordId"
+           class="btn btn-outline-secondary">
+            ← Back to Medical Record
+        </a>
+
     </div>
 
-    <a asp-page="./Index"
-       class="btn btn-outline-secondary">
-        ← Back to Medical Records
-    </a>
+    <div class="card border-primary">
 
-</div>
-
-<div class="card shadow-sm border-0">
-
-    <div class="card-body p-4">
+        <div class="card-body">
 
         <form method="post">
 
@@ -177,6 +182,7 @@
 
     </div>
 
+</div>
 </div>
 
 @section Scripts {
