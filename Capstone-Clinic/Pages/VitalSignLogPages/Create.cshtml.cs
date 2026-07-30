@@ -27,6 +27,24 @@ public class CreateModel : PageModel
 
     public string StudentName { get; set; } = "";
 
+    private void LoadMedicalRecordStudent(int medicalRecordId)
+    {
+        var medicalRecord = _context.MedicalRecords
+            .FirstOrDefault(m => m.MedicalRecordId == medicalRecordId);
+
+        if (medicalRecord == null)
+            return;
+
+        var student = _context.Students
+            .FirstOrDefault(s => s.StudentId == medicalRecord.StudentId);
+
+        if (student == null)
+            return;
+
+        StudentNumber = student.StudentNumber;
+        StudentName = student.FullName;
+    }
+
     public IActionResult OnGet(int? medicalRecordId)
     {
         if (medicalRecordId.HasValue)
@@ -37,20 +55,7 @@ public class CreateModel : PageModel
                 RecordedAt = DateTime.Now
             };
 
-            var medicalRecord = _context.MedicalRecords
-                .FirstOrDefault(m => m.MedicalRecordId == medicalRecordId.Value);
-
-            if (medicalRecord != null)
-            {
-                var student = _context.Students
-                    .FirstOrDefault(s => s.StudentId == medicalRecord.StudentId);
-
-                if (student != null)
-                {
-                    StudentNumber = student.StudentNumber;
-                    StudentName = student.FullName;
-                }
-            }
+            LoadMedicalRecordStudent(medicalRecordId.Value);
 
             return Page();
         }
@@ -88,31 +93,27 @@ public class CreateModel : PageModel
     {
         var reading = await _esp32Service.GetVitalsAsync();
 
-        if (VitalSignLog.MedicalRecordId != 0)
-        {
-            var medicalRecord = _context.MedicalRecords
-                .FirstOrDefault(m => m.MedicalRecordId == VitalSignLog.MedicalRecordId);
-
-            if (medicalRecord != null)
-            {
-                var student = _context.Students
-                    .FirstOrDefault(s => s.StudentId == medicalRecord.StudentId);
-
-                if (student != null)
-                {
-                    StudentNumber = student.StudentNumber;
-                    StudentName = student.FullName;
-                }
-            }
-        }
         if (reading != null && reading.FingerDetected)
         {
-            VitalSignLog.HeartRate = reading.AverageHeartRate;
+            // Heart Rate
+            VitalSignLog.HeartRate =
+                reading.AverageHeartRate > 0
+                    ? reading.AverageHeartRate
+                    : (int)Math.Round(reading.HeartRate);
+
+            // SpO₂
+            VitalSignLog.OxygenSaturation = reading.Spo2;
+
+            if (VitalSignLog.MedicalRecordId > 0)
+            {
+                LoadMedicalRecordStudent(VitalSignLog.MedicalRecordId);
+            }
 
             ModelState.Remove("VitalSignLog.HeartRate");
+            ModelState.Remove("VitalSignLog.OxygenSaturation");
 
             TempData["SuccessMessage"] =
-                "Heart rate successfully read from ESP32.";
+                "Heart Rate and SpO₂ successfully read from ESP32.";
         }
         else
         {

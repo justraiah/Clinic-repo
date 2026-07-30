@@ -6,5 +6,7 @@ public class VitalReading
 
     public int AverageHeartRate { get; set; }
 
+    public int Spo2 { get; set; }
+
     public bool FingerDetected { get; set; }
 }
