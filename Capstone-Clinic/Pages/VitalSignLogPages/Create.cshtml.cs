@@ -1,10 +1,11 @@
+using Capstone_Clinic.Data;
+using Capstone_Clinic.Helpers;
+using Capstone_Clinic.Models;
+using Capstone_Clinic.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
-using Microsoft.EntityFrameworkCore;
-using Capstone_Clinic.Models;
-using Capstone_Clinic.Data;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Capstone_Clinic.Helpers;
+using Microsoft.EntityFrameworkCore;
 
 namespace Capstone_Clinic.Pages.VitalSignLogPages;
 
@@ -12,10 +13,14 @@ public class CreateModel : PageModel
 {
 
     private readonly AppDbContext _context;
+    private readonly Esp32Service _esp32Service;
 
-    public CreateModel(AppDbContext context)
+    public CreateModel(
+        AppDbContext context,
+        Esp32Service esp32Service)
     {
         _context = context;
+        _esp32Service = esp32Service;
     }
 
     public string StudentNumber { get; set; } = "";
@@ -78,6 +83,45 @@ public class CreateModel : PageModel
     public SelectList StudentList { get; set; } = default!;
 
     // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD.
+
+    public async Task<IActionResult> OnPostReadSensorAsync()
+    {
+        var reading = await _esp32Service.GetVitalsAsync();
+
+        if (VitalSignLog.MedicalRecordId != 0)
+        {
+            var medicalRecord = _context.MedicalRecords
+                .FirstOrDefault(m => m.MedicalRecordId == VitalSignLog.MedicalRecordId);
+
+            if (medicalRecord != null)
+            {
+                var student = _context.Students
+                    .FirstOrDefault(s => s.StudentId == medicalRecord.StudentId);
+
+                if (student != null)
+                {
+                    StudentNumber = student.StudentNumber;
+                    StudentName = student.FullName;
+                }
+            }
+        }
+        if (reading != null && reading.FingerDetected)
+        {
+            VitalSignLog.HeartRate = reading.AverageHeartRate;
+
+            ModelState.Remove("VitalSignLog.HeartRate");
+
+            TempData["SuccessMessage"] =
+                "Heart rate successfully read from ESP32.";
+        }
+        else
+        {
+            TempData["ErrorMessage"] =
+                "No finger detected on the sensor.";
+        }
+
+        return Page();
+    }
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid)

@@ -1,7 +1,8 @@
 using Capstone_Clinic.Data;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Authentication.Cookies;
+using Capstone_Clinic.Services;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,7 @@ builder.Services.AddAuthentication(
     });
 
 builder.Services.AddAuthorization();
+builder.Services.AddHttpClient<Esp32Service>();
 
 builder.Services.AddRazorPages(options =>
 {
