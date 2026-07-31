@@ -45,9 +45,14 @@ public class SearchModel : PageModel
     private async Task LoadStudentAsync()
     {
         Student = await _context.Students
-            .FirstOrDefaultAsync(
-                s => s.StudentNumber == SearchStudentNumber
-            );
+    .FirstOrDefaultAsync(s =>
+
+        s.StudentNumber == SearchStudentNumber ||
+
+        s.FullName.ToLower()
+            .Contains(SearchStudentNumber.ToLower())
+
+    );
 
         if (Student == null)
         {

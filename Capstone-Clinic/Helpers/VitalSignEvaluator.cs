@@ -1,4 +1,5 @@
 ﻿using Capstone_Clinic.Models;
+using System.Linq;
 
 namespace Capstone_Clinic.Helpers
 {
@@ -128,7 +129,7 @@ namespace Capstone_Clinic.Helpers
                 remarks.Add("Hypotension");
             }
 
-            vital.Remarks = string.Join(", ", remarks);
+            vital.Remarks = string.Join(", ", remarks.Distinct());
         }
     }
 }

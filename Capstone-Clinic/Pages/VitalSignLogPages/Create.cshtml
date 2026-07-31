@@ -117,7 +117,6 @@
                 <label asp-for="VitalSignLog.HeartRate" class="form-label">
                     Heart Rate (BPM)
                 </label>
-                        <p class="text-danger">Model value: @Model.VitalSignLog.HeartRate</p>
                 <input asp-for="VitalSignLog.HeartRate"
                        class="form-control"
                        readonly
@@ -126,7 +125,7 @@
             </div>
 
             <div class="mb-3">
-                <label asp-for="VitalSignLog.OxygenSaturation" class="form-label">z
+                <label asp-for="VitalSignLog.OxygenSaturation" class="form-label">
                     SpO₂ (%)
                 </label>
                 <input asp-for="VitalSignLog.OxygenSaturation"
@@ -140,9 +139,32 @@
 
                         <button type="submit"
                                 asp-page-handler="ReadSensor"
-                                class="btn btn-primary w-100">
-                            📡 Read Heart Rate from ESP32
+                                class="btn btn-primary w-100"
+                                id="readSensorBtn">
+
+                            📡 Read Heart Rate & SpO₂
+
                         </button>
+                        <div id="sensorLoading"
+                             class="alert alert-info mt-3 d-none">
+
+                            <div class="d-flex align-items-center">
+
+                                <div class="spinner-border spinner-border-sm me-2"
+                                     role="status">
+                                </div>
+
+                                <div>
+
+                                    <strong>Reading sensor...</strong><br />
+
+                                    Please keep your finger on the sensor.
+
+                                </div>
+
+                            </div>
+
+                        </div>
 
                     </div>
 
@@ -236,5 +258,33 @@
 </div>
 
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
+    <script>
+
+        document.querySelector("form").addEventListener("submit", function () {
+
+            const button = document.getElementById("readSensorBtn");
+
+            if (button) {
+
+                button.disabled = true;
+
+                button.innerHTML =
+                    "⏳ Reading Sensor...";
+
+                document
+                    .getElementById("sensorLoading")
+                    .classList
+                    .remove("d-none");
+
+            }
+
+        });
+
+    </script>
+
 }
