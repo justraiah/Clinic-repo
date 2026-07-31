@@ -89,8 +89,10 @@ public class CreateModel : PageModel
 
     // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD.
 
+
     public async Task<IActionResult> OnPostReadSensorAsync()
     {
+        Console.WriteLine("===== READ SENSOR HANDLER START =====");
         var reading = await _esp32Service.GetVitalsAsync();
 
         if (reading != null && reading.FingerDetected)
@@ -120,11 +122,12 @@ public class CreateModel : PageModel
             TempData["ErrorMessage"] =
                 "No finger detected on the sensor.";
         }
-
+        Console.WriteLine("===== READ SENSOR HANDLER END =====");
         return Page();
     }
     public async Task<IActionResult> OnPostAsync()
     {
+        Console.WriteLine("===== SAVE HANDLER =====");
         if (!ModelState.IsValid)
         {
             StudentList = new SelectList(
@@ -194,7 +197,7 @@ public class CreateModel : PageModel
             _context.Alerts.Add(alert);
             await _context.SaveChangesAsync();
         }
-
+        Console.WriteLine("===== SAVE HANDLER END =====");
         return RedirectToPage("/MedicalRecordPages/Details",
     new { id = VitalSignLog.MedicalRecordId });
     }
