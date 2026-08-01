@@ -14,6 +14,7 @@ public class IndexModel : PageModel
     }
 
     public List<VitalSignDisplayModel> VitalSigns { get; set; } = new();
+    public List<StudentVitalSummary> StudentSummaries { get; set; } = new();
     public int? MedicalRecordId { get; set; }
 
     public string StudentName { get; set; } = "";
@@ -40,19 +41,66 @@ public class IndexModel : PageModel
     };
         if (medicalRecordId.HasValue)
         {
-            query = query.Where(x => x.Vital.MedicalRecordId == medicalRecordId.Value);
-
-            var student = await _context.MedicalRecords
+            // Find which student owns this medical record
+            var studentId = await _context.MedicalRecords
                 .Where(m => m.MedicalRecordId == medicalRecordId.Value)
-                .Join(_context.Students,
-                      m => m.StudentId,
-                      s => s.StudentId,
-                      (m, s) => s.FullName)
+                .Select(m => m.StudentId)
                 .FirstOrDefaultAsync();
 
-            StudentName = student ?? "";
+            // Get the student's name
+            StudentName = await _context.Students
+                .Where(s => s.StudentId == studentId)
+                .Select(s => s.FullName)
+                .FirstOrDefaultAsync() ?? "";
+
+            // Get ALL medical records belonging to this student
+            var medicalRecordIds = await _context.MedicalRecords
+                .Where(m => m.StudentId == studentId)
+                .Select(m => m.MedicalRecordId)
+                .ToListAsync();
+
+            // Show vital signs from ALL of those medical records
+            query = query.Where(x => medicalRecordIds.Contains(x.Vital.MedicalRecordId));
+        }
+        if (!medicalRecordId.HasValue)
+        {
+            StudentSummaries = await
+(
+    from m in _context.MedicalRecords
+    join s in _context.Students
+        on m.StudentId equals s.StudentId
+    select new StudentVitalSummary
+    {
+        StudentId = s.StudentId,
+        MedicalRecordId = m.MedicalRecordId,
+
+        StudentName = s.FullName,
+        StudentNumber = s.StudentNumber,
+
+        LastRecorded = _context.VitalSignLogs
+        .Where(v => v.MedicalRecordId == m.MedicalRecordId)
+        .OrderByDescending(v => v.RecordedAt)
+        .Select(v => v.RecordedAt)
+        .FirstOrDefault(),
+
+        LatestStatus = _context.VitalSignLogs
+        .Where(v => v.MedicalRecordId == m.MedicalRecordId)
+        .OrderByDescending(v => v.RecordedAt)
+        .Select(v => v.Status)
+        .FirstOrDefault() ?? "No Records",
+
+        TotalRecords = _context.VitalSignLogs
+        .Count(v => v.MedicalRecordId == m.MedicalRecordId),
+
+        CriticalCount = _context.VitalSignLogs
+        .Count(v =>
+            v.MedicalRecordId == m.MedicalRecordId &&
+            v.Status == "Critical")
+    }
+).ToListAsync();
         }
         VitalSigns = await query
+    .OrderByDescending(x => x.Vital.RecordedAt)
     .Select(x => new VitalSignDisplayModel
     {
         VitalSignLogId = x.Vital.VitalSignLogId,
@@ -83,7 +131,23 @@ public class IndexModel : PageModel
             LastVisitDate = latest.RecordedAt;
         }
     }
+    public class StudentVitalSummary
+    {
+        public int StudentId { get; set; }
 
+        public int MedicalRecordId { get; set; }
+
+        public string StudentName { get; set; } = "";
+        public string StudentNumber { get; set; } = "";
+
+        public DateTime LastRecorded { get; set; }
+
+        public string LatestStatus { get; set; } = "";
+
+        public int TotalRecords { get; set; }
+
+        public int CriticalCount { get; set; }
+    }
     public class VitalSignDisplayModel
     {
         public int VitalSignLogId { get; set; }

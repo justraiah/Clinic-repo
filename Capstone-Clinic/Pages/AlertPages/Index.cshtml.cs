@@ -48,16 +48,26 @@ public class IndexModel : PageModel
             }
 
         ).ToListAsync();
-        CriticalCount = Alerts.Count(a =>
-    a.Severity == "Critical" &&
-    a.Status == "Active");
+        CriticalCount = await _context.Alerts
+    .Join(_context.VitalSignLogs,
+        a => a.VitalLogId,
+        v => v.VitalSignLogId,
+        (a, v) => new { Alert = a, Vital = v })
+    .CountAsync(x =>
+        x.Alert.Status == "Active" &&
+        x.Vital.Status == "Critical");
 
-        WarningCount = Alerts.Count(a =>
-            a.Severity == "Warning" &&
-            a.Status == "Active");
+        WarningCount = await _context.Alerts
+            .Join(_context.VitalSignLogs,
+                a => a.VitalLogId,
+                v => v.VitalSignLogId,
+                (a, v) => new { Alert = a, Vital = v })
+            .CountAsync(x =>
+                x.Alert.Status == "Active" &&
+                x.Vital.Status == "Warning");
 
-        AcknowledgedCount = Alerts.Count(a =>
-            a.Status == "Acknowledged");
+        AcknowledgedCount = await _context.Alerts
+            .CountAsync(a => a.Status == "Acknowledged");
     }
     public async Task<IActionResult> OnPostAcknowledgeAsync(int id)
     {

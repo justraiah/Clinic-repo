@@ -13,7 +13,7 @@
         </h2>
 
         <p class="text-muted mb-0">
-            View and manage student medical records and clinic visit information.
+            View and manage student medical records. Open a record to view consultation history, vital signs, prescriptions, and other clinic information.
         </p>
     </div>
 
@@ -36,9 +36,8 @@
 
                     <tr>
                         <th>Student</th>
-                        <th>Visit Date</th>
-                        <th>Chief Complaint</th>
-                        <th>Updated</th>
+                        <th>Record Created</th>
+                        <th>Last Updated</th>
                         <th class="text-center">Actions</th>
                     </tr>
 
@@ -59,11 +58,7 @@
                             <td>
                                 @item.VisitDate.ToString("MMM dd, yyyy")
                             </td>
-                            <td>
-                                @(string.IsNullOrWhiteSpace(item.ChiefComplaint)
-                                    ? "—"
-                                    : item.ChiefComplaint)
-                            </td>
+
                             <td>
                                 @if (item.UpdatedAt == DateTime.MinValue)
                                 {
@@ -80,7 +75,7 @@
                                 <a asp-page="./Details"
                                    asp-route-id="@item.MedicalRecordId"
                                    class="btn btn-sm btn-info">
-                                    View
+                                    Open Record
                                 </a>
 
                                 <a asp-page="./Edit"

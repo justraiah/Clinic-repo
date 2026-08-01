@@ -15,6 +15,7 @@ public class DetailsModel : PageModel
     }
 
     public MedicalRecord MedicalRecord { get; set; } = default!;
+    public List<MedicalRecord> ConsultationHistory { get; set; } = new();
     public int TotalVisits { get; set; }
 
     public int CriticalVisits { get; set; }
@@ -40,6 +41,10 @@ public class DetailsModel : PageModel
         else
         {
             MedicalRecord = medicalrecord;
+            ConsultationHistory = await _context.MedicalRecords
+    .Where(m => m.StudentId == MedicalRecord.StudentId)
+    .OrderByDescending(m => m.VisitDate)
+    .ToListAsync();
 
             Student = await _context.Students
                 .FirstOrDefaultAsync(s => s.StudentId == MedicalRecord.StudentId)
@@ -55,21 +60,30 @@ public class DetailsModel : PageModel
                 }
             }
 
+            // Get every consultation (MedicalRecord) for this student
+            var medicalRecordIds = await _context.MedicalRecords
+                .Where(m => m.StudentId == MedicalRecord.StudentId)
+                .Select(m => m.MedicalRecordId)
+                .ToListAsync();
+
+            // Student-wide recent vital signs
             RecentVitalSigns = await _context.VitalSignLogs
-    .Where(v => v.MedicalRecordId == MedicalRecord.MedicalRecordId)
-    .OrderByDescending(v => v.RecordedAt)
-    .Take(5)
-    .ToListAsync();
+                .Where(v => medicalRecordIds.Contains(v.MedicalRecordId))
+                .OrderByDescending(v => v.RecordedAt)
+                .Take(5)
+                .ToListAsync();
+
+            // Student-wide statistics
             TotalVisits = await _context.VitalSignLogs
-    .CountAsync(v => v.MedicalRecordId == MedicalRecord.MedicalRecordId);
+                .CountAsync(v => medicalRecordIds.Contains(v.MedicalRecordId));
 
             CriticalVisits = await _context.VitalSignLogs
                 .CountAsync(v =>
-                    v.MedicalRecordId == MedicalRecord.MedicalRecordId &&
+                    medicalRecordIds.Contains(v.MedicalRecordId) &&
                     v.Status == "Critical");
 
             LatestStatus = await _context.VitalSignLogs
-                .Where(v => v.MedicalRecordId == MedicalRecord.MedicalRecordId)
+                .Where(v => medicalRecordIds.Contains(v.MedicalRecordId))
                 .OrderByDescending(v => v.RecordedAt)
                 .Select(v => v.Status)
                 .FirstOrDefaultAsync() ?? "No Records";

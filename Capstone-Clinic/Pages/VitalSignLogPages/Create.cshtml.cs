@@ -95,21 +95,20 @@ public class CreateModel : PageModel
         Console.WriteLine("===== READ SENSOR HANDLER START =====");
         var reading = await _esp32Service.GetVitalsAsync();
 
+        // Always reload the student information before returning the page
+        if (VitalSignLog.MedicalRecordId > 0)
+        {
+            LoadMedicalRecordStudent(VitalSignLog.MedicalRecordId);
+        }
+
         if (reading != null && reading.FingerDetected)
         {
-            // Heart Rate
             VitalSignLog.HeartRate =
                 reading.AverageHeartRate > 0
                     ? reading.AverageHeartRate
                     : (int)Math.Round(reading.HeartRate);
 
-            // SpO₂
             VitalSignLog.OxygenSaturation = reading.Spo2;
-
-            if (VitalSignLog.MedicalRecordId > 0)
-            {
-                LoadMedicalRecordStudent(VitalSignLog.MedicalRecordId);
-            }
 
             ModelState.Remove("VitalSignLog.HeartRate");
             ModelState.Remove("VitalSignLog.OxygenSaturation");
@@ -120,9 +119,9 @@ public class CreateModel : PageModel
         else
         {
             TempData["ErrorMessage"] =
-                "No finger detected on the sensor.";
+                "Unable to obtain enough stable readings. Please keep your finger steady and try again.";
         }
-        Console.WriteLine("===== READ SENSOR HANDLER END =====");
+
         return Page();
     }
     public async Task<IActionResult> OnPostAsync()

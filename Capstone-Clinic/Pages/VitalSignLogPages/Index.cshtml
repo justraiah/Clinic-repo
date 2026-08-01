@@ -115,137 +115,190 @@ else
 }
 <div class="table-responsive">
 
-    <table class="table table-striped table-hover align-middle">
-        <thead class="table-dark">
+    @if (Model.MedicalRecordId == null)
+    {
+        <p style="color:red">
+            VitalSigns.Count = @Model.VitalSigns.Count
+        </p>
+        <table class="table table-striped table-hover align-middle">
 
-            <tr>
+            <thead class="table-dark">
+                <tr>
+                    <th>Student</th>
+                    <th class="text-center">Latest Status</th>
+                    <th class="text-center">Total Records</th>
+                    <th class="text-center">Critical Visits</th>
+                    <th class="text-center">Last Recorded</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
 
-                @if (Model.MedicalRecordId == null)
+            <tbody>
+
+                @foreach (var student in Model.StudentSummaries)
                 {
-                    <th class="text-center">
-                        Student
-                    </th>
+                    <tr>
+
+                        <td>
+                            <strong>@student.StudentNumber</strong><br />
+                            <span class="text-muted">@student.StudentName</span>
+                        </td>
+
+                        <td class="text-center">
+
+                            @if (student.LatestStatus == "Critical")
+                            {
+                                <span class="badge bg-danger">🔴 Critical</span>
+                            }
+                            else if (student.LatestStatus == "Warning")
+                            {
+                                <span class="badge bg-warning text-dark">🟡 Warning</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">🟢 Normal</span>
+                            }
+
+                        </td>
+
+                        <td class="text-center fw-bold">
+                            @student.TotalRecords
+                        </td>
+
+                        <td class="text-center">
+
+                            @if (student.CriticalCount > 0)
+                            {
+                                <span class="badge bg-danger">@student.CriticalCount</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-success">0</span>
+                            }
+
+                        </td>
+
+                        <td class="text-center">
+
+                            @(student.LastRecorded == default
+                                ? "No Records"
+                                : student.LastRecorded.ToString("MMM dd, yyyy"))
+
+                        </td>
+
+                        <td class="text-center">
+
+                            <a asp-page="./Index"
+                               asp-route-medicalRecordId="@student.MedicalRecordId"
+                               class="btn btn-primary btn-sm">
+                                View History
+                            </a>
+
+                        </td>
+
+                    </tr>
                 }
 
-                <th class="text-center">
-                    Visit Reason
-                </th>
+            </tbody>
 
-                <th class="text-center">
-                    Temp
-                </th>
+        </table>
+    }
+    else
+    {
+        <table class="table table-striped table-hover align-middle">
 
-                <th class="text-center">
-                    HR
-                </th>
+            <thead class="table-dark">
+                <tr>
+                    <th class="text-center">Visit Reason</th>
+                    <th class="text-center">Temp</th>
+                    <th class="text-center">HR</th>
+                    <th class="text-center">SpO₂</th>
+                    <th class="text-center">BP</th>
+                    <th class="text-center">Recorded</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
 
-                <th class="text-center">
-                    SpO₂
-                </th>
+            <tbody>
 
-                <th class="text-center">
-                    BP
-                </th>
-
-                <th class="text-center">
-                    Recorded
-                </th>
-
-                <th class="text-center">
-                    Status
-                </th>
-
-                <th class="text-center">
-                    Actions
-                </th>
-
-            </tr>
-
-        </thead>
-    <tbody>
-        @foreach (var item in Model.VitalSigns)
-        {
-        <tr>
-                @if (Model.MedicalRecordId == null)
+                @foreach (var item in Model.VitalSigns)
                 {
-                    <td>
-                        @item.Student
-                    </td>
+                    <tr>
+
+                        <td>
+                            @if (string.IsNullOrWhiteSpace(item.VisitReason))
+                            {
+                                <span class="text-muted">N/A</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-info text-dark">
+                                    @item.VisitReason
+                                </span>
+                            }
+                        </td>
+
+                        <td class="text-center">@($"{item.Temperature:F1} °C")</td>
+
+                        <td class="text-center">@($"{item.HeartRate} BPM")</td>
+
+                        <td class="text-center">@($"{item.OxygenSaturation}%")</td>
+
+                        <td class="text-center">@($"{item.SystolicBP}/{item.DiastolicBP} mmHg")</td>
+
+                        <td class="text-center">
+                            @item.RecordedAt.ToString("MMM dd, yyyy hh:mm tt")
+                        </td>
+
+                        <td class="text-center">
+
+                            @if (item.Status == "Normal")
+                            {
+                                <span class="badge bg-success">🟢 Normal</span>
+                            }
+                            else if (item.Status == "Warning")
+                            {
+                                <span class="badge bg-warning text-dark">🟡 Warning</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">🔴 Critical</span>
+                            }
+
+                        </td>
+
+                        <td class="text-center">
+
+                            <a class="btn btn-sm btn-info"
+                               asp-page="./Details"
+                               asp-route-id="@item.VitalSignLogId"
+                               asp-route-medicalRecordId="@Model.MedicalRecordId">
+                                View
+                            </a>
+
+                            <a class="btn btn-sm btn-warning"
+                               asp-page="./Edit"
+                               asp-route-id="@item.VitalSignLogId"
+                               asp-route-medicalRecordId="@Model.MedicalRecordId">
+                                Edit
+                            </a>
+
+                            <a class="btn btn-sm btn-danger"
+                               asp-page="./Delete"
+                               asp-route-id="@item.VitalSignLogId"
+                               asp-route-medicalRecordId="@Model.MedicalRecordId">
+                                Delete
+                            </a>
+
+                        </td>
+
+                    </tr>
                 }
-                <td>
-                    @if (string.IsNullOrWhiteSpace(item.VisitReason))
-                    {
-                        <span class="text-muted">
-                            N/A
-                        </span>
-                    }
-                    else
-                    {
-                        <span class="badge bg-info text-dark">
-                            @item.VisitReason
-                        </span>
-                    }
-                </td>
-                <td class="text-center">
-                    @($"{item.Temperature:F1} °C")
-            </td>
-                <td class="text-center">
-                    @($"{item.HeartRate} BPM")
-            </td>
-            <td class="text-center">
-                    @($"{item.OxygenSaturation}%")
-            </td>
-            <td class="text-center">
-                    @($"{item.SystolicBP}/{item.DiastolicBP} mmHg")
-            </td>
-            <td class="text-center">
-                    @item.RecordedAt.ToString("MMM dd, yyyy hh:mm tt")
-            </td>
 
-                    <td class="text-center">
-                    @if (item.Status == "Normal")
-                    {
-                        <span class="badge bg-success">
-                            🟢 Normal
-                        </span>
-                    }
-                    else if (item.Status == "Warning")
-                    {
-                        <span class="badge bg-warning text-dark">
-                            🟡 Warning
-                        </span>
-                    }
-                    else if (item.Status == "Critical")
-                    {
-                        <span class="badge bg-danger">
-                            🔴 Critical
-                        </span>
-                    }
-                </td>
-                    <td class="text-center">
-                    <a class="btn btn-sm btn-info"
-                       asp-page="./Details"
-                       asp-route-id="@item.VitalSignLogId"
-                       asp-route-medicalRecordId="@Model.MedicalRecordId">
-                        View
-                    </a>
+            </tbody>
 
-                    <a class="btn btn-sm btn-warning"
-                       asp-page="./Edit"
-                       asp-route-id="@item.VitalSignLogId"
-                       asp-route-medicalRecordId="@Model.MedicalRecordId">
-                        Edit
-                    </a>
+        </table>
+    }
 
-                    <a class="btn btn-sm btn-danger"
-                       asp-page="./Delete"
-                       asp-route-id="@item.VitalSignLogId"
-                       asp-route-medicalRecordId="@Model.MedicalRecordId">
-                        Delete
-                    </a>
-                </td>
-        </tr>
-}
-    </tbody>
-</table>
 </div>
