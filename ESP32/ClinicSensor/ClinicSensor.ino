@@ -8,6 +8,9 @@
 const char* ssid = "DSP 2.4Ghz";
 const char* password = "P@$$w0rd0914";
 
+const byte TOTAL_MEASUREMENTS = 5;
+const byte MIN_VALID_READINGS = 3;
+
 WebServer server(80);
 MAX30105 particleSensor;
 
@@ -190,7 +193,7 @@ bool measureVitals()
     long spo2Sum = 0;
     int validCount = 0;
 
-    for (int measurement = 0; measurement < 5; measurement++)
+    for (int measurement = 0; measurement < TOTAL_MEASUREMENTS; measurement++)
     {
         for (int i = 0; i < 100; i++)
         {
@@ -249,8 +252,20 @@ delay(250);
     measurementInProgress = false;
     measurementComplete = true;
 
-    if (validCount == 0)
-        return false;
+    const int MIN_VALID_READINGS = 3;
+
+if (validCount < MIN_VALID_READINGS)
+{
+    Serial.println("---------------------");
+    Serial.println("Measurement failed.");
+    Serial.print("Only ");
+    Serial.print(validCount);
+    Serial.println(" valid reading(s).");
+    Serial.println("---------------------");
+
+    fingerDetected = false;
+    return false;
+}
 
     beatAvg = hrSum / validCount;
     spo2 = spo2Sum / validCount;
