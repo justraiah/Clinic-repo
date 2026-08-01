@@ -6,7 +6,7 @@
 #include <WebServer.h>
 
 const char* ssid = "DSP 2.4Ghz";
-const char* password = "P@$$w0rd0914";
+const char* password = "";
 
 const byte TOTAL_MEASUREMENTS = 5;
 const byte MIN_VALID_READINGS = 3;
