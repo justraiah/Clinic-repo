@@ -1,4 +1,269 @@
 ﻿@page
 @model Capstone_Clinic.Pages.Reports.IndexModel
+
 @{
+    ViewData["Title"] = "Reports";
 }
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+
+    <div>
+
+        <h2 class="fw-bold mb-1">
+            📊 Reports Dashboard
+        </h2>
+
+        <p class="text-muted mb-0">
+            Overview of clinic operations and student health statistics.
+        </p>
+
+    </div>
+
+</div>
+<form method="get" class="row mb-4">
+
+    <div class="col-md-3">
+
+        <label class="form-label fw-semibold">
+            Report Period
+        </label>
+
+        <select asp-for="Period"
+                class="form-select"
+                onchange="this.form.submit()">
+
+            <option value="All">All Time</option>
+            <option value="Today">Today</option>
+            <option value="Week">This Week</option>
+            <option value="Month">This Month</option>
+            <option value="Year">This Year</option>
+
+        </select>
+
+    </div>
+
+</form>
+<div class="row">
+
+    <div class="col-md-3 mb-3">
+        <div class="card border-primary shadow-sm">
+            <div class="card-body text-center">
+                <h1 class="display-5 fw-bold text-primary">
+                    @Model.TotalStudents</h2>
+                <h6>Total Students</h6>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card border-success shadow-sm">
+            <div class="card-body text-center">
+                <h2 class="text-success">@Model.TotalMedicalRecords</h2>
+                <h6>Medical Records</h6>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card border-danger shadow-sm">
+            <div class="card-body text-center">
+                <h2 class="text-danger">@Model.TotalVitalSigns</h2>
+                <h6>Vital Sign Records</h6>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3 mb-3">
+        <div class="card border-warning shadow-sm">
+            <div class="card-body text-center">
+                <h2 class="text-warning">@Model.ActiveAlerts</h2>
+                <h6>Active Alerts</h6>
+            </div>
+        </div>
+    </div>
+
+</div>
+<hr class="my-4" />
+
+<h4 class="fw-bold mb-3">
+    ❤️ Vital Statistics
+</h4>
+
+<div class="row">
+
+    <div class="col-md-4 mb-3">
+        <div class="card border-success shadow-sm">
+            <div class="card-body text-center">
+                <h2 class="text-success">@Model.NormalCount</h2>
+                <h6>Normal Readings</h6>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card border-warning shadow-sm">
+            <div class="card-body text-center">
+                <h2 class="text-warning">@Model.WarningCount</h2>
+                <h6>Warning Readings</h6>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 mb-3">
+        <div class="card border-danger shadow-sm">
+            <div class="card-body text-center">
+                <h2 class="text-danger">@Model.CriticalCount</h2>
+                <h6>Critical Readings</h6>
+            </div>
+        </div>
+    </div>
+
+</div>
+<hr class="my-4" />
+
+<h4 class="fw-bold mb-3">
+    📋 Top Visit Reasons
+</h4>
+
+<div class="card shadow-sm h-100">
+
+    <div class="card-body">
+
+        <table class="table table-hover align-middle">
+
+            <thead class="table-dark">
+
+                <tr>
+                    <th>Visit Reason</th>
+                    <th class="text-center">Total Cases</th>
+                </tr>
+
+            </thead>
+
+            <tbody>
+
+                @foreach (var item in Model.TopVisitReasons)
+                {
+                    <tr>
+
+                        <td>@item.VisitReason</td>
+
+                        <td class="text-center fw-bold">
+                            @item.Count
+                        </td>
+
+                    </tr>
+                }
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+<div class="card mt-4">
+    <div class="card-header bg-danger text-white">
+        <h5 class="mb-0">Top Students with Critical Visits</h5>
+    </div>
+
+    <div class="card-body p-0">
+        <table class="table table-striped mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Student No.</th>
+                    <th>Student</th>
+                    <th class="text-center">Critical Visits</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var student in Model.TopCriticalStudents)
+                {
+                    <tr>
+                        <td>@student.StudentNumber</td>
+                        <td>@student.StudentName</td>
+                        <td class="text-center">
+                            <span class="badge bg-danger">
+                                @student.CriticalVisits
+                            </span>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+<hr class="my-4" />
+
+<h4 class="fw-bold mb-3">
+    📊 Vital Status Distribution
+</h4>
+
+<div class="card shadow-sm h-100">
+
+    <div class="card-body">
+
+        <h6>🟢 Normal (@Model.NormalCount)</h6>
+
+        <div class="progress mb-3" style="height:25px;">
+            <div class="progress-bar bg-success"
+                 role="progressbar"
+                 style="width:@Model.NormalPercentage%">
+                @Model.NormalPercentage.ToString("0.0")%
+            </div>
+        </div>
+
+        <h6>🟡 Warning (@Model.WarningCount)</h6>
+
+        <div class="progress mb-3" style="height:25px;">
+            <div class="progress-bar bg-warning text-dark"
+                 role="progressbar"
+                 style="width:@Model.WarningPercentage%">
+                @Model.WarningPercentage.ToString("0.0")%
+            </div>
+        </div>
+
+        <h6>🔴 Critical (@Model.CriticalCount)</h6>
+
+        <div class="progress" style="height:25px;">
+            <div class="progress-bar bg-danger"
+                 role="progressbar"
+                 style="width:@Model.CriticalPercentage%">
+                @Model.CriticalPercentage.ToString("0.0")%
+            </div>
+        </div>
+
+    </div>
+
+</div>
+    <div class="card shadow-sm mt-4">
+        <div class="card-header bg-danger text-white">
+            🚨 Recent Critical Alerts
+        </div>
+
+        <div class="card-body p-0">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Alert</th>
+                        <th>Created</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    @foreach (var item in Model.RecentCriticalAlerts)
+                    {
+                        <tr>
+                            <td>@item.StudentName</td>
+                            <td>@item.AlertType</td>
+                            <td>@item.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")</td>
+                        </tr>
+                    }
+
+                </tbody>
+            </table>
+        </div>
+    </div>
