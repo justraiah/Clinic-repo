@@ -32,6 +32,7 @@ namespace Capstone_Clinic.Pages
         public async Task OnGetAsync()
         {
             LastUpdated = DateTime.Now;
+           
             StudentCount = await _context.Students.CountAsync();
 
             MedicalRecordCount = await _context.MedicalRecords.CountAsync();

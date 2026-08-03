@@ -63,6 +63,12 @@
                                     🚨 Alerts
                                 </a>
                             </li>
+                            <li class="nav-item">
+                                <a class="nav-link @(currentPage!.StartsWith("/Reports") ? "active fw-bold text-primary" : "")"
+                                   asp-page="/Reports/Index">
+                                    📊 Reports
+                                </a>
+                            </li>
 
                             <li class="nav-item ms-auto">
                                 <span class="nav-link text-secondary">

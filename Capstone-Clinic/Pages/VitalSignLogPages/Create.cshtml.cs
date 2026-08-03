@@ -77,7 +77,6 @@ public class CreateModel : PageModel
         {
             RecordedAt = DateTime.Now
         };
-
         return Page();
     }
 

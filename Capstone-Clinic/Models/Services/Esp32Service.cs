@@ -12,35 +12,39 @@ public class Esp32Service
         _httpClient = httpClient;
     }
 
+    public bool IsEsp32Online { get; private set; }
     public async Task<VitalReading?> GetVitalsAsync()
     {
-        Console.WriteLine("1. Sending request...");
+        try
+        {
+            Console.WriteLine("Sending request to ESP32...");
 
-        var response = await _httpClient.GetAsync("http://192.168.1.16/");
+            var response = await _httpClient.GetAsync("http://192.168.1.16/");
 
-        Console.WriteLine("2. Response received.");
+            Console.WriteLine($"ESP32 responded: {response.StatusCode}");
 
-        Console.WriteLine($"Status: {response.StatusCode}");
+            IsEsp32Online = response.IsSuccessStatusCode;
 
-        Console.WriteLine("3. Reading body...");
+            var json = await response.Content.ReadAsStringAsync();
 
-        var json = await response.Content.ReadAsStringAsync();
+            Console.WriteLine($"Response JSON: {json}");
 
-        Console.WriteLine("4. Body read.");
+            var result = JsonSerializer.Deserialize<VitalReading>(
+                json,
+                new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
 
-        Console.WriteLine(json);
+            return result;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"ESP32 ERROR: {ex}");
 
-        Console.WriteLine("5. Deserializing...");
+            IsEsp32Online = false;
 
-        var result = JsonSerializer.Deserialize<VitalReading>(
-            json,
-            new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-
-        Console.WriteLine("6. Finished.");
-
-        return result;
+            return null;
+        }
     }
 }
