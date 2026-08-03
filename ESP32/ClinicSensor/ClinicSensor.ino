@@ -20,7 +20,7 @@ byte rates[RATE_SIZE];
 byte rateSpot = 0;
 long lastBeat = 0;
 
-// -------- Current Measurements --------
+// -------- Current Measurements ------
 float beatsPerMinute = 0;
 int beatAvg = 0;
 
