@@ -1,15 +1,18 @@
 ﻿using System.Text.Json;
 using Capstone_Clinic.Models.IoT;
+using Microsoft.Extensions.Configuration;
 
 namespace Capstone_Clinic.Services;
 
 public class Esp32Service
 {
     private readonly HttpClient _httpClient;
+    private readonly IConfiguration _configuration;
 
-    public Esp32Service(HttpClient httpClient)
+    public Esp32Service(HttpClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
+        _configuration = configuration;
     }
 
     public bool IsEsp32Online { get; private set; }
@@ -19,7 +22,7 @@ public class Esp32Service
         {
             Console.WriteLine("Sending request to ESP32...");
 
-            var response = await _httpClient.GetAsync("http://192.168.1.16/");
+            var response = await _httpClient.GetAsync(_configuration["Esp32:BaseUrl"]);
 
             Console.WriteLine($"ESP32 responded: {response.StatusCode}");
 
