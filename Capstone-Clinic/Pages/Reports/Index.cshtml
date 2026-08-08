@@ -17,6 +17,21 @@
             Overview of clinic operations and student health statistics.
         </p>
 
+        <div class="mt-2">
+            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
+                <i class="bi bi-calendar3 me-1"></i>
+                Showing:
+                @(Model.Period switch
+                {
+                    "Today" => "Today",
+                    "Week" => "This Week",
+                    "Month" => "This Month",
+                    "Year" => "This Year",
+                    _ => "All Time"
+                })
+            </span>
+        </div>
+
     </div>
 
 </div>
@@ -151,22 +166,32 @@
 
             </thead>
 
-            <tbody>
+                <tbody>
 
-                @foreach (var item in Model.TopVisitReasons)
-                {
-                    <tr>
+                    @if (Model.TopVisitReasons.Any())
+                    {
+                        @foreach (var item in Model.TopVisitReasons)
+                        {
+                            <tr>
+                                <td>@item.VisitReason</td>
 
-                        <td>@item.VisitReason</td>
+                                <td class="text-center fw-bold">
+                                    @item.Count
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="2" class="text-center text-muted py-4">
+                                <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+                                No visit reasons recorded for the selected period.
+                            </td>
+                        </tr>
+                    }
 
-                        <td class="text-center fw-bold">
-                            @item.Count
-                        </td>
-
-                    </tr>
-                }
-
-            </tbody>
+                </tbody>
 
         </table>
 
@@ -188,20 +213,36 @@
                 </tr>
             </thead>
 
-            <tbody>
-                @foreach (var student in Model.TopCriticalStudents)
-                {
-                    <tr>
-                        <td>@student.StudentNumber</td>
-                        <td>@student.StudentName</td>
-                        <td class="text-center">
-                            <span class="badge bg-danger">
-                                @student.CriticalVisits
-                            </span>
-                        </td>
-                    </tr>
-                }
-            </tbody>
+                <tbody>
+
+                    @if (Model.TopCriticalStudents.Any())
+                    {
+                        @foreach (var student in Model.TopCriticalStudents)
+                        {
+                            <tr>
+                                <td>@student.StudentNumber</td>
+
+                                <td>@student.StudentName</td>
+
+                                <td class="text-center">
+                                    <span class="badge bg-danger">
+                                        @student.CriticalVisits
+                                    </span>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="3" class="text-center text-muted py-4">
+                                <i class="bi bi-person-check fs-4 d-block mb-2"></i>
+                                No students with critical visits for the selected period.
+                            </td>
+                        </tr>
+                    }
+
+                </tbody>
         </table>
     </div>
 </div>
@@ -265,12 +306,28 @@
 
                 <tbody>
 
-                    @foreach (var item in Model.RecentCriticalAlerts)
+                    @if (Model.RecentCriticalAlerts.Any())
+                    {
+                        @foreach (var item in Model.RecentCriticalAlerts)
+                        {
+                            <tr>
+                                <td>@item.StudentName</td>
+
+                                <td>@item.AlertType</td>
+
+                                <td>
+                                    @item.CreatedAt.ToString("MMMM dd, yyyy hh:mm tt")
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
                     {
                         <tr>
-                            <td>@item.StudentName</td>
-                            <td>@item.AlertType</td>
-                            <td>@item.CreatedAt.ToString("MMM dd, yyyy hh:mm tt")</td>
+                            <td colspan="3" class="text-center text-muted py-4">
+                                <i class="bi bi-shield-check fs-4 d-block mb-2"></i>
+                                No critical alerts recorded for the selected period.
+                            </td>
                         </tr>
                     }
 

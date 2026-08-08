@@ -57,12 +57,33 @@ public class CreateModel : PageModel
     // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD.
     public async Task<IActionResult> OnPostAsync()
     {
+        // Optional consultation fields should be stored as empty strings
+        // because the existing database columns do not allow NULL.
+        MedicalRecord.Medications ??= "";
+        MedicalRecord.Allergies ??= "";
+        MedicalRecord.ClinicalNotes ??= "";
+
+        // Remove implicit validation errors for optional fields.
+        ModelState.Remove("MedicalRecord.Medications");
+        ModelState.Remove("MedicalRecord.Allergies");
+        ModelState.Remove("MedicalRecord.ClinicalNotes");
+
         if (!ModelState.IsValid)
         {
+            Student = await _context.Students
+                .FirstOrDefaultAsync(s => s.StudentId == MedicalRecord.StudentId);
+
+            if (Student != null)
+            {
+                StudentAge = DateTime.Today.Year - Student.DateOfBirth.Year;
+            }
+
             return Page();
         }
+
         MedicalRecord.CreatedAt = DateTime.Now;
         MedicalRecord.UpdatedAt = DateTime.Now;
+
         _context.MedicalRecords.Add(MedicalRecord);
         await _context.SaveChangesAsync();
 

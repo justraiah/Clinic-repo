@@ -78,7 +78,7 @@
                     <h6>Last Visit</h6>
 
                     <small class="text-muted">
-                        @(Model.LastVisitDate?.ToString("MMM dd, yyyy") ?? "N/A")
+                        @(Model.LastVisitDate?.ToString("MMMM dd, yyyy") ?? "N/A")
                     </small>
 
                 </div>
@@ -179,7 +179,7 @@ else
 
                             @(student.LastRecorded == default
                                 ? "No Records"
-                                : student.LastRecorded.ToString("MMM dd, yyyy"))
+                                : student.LastRecorded.ToString("MMMM dd, yyyy"))
 
                         </td>
 
@@ -245,7 +245,7 @@ else
                         <td class="text-center">@($"{item.SystolicBP}/{item.DiastolicBP} mmHg")</td>
 
                         <td class="text-center">
-                            @item.RecordedAt.ToString("MMM dd, yyyy hh:mm tt")
+                            @item.RecordedAt.ToString("MMMM dd, yyyy hh:mm tt")
                         </td>
 
                         <td class="text-center">

@@ -37,6 +37,17 @@ public class SearchModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
+        if (string.IsNullOrWhiteSpace(SearchStudentNumber))
+        {
+            ModelState.AddModelError(
+                nameof(SearchStudentNumber),
+                "Please enter a Student Number or student name.");
+
+            return Page();
+        }
+
+        SearchStudentNumber = SearchStudentNumber.Trim();
+
         await LoadStudentAsync();
 
         return Page();

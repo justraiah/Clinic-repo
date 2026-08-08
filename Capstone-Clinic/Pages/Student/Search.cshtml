@@ -29,7 +29,9 @@
         <div class="card-body">
 
             <p class="text-muted">
-                Search a student using their Student Number.
+                <p class="text-muted">
+                    Search a student using their Student Number or full name.
+                </p>
             </p>
 
             <form method="post">
@@ -40,6 +42,9 @@
                         <input asp-for="SearchStudentNumber"
                                class="form-control"
                                placeholder="Enter Student Number (e.g. 26-00001)" />
+                        <span asp-validation-for="SearchStudentNumber"
+                              class="text-danger small">
+                        </span>
                     </div>
 
                     <div class="col-md-3">

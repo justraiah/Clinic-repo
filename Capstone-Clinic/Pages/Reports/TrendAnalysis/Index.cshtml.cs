@@ -39,12 +39,12 @@ namespace Capstone_Clinic.Pages.Reports.TrendAnalysis
 
         public async Task OnGetAsync()
         {
-            TotalConsultations = await _context.VitalSignLogs.CountAsync();
+            TotalConsultations = await _context.MedicalRecords.CountAsync();
 
-            PatientsServed = await _context.VitalSignLogs
-                .Select(v => v.MedicalRecordId)
+            PatientsServed = await _context.MedicalRecords
+                .Select(m => m.StudentId)
                 .Distinct()
-                .CountAsync();
+                .CountAsync(); ;
 
             HealthAlerts = await _context.Alerts.CountAsync();
             ActiveAlerts = await _context.Alerts
@@ -59,20 +59,25 @@ namespace Capstone_Clinic.Pages.Reports.TrendAnalysis
             AverageHeartRate = await _context.VitalSignLogs
                 .AverageAsync(v => (double?)v.HeartRate) ?? 0;
 
-            var monthlyData = await _context.VitalSignLogs
-                .GroupBy(v => new
-                 {
-                    v.RecordedAt.Year,
-                    v.RecordedAt.Month
-                 })
+            var monthlyData = await _context.MedicalRecords
+                .GroupBy(m => new
+                {
+                     m.VisitDate.Year,
+                     m.VisitDate.Month
+                })
                 .OrderBy(g => g.Key.Year)
                 .ThenBy(g => g.Key.Month)
                 .Select(g => new
-                   {
-                     Month = new DateTime(g.Key.Year, g.Key.Month, 1).ToString("MMM yyyy"),
+                {
+                    Month = new DateTime(
+                        g.Key.Year,
+                        g.Key.Month,
+                        1
+                     ).ToString("MMM yyyy"),
+
                      Count = g.Count()
-                     })
-                   .ToListAsync();
+                })
+                .ToListAsync();
 
             MonthLabels = monthlyData.Select(x => x.Month).ToList();
 

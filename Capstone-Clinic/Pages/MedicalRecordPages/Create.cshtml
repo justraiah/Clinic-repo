@@ -91,6 +91,9 @@
                     <input asp-for="MedicalRecord.VisitDate"
                            type="date"
                            class="form-control" />
+                    <span asp-validation-for="MedicalRecord.VisitDate"
+                          class="text-danger small">
+                    </span>
 
                 </div>
 
@@ -103,6 +106,9 @@
                     <textarea asp-for="MedicalRecord.ChiefComplaint"
                               rows="3"
                               class="form-control"></textarea>
+                    <span asp-validation-for="MedicalRecord.ChiefComplaint"
+                          class="text-danger small">
+                    </span>
 
                 </div>
 
@@ -115,6 +121,9 @@
                     <textarea asp-for="MedicalRecord.Diagnosis"
                               rows="3"
                               class="form-control"></textarea>
+                    <span asp-validation-for="MedicalRecord.Diagnosis"
+                          class="text-danger small">
+                    </span>
 
                 </div>
 
