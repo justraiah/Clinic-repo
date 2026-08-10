@@ -4,20 +4,60 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using QuestPDF.Infrastructure;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.OpenApi.Models;
 
 QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddAuthentication(
-    CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme =
+        CookieAuthenticationDefaults.AuthenticationScheme;
+
+    options.DefaultSignInScheme =
+        CookieAuthenticationDefaults.AuthenticationScheme;
+
+    options.DefaultChallengeScheme =
+        CookieAuthenticationDefaults.AuthenticationScheme;
+})
+.AddCookie(
+    CookieAuthenticationDefaults.AuthenticationScheme,
+    options =>
     {
         options.LoginPath = "/Login";
         options.AccessDeniedPath = "/Login";
-    });
+    })
+.AddCookie(
+    "StudentScheme",
+    options =>
+    {
+        options.LoginPath = "/StudentLogin";
+        options.AccessDeniedPath = "/StudentLogin";
+    })
+.AddJwtBearer(
+    "MobileJwt",
+    options =>
+    {
+        options.TokenValidationParameters =
+            new Microsoft.IdentityModel.Tokens.TokenValidationParameters
+            {
+                ValidateIssuer = true,
+                ValidateAudience = true,
+                ValidateLifetime = true,
+                ValidateIssuerSigningKey = true,
 
+                ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                ValidAudience = builder.Configuration["Jwt:Audience"],
+
+                IssuerSigningKey =
+                    new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+                        System.Text.Encoding.UTF8.GetBytes(
+                            builder.Configuration["Jwt:Key"]!))
+            };
+    });
 builder.Services.AddAuthorization();
 builder.Services.AddHttpClient<Esp32Service>();
 
@@ -25,6 +65,43 @@ builder.Services.AddRazorPages(options =>
 {
     options.Conventions.AuthorizeFolder("/");
     options.Conventions.AllowAnonymousToPage("/Login");
+});
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Clinic Monitoring System Mobile API",
+        Version = "v1",
+        Description = "Backend API for the CMS student mobile application."
+    });
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Enter your JWT token."
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
 });
 
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -46,10 +123,16 @@ app.UseHttpsRedirection();
 app.UseStaticFiles();
 
 app.UseRouting();
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapRazorPages();
+app.MapControllers();
 
 app.Run();

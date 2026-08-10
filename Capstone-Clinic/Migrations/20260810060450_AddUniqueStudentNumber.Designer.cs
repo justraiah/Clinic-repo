@@ -4,6 +4,7 @@ using Capstone_Clinic.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Capstone_Clinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260810060450_AddUniqueStudentNumber")]
+    partial class AddUniqueStudentNumber
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -218,46 +221,6 @@ namespace Capstone_Clinic.Migrations
                     b.ToTable("Students");
                 });
 
-            modelBuilder.Entity("Capstone_Clinic.Models.StudentAccount", b =>
-                {
-                    b.Property<int>("StudentAccountId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StudentAccountId"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(150)
-                        .HasColumnType("nvarchar(150)");
-
-                    b.Property<bool>("IsActive")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("PasswordHash")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("StudentId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("UpdatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("StudentAccountId");
-
-                    b.HasIndex("Email")
-                        .IsUnique();
-
-                    b.HasIndex("StudentId")
-                        .IsUnique();
-
-                    b.ToTable("StudentAccounts");
-                });
-
             modelBuilder.Entity("Capstone_Clinic.Models.VitalSignLog", b =>
                 {
                     b.Property<int>("VitalSignLogId")
@@ -324,17 +287,6 @@ namespace Capstone_Clinic.Migrations
                     b.Navigation("MedicalRecord");
 
                     b.Navigation("Staff");
-                });
-
-            modelBuilder.Entity("Capstone_Clinic.Models.StudentAccount", b =>
-                {
-                    b.HasOne("Capstone_Clinic.Models.Student", "Student")
-                        .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Student");
                 });
 #pragma warning restore 612, 618
         }

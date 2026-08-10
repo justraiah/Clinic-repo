@@ -18,6 +18,7 @@ public class SearchModel : PageModel
     public string SearchStudentNumber { get; set; } = "";
 
     public Models.Student? Student { get; set; }
+    public Models.StudentAccount? StudentAccount { get; set; }
 
     public bool StudentNotFound { get; set; }
 
@@ -81,5 +82,7 @@ public class SearchModel : PageModel
             HasMedicalRecord = true;
             MedicalRecordId = medicalRecord.MedicalRecordId;
         }
+        StudentAccount = await _context.StudentAccounts
+    .FirstOrDefaultAsync(a => a.StudentId == Student.StudentId);
     }
 }
