@@ -2,9 +2,10 @@
 {
     public class Consultation
     {
+        public int StudentId { get; set; }
         public int ConsultationId { get; set; }
 
-        public int MedicalRecordId { get; set; }
+        public int? MedicalRecordId { get; set; }
 
         public DateTime ConsultationDate { get; set; } = DateTime.Now;
 
