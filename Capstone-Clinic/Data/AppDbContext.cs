@@ -12,6 +12,7 @@ namespace Capstone_Clinic.Data
 
         public DbSet<Student> Students { get; set; }
         public DbSet<StudentAccount> StudentAccounts { get; set; }
+        public DbSet<ClinicPatient> ClinicPatients { get; set; }
 
         public DbSet<MedicalRecord> MedicalRecords { get; set; }
 
