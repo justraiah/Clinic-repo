@@ -161,6 +161,18 @@ public class CreateModel : PageModel
 
             return Page();
         }
+        var medicalRecord = await _context.MedicalRecords
+    .FirstOrDefaultAsync(m =>
+        m.MedicalRecordId == VitalSignLog.MedicalRecordId);
+
+        if (medicalRecord == null)
+        {
+            ModelState.AddModelError("", "Medical Record not found.");
+
+            return Page();
+        }
+
+        VitalSignLog.ClinicPatientId = medicalRecord.ClinicPatientId;
         VitalSignLog.StaffId = 1;
         VitalSignLog.RecordedAt = DateTime.Now;
 

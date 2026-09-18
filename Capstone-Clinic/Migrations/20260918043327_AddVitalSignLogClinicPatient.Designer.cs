@@ -4,6 +4,7 @@ using Capstone_Clinic.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Capstone_Clinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260918043327_AddVitalSignLogClinicPatient")]
+    partial class AddVitalSignLogClinicPatient
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -246,7 +249,7 @@ namespace Capstone_Clinic.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VitalSignLogId"));
 
-                    b.Property<int>("ClinicPatientId")
+                    b.Property<int?>("ClinicPatientId")
                         .HasColumnType("int");
 
                     b.Property<int>("DiastolicBP")
@@ -327,9 +330,7 @@ namespace Capstone_Clinic.Migrations
                 {
                     b.HasOne("Capstone_Clinic.Models.ClinicPatient", "ClinicPatient")
                         .WithMany()
-                        .HasForeignKey("ClinicPatientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ClinicPatientId");
 
                     b.Navigation("ClinicPatient");
                 });

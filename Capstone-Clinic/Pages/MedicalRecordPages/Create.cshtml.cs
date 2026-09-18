@@ -68,6 +68,20 @@ public class CreateModel : PageModel
         ModelState.Remove("MedicalRecord.Allergies");
         ModelState.Remove("MedicalRecord.ClinicalNotes");
 
+        var clinicPatient = await _context.ClinicPatients
+    .FirstOrDefaultAsync(cp => cp.StudentId == MedicalRecord.StudentId);
+
+        if (clinicPatient == null)
+        {
+            ModelState.AddModelError(
+                "",
+                "No clinic patient record exists for this student."
+            );
+        }
+        else
+        {
+            MedicalRecord.ClinicPatientId = clinicPatient.ClinicPatientId;
+        }
         if (!ModelState.IsValid)
         {
             Student = await _context.Students

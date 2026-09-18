@@ -8,6 +8,10 @@ namespace Capstone_Clinic.Models
 
         public int StudentId { get; set; }
 
+        public int ClinicPatientId { get; set; }
+
+        public ClinicPatient? ClinicPatient { get; set; }
+
         [Required(ErrorMessage = "Visit date is required.")]
         public DateTime VisitDate { get; set; }
 

@@ -4,6 +4,7 @@ using Capstone_Clinic.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Capstone_Clinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260918032444_AddMedicalRecordClinicPatient")]
+    partial class AddMedicalRecordClinicPatient
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -93,7 +96,7 @@ namespace Capstone_Clinic.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("ClinicPatientId")
+                    b.Property<int?>("ClinicPatientId")
                         .HasColumnType("int");
 
                     b.Property<string>("ClinicalNotes")
@@ -246,9 +249,6 @@ namespace Capstone_Clinic.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VitalSignLogId"));
 
-                    b.Property<int>("ClinicPatientId")
-                        .HasColumnType("int");
-
                     b.Property<int>("DiastolicBP")
                         .HasColumnType("int");
 
@@ -287,8 +287,6 @@ namespace Capstone_Clinic.Migrations
 
                     b.HasKey("VitalSignLogId");
 
-                    b.HasIndex("ClinicPatientId");
-
                     b.ToTable("VitalSignLogs");
                 });
 
@@ -305,9 +303,7 @@ namespace Capstone_Clinic.Migrations
                 {
                     b.HasOne("Capstone_Clinic.Models.ClinicPatient", "ClinicPatient")
                         .WithMany()
-                        .HasForeignKey("ClinicPatientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ClinicPatientId");
 
                     b.Navigation("ClinicPatient");
                 });
@@ -321,17 +317,6 @@ namespace Capstone_Clinic.Migrations
                         .IsRequired();
 
                     b.Navigation("Student");
-                });
-
-            modelBuilder.Entity("Capstone_Clinic.Models.VitalSignLog", b =>
-                {
-                    b.HasOne("Capstone_Clinic.Models.ClinicPatient", "ClinicPatient")
-                        .WithMany()
-                        .HasForeignKey("ClinicPatientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("ClinicPatient");
                 });
 
             modelBuilder.Entity("Capstone_Clinic.Models.Student", b =>

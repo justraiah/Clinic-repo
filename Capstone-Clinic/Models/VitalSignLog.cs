@@ -5,6 +5,9 @@
         public int VitalSignLogId { get; set; }
 
         public int MedicalRecordId { get; set; }
+        public int ClinicPatientId { get; set; }
+
+        public ClinicPatient? ClinicPatient { get; set; }
 
         public double Temperature { get; set; }
 
