@@ -54,6 +54,18 @@ public class EditModel : PageModel
         {
             return Page();
         }
+        var existingMedicalRecord = await _context.MedicalRecords
+    .AsNoTracking()
+    .FirstOrDefaultAsync(m =>
+        m.MedicalRecordId == MedicalRecord.MedicalRecordId);
+
+        if (existingMedicalRecord == null)
+        {
+            return NotFound();
+        }
+
+        MedicalRecord.ClinicPatientId =
+            existingMedicalRecord.ClinicPatientId;
 
         _context.Attach(MedicalRecord).State = EntityState.Modified;
         MedicalRecord.UpdatedAt = DateTime.Now;

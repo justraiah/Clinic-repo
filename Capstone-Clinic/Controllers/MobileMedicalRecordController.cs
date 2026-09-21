@@ -41,6 +41,7 @@ public class MobileMedicalRecordController : ControllerBase
                 visitDate = mr.VisitDate,
 
                 chiefComplaint = mr.ChiefComplaint,
+                painScale = mr.PainScale,
                 diagnosis = mr.Diagnosis,
                 medications = mr.Medications,
                 allergies = mr.Allergies,

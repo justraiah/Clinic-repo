@@ -30,5 +30,7 @@ namespace Capstone_Clinic.Models
         public DateTime CreatedAt { get; set; }
 
         public DateTime UpdatedAt { get; set; }
+        [Range(0, 10)]
+        public int PainScale { get; set; }
     }
 }

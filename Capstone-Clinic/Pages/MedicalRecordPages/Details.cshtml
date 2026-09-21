@@ -277,17 +277,27 @@
                        readonly />
             </div>
 
-            <div class="mb-3">
-                <label class="form-label fw-semibold">
-                    Chief Complaint
-                </label>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        Chief Complaint
+                    </label>
 
-                <textarea class="form-control"
-                          rows="2"
-                          readonly>@Model.MedicalRecord.ChiefComplaint</textarea>
-            </div>
+                    <textarea class="form-control"
+                              rows="2"
+                              readonly>@Model.MedicalRecord.ChiefComplaint</textarea>
+                </div>
 
-            <div class="mb-0">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">
+                        Pain Scale (0–10)
+                    </label>
+
+                    <input class="form-control"
+                           value="@Model.MedicalRecord.PainScale"
+                           readonly />
+                </div>
+
+                <div class="mb-0">
                 <label class="form-label fw-semibold">
                     Diagnosis
                 </label>

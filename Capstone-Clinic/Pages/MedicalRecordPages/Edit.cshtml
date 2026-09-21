@@ -96,6 +96,25 @@
 
                 </div>
 
+                    <div class="col-md-6">
+
+                        <label asp-for="MedicalRecord.PainScale"
+                               class="form-label">
+                            Pain Scale (0–10)
+                        </label>
+
+                        <input asp-for="MedicalRecord.PainScale"
+                               class="form-control"
+                               type="number"
+                               min="0"
+                               max="10" />
+
+                        <span asp-validation-for="MedicalRecord.PainScale"
+                              class="text-danger">
+                        </span>
+
+                    </div>
+
                 <div class="col-md-6">
 
                     <label asp-for="MedicalRecord.Diagnosis"
