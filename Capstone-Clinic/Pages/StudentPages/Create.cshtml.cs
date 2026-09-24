@@ -32,6 +32,15 @@ public class CreateModel : PageModel
         }
 
         _context.Students.Add(Student);
+
+        var clinicPatient = new ClinicPatient
+        {
+            PatientType = "Student",
+            Student = Student
+        };
+
+        _context.ClinicPatients.Add(clinicPatient);
+
         await _context.SaveChangesAsync();
 
         TempData["SuccessMessage"] = "✅ Student registered successfully.";
