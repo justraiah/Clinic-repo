@@ -4,6 +4,7 @@ using Capstone_Clinic.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Capstone_Clinic.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260924060908_AddVitalSignLogMedicalRecordRelationship")]
+    partial class AddVitalSignLogMedicalRecordRelationship
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,8 +52,6 @@ namespace Capstone_Clinic.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("AlertId");
-
-                    b.HasIndex("VitalLogId");
 
                     b.ToTable("Alerts");
                 });
@@ -299,17 +300,6 @@ namespace Capstone_Clinic.Migrations
                     b.ToTable("VitalSignLogs");
                 });
 
-            modelBuilder.Entity("Capstone_Clinic.Models.Alert", b =>
-                {
-                    b.HasOne("Capstone_Clinic.Models.VitalSignLog", "VitalSignLog")
-                        .WithMany("Alerts")
-                        .HasForeignKey("VitalLogId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("VitalSignLog");
-                });
-
             modelBuilder.Entity("Capstone_Clinic.Models.ClinicPatient", b =>
                 {
                     b.HasOne("Capstone_Clinic.Models.Student", "Student")
@@ -368,11 +358,6 @@ namespace Capstone_Clinic.Migrations
             modelBuilder.Entity("Capstone_Clinic.Models.Student", b =>
                 {
                     b.Navigation("StudentAccount");
-                });
-
-            modelBuilder.Entity("Capstone_Clinic.Models.VitalSignLog", b =>
-                {
-                    b.Navigation("Alerts");
                 });
 #pragma warning restore 612, 618
         }

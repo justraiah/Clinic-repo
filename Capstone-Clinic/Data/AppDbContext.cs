@@ -13,12 +13,26 @@ namespace Capstone_Clinic.Data
         public DbSet<Student> Students { get; set; }
         public DbSet<StudentAccount> StudentAccounts { get; set; }
         public DbSet<ClinicPatient> ClinicPatients { get; set; }
-
         public DbSet<MedicalRecord> MedicalRecords { get; set; }
-
         public DbSet<VitalSignLog> VitalSignLogs { get; set; }
-
         public DbSet<Alert> Alerts { get; set; }
         public DbSet<Staff> Staffs { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<VitalSignLog>()
+                .HasOne(v => v.MedicalRecord)
+                .WithMany(m => m.VitalSignLogs)
+                .HasForeignKey(v => v.MedicalRecordId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Alert>()
+                .HasOne(a => a.VitalSignLog)
+                .WithMany(v => v.Alerts)
+                .HasForeignKey(a => a.VitalLogId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
     }
 }

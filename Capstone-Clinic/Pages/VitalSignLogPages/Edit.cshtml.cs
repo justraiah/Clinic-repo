@@ -46,9 +46,65 @@ public class EditModel : PageModel
         {
             return Page();
         }
-        VitalSignEvaluator.Evaluate(VitalSignLog);
 
-        _context.Attach(VitalSignLog).State = EntityState.Modified;
+        var existingVital = await _context.VitalSignLogs
+            .FirstOrDefaultAsync(v =>
+                v.VitalSignLogId == VitalSignLog.VitalSignLogId);
+
+        if (existingVital == null)
+        {
+            return NotFound();
+        }
+
+        // Preserve authoritative fields from the database.
+        VitalSignLog.MedicalRecordId = existingVital.MedicalRecordId;
+        VitalSignLog.ClinicPatientId = existingVital.ClinicPatientId;
+        VitalSignLog.StaffId = existingVital.StaffId;
+        VitalSignLog.RecordedAt = existingVital.RecordedAt;
+
+        // Update only editable vital-sign fields.
+        existingVital.Temperature = VitalSignLog.Temperature;
+        existingVital.HeartRate = VitalSignLog.HeartRate;
+        existingVital.OxygenSaturation = VitalSignLog.OxygenSaturation;
+        existingVital.SystolicBP = VitalSignLog.SystolicBP;
+        existingVital.DiastolicBP = VitalSignLog.DiastolicBP;
+        existingVital.VisitReason = VitalSignLog.VisitReason;
+
+        // Re-evaluate the updated vital signs.
+        VitalSignEvaluator.Evaluate(existingVital);
+
+        // Reconcile existing active alerts for this vital record.
+        var activeAlerts = await _context.Alerts
+            .Where(a =>
+                a.VitalLogId == existingVital.VitalSignLogId &&
+                a.Status == "Active")
+            .ToListAsync();
+
+        foreach (var alert in activeAlerts)
+        {
+            alert.Status = "Resolved";
+        }
+
+        // Create a new alert if the updated reading is abnormal.
+        if (existingVital.Status == "Warning" ||
+            existingVital.Status == "Critical")
+        {
+            var firstRemark = existingVital.Remarks
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .FirstOrDefault()?.Trim()
+                ?? "Abnormal Vital Signs";
+
+            var alert = new Alert
+            {
+                VitalLogId = existingVital.VitalSignLogId,
+                AlertType = firstRemark,
+                AlertMessage = existingVital.Remarks,
+                Status = "Active",
+                CreatedAt = DateTime.Now
+            };
+
+            _context.Alerts.Add(alert);
+        }
 
         try
         {
@@ -60,10 +116,8 @@ public class EditModel : PageModel
             {
                 return NotFound();
             }
-            else
-            {
-                throw;
-            }
+
+            throw;
         }
 
         if (MedicalRecordId.HasValue)
@@ -74,7 +128,6 @@ public class EditModel : PageModel
 
         return RedirectToPage("./Index");
     }
-
     private bool VitalSignLogExists(int id)
     {
         return _context.VitalSignLogs.Any(e => e.VitalSignLogId == id);

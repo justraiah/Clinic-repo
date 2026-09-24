@@ -6,6 +6,7 @@
 
         // The vital-sign record that triggered this alert
         public int VitalLogId { get; set; }
+        public VitalSignLog? VitalSignLog { get; set; }
 
         // Example: Tachycardia, Bradycardia, Hypoxemia
         public string AlertType { get; set; } = "";

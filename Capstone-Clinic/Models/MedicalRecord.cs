@@ -11,6 +11,7 @@ namespace Capstone_Clinic.Models
         public int ClinicPatientId { get; set; }
 
         public ClinicPatient? ClinicPatient { get; set; }
+        public ICollection<VitalSignLog> VitalSignLogs { get; set; } = new List<VitalSignLog>();
 
         [Required(ErrorMessage = "Visit date is required.")]
         public DateTime VisitDate { get; set; }
