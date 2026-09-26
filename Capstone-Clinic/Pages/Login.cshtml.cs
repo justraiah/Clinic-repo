@@ -1,20 +1,24 @@
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Capstone_Clinic.Data;
+using Capstone_Clinic.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using System.Security.Claims;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace Capstone_Clinic.Pages;
 
 public class LoginModel : PageModel
 {
     private readonly AppDbContext _context;
+    private readonly PasswordHasher<Staff> _passwordHasher;
 
     public LoginModel(AppDbContext context)
     {
         _context = context;
+        _passwordHasher = new PasswordHasher<Staff>();
     }
     [BindProperty]
     public string Username { get; set; } = "";
@@ -32,11 +36,27 @@ public class LoginModel : PageModel
     public async Task<IActionResult> OnPostAsync()
     {
         var staff = await _context.Staffs
-            .FirstOrDefaultAsync(s =>
-                s.Username == Username &&
-                s.Password == Password);
+    .FirstOrDefaultAsync(s => s.Username == Username);
 
         if (staff == null)
+        {
+            ErrorMessage = "Invalid username or password.";
+            return Page();
+        }
+        if (string.IsNullOrWhiteSpace(staff.PasswordHash))
+        {
+            ErrorMessage = "Invalid username or password.";
+            return Page();
+        }
+
+        PasswordVerificationResult passwordResult;
+        {
+            passwordResult = _passwordHasher.VerifyHashedPassword(
+                staff,
+                staff.PasswordHash,
+                Password);
+        }
+        if (passwordResult == PasswordVerificationResult.Failed)
         {
             ErrorMessage = "Invalid username or password.";
             return Page();

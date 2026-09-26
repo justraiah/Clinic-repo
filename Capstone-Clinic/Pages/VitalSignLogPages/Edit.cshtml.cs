@@ -55,6 +55,11 @@ public class EditModel : PageModel
         {
             return NotFound();
         }
+        if (MedicalRecordId.HasValue &&
+    existingVital.MedicalRecordId != MedicalRecordId.Value)
+        {
+            return BadRequest("Vital sign does not belong to the selected medical record.");
+        }
 
         // Preserve authoritative fields from the database.
         VitalSignLog.MedicalRecordId = existingVital.MedicalRecordId;

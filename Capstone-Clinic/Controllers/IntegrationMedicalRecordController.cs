@@ -1,5 +1,6 @@
 ﻿using Capstone_Clinic.Data;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace Capstone_Clinic.Controllers;
@@ -9,16 +10,29 @@ namespace Capstone_Clinic.Controllers;
 public class IntegrationMedicalRecordController : ControllerBase
 {
     private readonly AppDbContext _context;
+    private readonly IConfiguration _configuration;
 
-    public IntegrationMedicalRecordController(AppDbContext context)
+    public IntegrationMedicalRecordController(
+        AppDbContext context,
+        IConfiguration configuration)
     {
         _context = context;
+        _configuration = configuration;
     }
 
     [HttpGet("{studentNumber}/medical-records")]
     public async Task<IActionResult> GetStudentMedicalRecords(
-        string studentNumber)
+    string studentNumber,
+    [FromHeader(Name = "X-Integration-Key")] string? integrationKey)
     {
+        if (!IsAuthorizedIntegrationRequest(integrationKey))
+        {
+            return Unauthorized(new
+            {
+                message = "Invalid integration credentials."
+            });
+        }
+
         var student = await _context.Students
             .FirstOrDefaultAsync(s =>
                 s.StudentNumber == studentNumber);
@@ -51,10 +65,20 @@ public class IntegrationMedicalRecordController : ControllerBase
 
         return Ok(medicalRecords);
     }
+
     [HttpGet("{studentNumber}/vital-signs")]
     public async Task<IActionResult> GetStudentVitalSigns(
-    string studentNumber)
+    string studentNumber,
+    [FromHeader(Name = "X-Integration-Key")] string? integrationKey)
     {
+        if (!IsAuthorizedIntegrationRequest(integrationKey))
+        {
+            return Unauthorized(new
+            {
+                message = "Invalid integration credentials."
+            });
+        }
+
         var student = await _context.Students
             .FirstOrDefaultAsync(s =>
                 s.StudentNumber == studentNumber);
@@ -90,5 +114,22 @@ public class IntegrationMedicalRecordController : ControllerBase
             .ToListAsync();
 
         return Ok(vitalSigns);
+    }
+
+    private bool IsAuthorizedIntegrationRequest(string? integrationKey)
+    {
+        var configuredKey =
+            _configuration["Integration:ApiKey"];
+
+        if (string.IsNullOrWhiteSpace(configuredKey))
+            return false;
+
+        if (string.IsNullOrWhiteSpace(integrationKey))
+            return false;
+
+        return string.Equals(
+            integrationKey,
+            configuredKey,
+            StringComparison.Ordinal);
     }
 }

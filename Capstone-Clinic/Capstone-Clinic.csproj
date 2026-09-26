@@ -5,6 +5,7 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <RootNamespace>Capstone_Clinic</RootNamespace>
+	<UserSecretsId>Capstone-Clinic-S3</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
