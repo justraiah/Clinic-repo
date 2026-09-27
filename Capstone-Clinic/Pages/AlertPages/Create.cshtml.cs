@@ -24,16 +24,8 @@ public class CreateModel : PageModel
     public Alert Alert { get; set; } = default!;
 
     // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD.
-    public async Task<IActionResult> OnPostAsync()
+    public IActionResult OnPostAsync()
     {
-        if (!ModelState.IsValid)
-        {
-            return Page();
-        }
-
-        _context.Alerts.Add(Alert);
-        await _context.SaveChangesAsync();
-
-        return RedirectToPage("./Index");
+        return Forbid();
     }
 }

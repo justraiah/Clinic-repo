@@ -1,15 +1,39 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
 
 namespace Capstone_Clinic.Controllers;
 
 [ApiController]
 [Route("api/iot/vital-signs")]
+
 public class IoTVitalSignController : ControllerBase
 {
+    private readonly IConfiguration _configuration;
+
+    public IoTVitalSignController(IConfiguration configuration)
+    {
+        _configuration = configuration;
+    }
     [HttpPost]
     public IActionResult ReceiveVitalSigns(
-        [FromBody] IoTVitalSignRequest request)
+    [FromBody] IoTVitalSignRequest request,
+    [FromHeader(Name = "X-IoT-Key")] string? iotKey)
     {
+        var configuredKey = _configuration["IoT:ApiKey"];
+
+        if (string.IsNullOrWhiteSpace(configuredKey) ||
+            string.IsNullOrWhiteSpace(iotKey) ||
+            !string.Equals(
+                iotKey,
+                configuredKey,
+                StringComparison.Ordinal))
+        {
+            return Unauthorized(new
+            {
+                success = false,
+                message = "Invalid IoT credentials."
+            });
+        }
         if (!request.FingerDetected)
         {
             return BadRequest(new

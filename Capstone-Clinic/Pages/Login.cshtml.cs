@@ -14,6 +14,11 @@ public class LoginModel : PageModel
 {
     private readonly AppDbContext _context;
     private readonly PasswordHasher<Staff> _passwordHasher;
+    private static readonly Dictionary<string, (int Attempts, DateTime LockedUntil)> FailedLogins = new();
+    private static readonly object FailedLoginLock = new();
+
+    private const int MaxFailedAttempts = 5;
+    private static readonly TimeSpan LockoutDuration = TimeSpan.FromMinutes(15);
 
     public LoginModel(AppDbContext context)
     {
@@ -35,37 +40,76 @@ public class LoginModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
+        var username = Username.Trim().ToLowerInvariant();
+
+        lock (FailedLoginLock)
+        {
+            if (FailedLogins.TryGetValue(username, out var attemptInfo) &&
+                attemptInfo.LockedUntil > DateTime.UtcNow)
+            {
+                ErrorMessage = "Too many failed login attempts. Please try again later.";
+                return Page();
+            }
+
+            if (attemptInfo.LockedUntil <= DateTime.UtcNow &&
+                attemptInfo.Attempts >= MaxFailedAttempts)
+            {
+                FailedLogins.Remove(username);
+            }
+        }
+
         var staff = await _context.Staffs
-    .FirstOrDefaultAsync(s => s.Username == Username);
+            .FirstOrDefaultAsync(s => s.Username == Username);
 
-        if (staff == null)
+        var passwordValid = false;
+
+        if (staff != null &&
+            !string.IsNullOrWhiteSpace(staff.PasswordHash))
         {
-            ErrorMessage = "Invalid username or password.";
-            return Page();
+            var passwordResult =
+                _passwordHasher.VerifyHashedPassword(
+                    staff,
+                    staff.PasswordHash,
+                    Password);
+
+            passwordValid =
+                passwordResult != PasswordVerificationResult.Failed;
         }
-        if (string.IsNullOrWhiteSpace(staff.PasswordHash))
+
+        if (!passwordValid)
         {
+            lock (FailedLoginLock)
+            {
+                var attempts = FailedLogins.TryGetValue(
+                    username,
+                    out var existing)
+                    ? existing.Attempts + 1
+                    : 1;
+
+                var lockedUntil =
+                    attempts >= MaxFailedAttempts
+                        ? DateTime.UtcNow.Add(LockoutDuration)
+                        : DateTime.MinValue;
+
+                FailedLogins[username] =
+                    (attempts, lockedUntil);
+            }
+
             ErrorMessage = "Invalid username or password.";
             return Page();
         }
 
-        PasswordVerificationResult passwordResult;
+        lock (FailedLoginLock)
         {
-            passwordResult = _passwordHasher.VerifyHashedPassword(
-                staff,
-                staff.PasswordHash,
-                Password);
-        }
-        if (passwordResult == PasswordVerificationResult.Failed)
-        {
-            ErrorMessage = "Invalid username or password.";
-            return Page();
+            FailedLogins.Remove(username);
         }
 
         var claims = new List<Claim>
     {
-        new Claim(ClaimTypes.Name, staff.FullName),
-        new Claim(ClaimTypes.NameIdentifier, staff.StaffId.ToString()),
+        new Claim(ClaimTypes.Name, staff!.FullName),
+        new Claim(
+            ClaimTypes.NameIdentifier,
+            staff.StaffId.ToString()),
         new Claim(ClaimTypes.Role, staff.Role)
     };
 

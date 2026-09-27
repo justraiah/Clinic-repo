@@ -121,47 +121,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
-if (app.Environment.IsDevelopment())
-{
-    using var scope = app.Services.CreateScope();
-
-    var context = scope.ServiceProvider
-        .GetRequiredService<AppDbContext>();
-
-    var passwordHasher =
-        new PasswordHasher<StudentAccount>();
-
-    var student = await context.Students
-        .FirstOrDefaultAsync(s =>
-            s.StudentNumber == "23-00148");
-
-    if (student != null)
-    {
-        var existingAccount =
-            await context.StudentAccounts
-                .FirstOrDefaultAsync(a =>
-                    a.StudentId == student.StudentId);
-
-        if (existingAccount == null)
-        {
-            var account = new StudentAccount
-            {
-                StudentId = student.StudentId,
-                Email = "23-00148@test.local",
-                IsActive = true
-            };
-
-            account.PasswordHash =
-                passwordHasher.HashPassword(
-                    account,
-                    "pass123");
-
-            context.StudentAccounts.Add(account);
-
-            await context.SaveChangesAsync();
-        }
-    }
-}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

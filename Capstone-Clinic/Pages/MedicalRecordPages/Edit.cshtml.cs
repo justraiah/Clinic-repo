@@ -66,6 +66,8 @@ public class EditModel : PageModel
 
         MedicalRecord.ClinicPatientId =
             existingMedicalRecord.ClinicPatientId;
+        MedicalRecord.StudentId =
+    existingMedicalRecord.StudentId;
 
         _context.Attach(MedicalRecord).State = EntityState.Modified;
         MedicalRecord.UpdatedAt = DateTime.Now;
