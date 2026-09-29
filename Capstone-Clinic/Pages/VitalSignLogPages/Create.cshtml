@@ -120,7 +120,10 @@
                 </label>
                 <input asp-for="VitalSignLog.HeartRate"
                        class="form-control"
-                       readonly
+                       @* readonly *@
+                               type="number"
+                               min="30"
+                               max="220"
                        placeholder="Press 'Read Sensor'" />
                 <span asp-validation-for="VitalSignLog.HeartRate" class="text-danger"></span>
             </div>
@@ -131,7 +134,10 @@
                 </label>
                 <input asp-for="VitalSignLog.OxygenSaturation"
                        class="form-control"
-                       readonly
+                       @* readonly *@
+                               type="number"
+                               min="70"
+                               max="100"
                        placeholder="Press 'Read Sensor'" />
                 <span asp-validation-for="VitalSignLog.OxygenSaturation" class="text-danger"></span>
             </div>
@@ -201,6 +207,21 @@
                 <span asp-validation-for="VitalSignLog.Temperature"
                       class="text-danger"></span>
             </div>
+                    <div class="mb-3">
+                        <label asp-for="VitalSignLog.RespiratoryRate" class="form-label">
+                            Respiratory Rate (breaths/min)
+                        </label>
+
+                        <input asp-for="VitalSignLog.RespiratoryRate"
+                               class="form-control"
+                               type="number"
+                               min="1"
+                               max="100"
+                               placeholder="e.g. 16" />
+
+                        <span asp-validation-for="VitalSignLog.RespiratoryRate"
+                              class="text-danger"></span>
+                    </div>
 
                     <div class="row mb-3">
 

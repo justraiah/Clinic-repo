@@ -209,6 +209,7 @@ else
                     <th class="text-center">Visit Reason</th>
                     <th class="text-center">Temp</th>
                     <th class="text-center">HR</th>
+                    <th class="text-center">RR</th>
                     <th class="text-center">SpO₂</th>
                     <th class="text-center">BP</th>
                     <th class="text-center">Recorded</th>
@@ -239,6 +240,8 @@ else
                         <td class="text-center">@($"{item.Temperature:F1} °C")</td>
 
                         <td class="text-center">@($"{item.HeartRate} BPM")</td>
+
+                        <td class="text-center">@($"{item.RespiratoryRate} breaths/min")</td>
 
                         <td class="text-center">@($"{item.OxygenSaturation}%")</td>
 

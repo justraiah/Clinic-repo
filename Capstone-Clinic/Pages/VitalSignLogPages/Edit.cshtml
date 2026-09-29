@@ -55,6 +55,21 @@
             </div>
 
             <div class="mb-3">
+                <label asp-for="VitalSignLog.RespiratoryRate" class="form-label">
+                    Respiratory Rate (breaths/min)
+                </label>
+
+                <input asp-for="VitalSignLog.RespiratoryRate"
+                       class="form-control"
+                       type="number"
+                       min="1"
+                       max="100" />
+
+                <span asp-validation-for="VitalSignLog.RespiratoryRate"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
                 <label class="form-label">
                     SpO₂ (%)
                 </label>

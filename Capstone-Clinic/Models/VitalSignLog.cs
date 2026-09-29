@@ -19,6 +19,8 @@ namespace Capstone_Clinic.Models
 
         [Range(30, 220)]
         public int HeartRate { get; set; }
+        [Range(1, 100)]
+        public int RespiratoryRate { get; set; }
 
         [Range(70, 100)]
         public int OxygenSaturation { get; set; }

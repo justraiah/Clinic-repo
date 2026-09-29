@@ -107,6 +107,7 @@ public class IndexModel : PageModel
         Student = x.Student.StudentNumber + " - " + x.Student.FullName,
         Temperature = x.Vital.Temperature,
         HeartRate = x.Vital.HeartRate,
+        RespiratoryRate = x.Vital.RespiratoryRate,
         OxygenSaturation = x.Vital.OxygenSaturation,
         SystolicBP = x.Vital.SystolicBP,
         DiastolicBP = x.Vital.DiastolicBP,
@@ -157,6 +158,7 @@ public class IndexModel : PageModel
         public double Temperature { get; set; }
 
         public int HeartRate { get; set; }
+        public int RespiratoryRate { get; set; }
 
         public int OxygenSaturation { get; set; }
 

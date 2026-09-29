@@ -45,6 +45,7 @@ public class MobileVitalSignController : ControllerBase
 
                 temperature = vs.Temperature,
                 heartRate = vs.HeartRate,
+                respiratoryRate = vs.RespiratoryRate,
                 oxygenSaturation = vs.OxygenSaturation,
 
                 systolicBP = vs.SystolicBP,
