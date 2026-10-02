@@ -100,15 +100,23 @@ public class IndexModel : PageModel
     from vital in vitalQuery
     join medical in _context.MedicalRecords
         on vital.MedicalRecordId equals medical.MedicalRecordId
+    join clinicPatient in _context.ClinicPatients
+        on medical.ClinicPatientId equals clinicPatient.ClinicPatientId
     join student in _context.Students
-        on medical.StudentId equals student.StudentId
+        on medical.StudentId equals student.StudentId into studentGroup
+    from student in studentGroup.DefaultIfEmpty()
 
     where vital.Status == "Critical"
 
-    group student by new
+    group new { student, clinicPatient } by new
     {
-        student.StudentNumber,
-        student.FullName
+        StudentNumber = student != null
+            ? student.StudentNumber
+            : clinicPatient.Identifier ?? "",
+
+        StudentName = student != null
+            ? student.FullName
+            : clinicPatient.FullName ?? "Community Member"
     }
     into g
 
@@ -117,7 +125,7 @@ public class IndexModel : PageModel
     select new TopCriticalStudentViewModel
     {
         StudentNumber = g.Key.StudentNumber,
-        StudentName = g.Key.FullName,
+        StudentName = g.Key.StudentName,
         CriticalVisits = g.Count()
     }
 
@@ -136,8 +144,11 @@ public class IndexModel : PageModel
         on alert.VitalLogId equals vital.VitalSignLogId
     join medical in _context.MedicalRecords
         on vital.MedicalRecordId equals medical.MedicalRecordId
+    join clinicPatient in _context.ClinicPatients
+        on medical.ClinicPatientId equals clinicPatient.ClinicPatientId
     join student in _context.Students
-        on medical.StudentId equals student.StudentId
+        on medical.StudentId equals student.StudentId into studentGroup
+    from student in studentGroup.DefaultIfEmpty()
 
     where vital.Status == "Critical"
 
@@ -145,7 +156,10 @@ public class IndexModel : PageModel
 
     select new RecentCriticalAlertViewModel
     {
-        StudentName = student.FullName,
+        StudentName = student != null
+            ? student.FullName
+            : clinicPatient.FullName ?? "Community Member",
+
         AlertType = alert.AlertType,
         CreatedAt = alert.CreatedAt
     }

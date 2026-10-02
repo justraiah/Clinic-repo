@@ -45,11 +45,29 @@ public class DeleteModel : PageModel
             return NotFound();
         }
 
-        var medicalrecord = await _context.MedicalRecords.FindAsync(id);
+        var medicalrecord = await _context.MedicalRecords
+            .FirstOrDefaultAsync(m => m.MedicalRecordId == id);
+
         if (medicalrecord != null)
         {
             MedicalRecord = medicalrecord;
+
+            var vitalSignLogs = await _context.VitalSignLogs
+                .Where(v => v.MedicalRecordId == id)
+                .ToListAsync();
+
+            var vitalSignLogIds = vitalSignLogs
+                .Select(v => v.VitalSignLogId)
+                .ToList();
+
+            var alerts = await _context.Alerts
+                .Where(a => vitalSignLogIds.Contains(a.VitalLogId))
+                .ToListAsync();
+
+            _context.Alerts.RemoveRange(alerts);
+            _context.VitalSignLogs.RemoveRange(vitalSignLogs);
             _context.MedicalRecords.Remove(MedicalRecord);
+
             await _context.SaveChangesAsync();
         }
 

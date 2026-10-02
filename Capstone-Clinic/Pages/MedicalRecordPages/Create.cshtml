@@ -1,6 +1,5 @@
 @page
 @model Capstone_Clinic.Pages.MedicalRecordPages.CreateModel
-
 @{
     ViewData["Title"] = "New Consultation";
 }
@@ -8,24 +7,19 @@
 <div class="container-xl mt-4">
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-
         <div>
-
             <h2 class="fw-bold mb-1">
                 🩺 New Consultation
             </h2>
-
             <p class="text-muted mb-0">
-                Create the student's first medical record.
+                Create a new medical record.
             </p>
-
         </div>
 
         <a asp-page="/Student/Search"
            class="btn btn-outline-secondary">
             ← Back to Student Lookup
         </a>
-
     </div>
 
     <form method="post">
@@ -46,32 +40,102 @@
 
             <div class="card-body">
 
-                <div class="row">
+                @if (Model.Student != null)
+                {
+                    <div class="row">
 
-                    <div class="col-md-6 mb-3">
-                        <strong>Full Name</strong><br />
-                        @Model.Student?.FullName
+                        <div class="col-md-6 mb-3">
+                            <strong>Full Name</strong><br />
+                            @Model.Student.FullName
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <strong>Student Number</strong><br />
+                            @Model.Student.StudentNumber
+                        </div>
+
+                        <div class="col-md-6">
+                            <strong>Age</strong><br />
+                            @Model.StudentAge years old
+                        </div>
+
+                        <div class="col-md-6">
+                            <strong>Course / Year Level</strong><br />
+                            @Model.Student.Course • Year @Model.Student.YearLevel
+                        </div>
+
                     </div>
+                }
+                else
+                {
+                    <input type="hidden"
+                           asp-for="MedicalRecord.ClinicPatientId" />
 
-                    <div class="col-md-6 mb-3">
-                        <strong>Student Number</strong><br />
-                        @Model.Student?.StudentNumber
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">
+                                Patient Type
+                            </label>
+
+                            <select name="CommunityPatientType"
+                                    class="form-select"
+                                @(Model.IsExistingPatient ? "disabled" : "")>
+                                <option value="Faculty"
+                                        selected="@(Model.CommunityPatientType == "Faculty")">
+                                    Faculty
+                                </option>
+                                <option value="Staff"
+                                        selected="@(Model.CommunityPatientType == "Staff")">
+                                    Staff
+                                </option>
+                                <option value="Other Community Member"
+                                        selected="@(Model.CommunityPatientType == "Other Community Member")">
+                                    Other Community Member
+                                </option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">
+                                Full Name
+                            </label>
+
+                            <input name="CommunityFullName"
+                                   value="@Model.CommunityFullName"
+                                   class="form-control"
+                                   placeholder="Enter full name"
+                            @(Model.IsExistingPatient ? "readonly" : "") />
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">
+                                Identifier
+                            </label>
+
+                            <input name="CommunityIdentifier"
+                                   value="@Model.CommunityIdentifier"
+                                   class="form-control"
+                                   placeholder="Employee ID / other identifier"
+                            @(Model.IsExistingPatient ? "readonly" : "") />
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label fw-semibold">
+                                Date of Birth
+                            </label>
+
+                            <input name="CommunityDateOfBirth"
+                                   value="@(Model.CommunityDateOfBirth?.ToString("yyyy-MM-dd"))"
+                                   type="date"
+                                   class="form-control"
+                            @(Model.IsExistingPatient ? "readonly" : "") />
+                        </div>
+
                     </div>
-
-                    <div class="col-md-6">
-                        <strong>Age</strong><br />
-                        @Model.StudentAge years old
-                    </div>
-
-                    <div class="col-md-6">
-                        <strong>Course / Year Level</strong><br />
-                        @Model.Student?.Course • Year @Model.Student?.YearLevel
-                    </div>
-
-                </div>
+                }
 
             </div>
-
         </div>
 
         <div class="card border-success mb-4">
@@ -91,6 +155,7 @@
                     <input asp-for="MedicalRecord.VisitDate"
                            type="date"
                            class="form-control" />
+
                     <span asp-validation-for="MedicalRecord.VisitDate"
                           class="text-danger small">
                     </span>
@@ -106,6 +171,7 @@
                     <textarea asp-for="MedicalRecord.ChiefComplaint"
                               rows="3"
                               class="form-control"></textarea>
+
                     <span asp-validation-for="MedicalRecord.ChiefComplaint"
                           class="text-danger small">
                     </span>
@@ -140,6 +206,7 @@
                     <textarea asp-for="MedicalRecord.Diagnosis"
                               rows="3"
                               class="form-control"></textarea>
+
                     <span asp-validation-for="MedicalRecord.Diagnosis"
                           class="text-danger small">
                     </span>
@@ -147,7 +214,6 @@
                 </div>
 
             </div>
-
         </div>
 
         <div class="card border-warning mb-4">
@@ -183,7 +249,6 @@
                 </div>
 
             </div>
-
         </div>
 
         <div class="card border-secondary mb-4">

@@ -19,6 +19,8 @@ public class EditModel : PageModel
     public MedicalRecord MedicalRecord { get; set; } = default!;
     public string StudentNumber { get; set; } = "";
     public string StudentName { get; set; } = "";
+    public string CommunityPatientName { get; set; } = "";
+    public string CommunityPatientIdentifier { get; set; } = "";
 
     public async Task<IActionResult> OnGetAsync(int? id)
     {
@@ -35,12 +37,24 @@ public class EditModel : PageModel
         MedicalRecord = medicalrecord;
 
         var student = await _context.Students
-            .FirstOrDefaultAsync(s => s.StudentId == medicalrecord.StudentId);
+    .FirstOrDefaultAsync(s => s.StudentId == medicalrecord.StudentId);
 
         if (student != null)
         {
             StudentNumber = student.StudentNumber;
             StudentName = student.FullName;
+        }
+        else
+        {
+            var communityPatient = await _context.ClinicPatients
+                .FirstOrDefaultAsync(cp =>
+                    cp.ClinicPatientId == medicalrecord.ClinicPatientId);
+
+            if (communityPatient != null)
+            {
+                CommunityPatientName = communityPatient.FullName ?? "";
+                CommunityPatientIdentifier = communityPatient.Identifier ?? "";
+            }
         }
 
         return Page();

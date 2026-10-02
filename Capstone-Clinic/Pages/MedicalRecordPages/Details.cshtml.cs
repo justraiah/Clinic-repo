@@ -9,22 +9,28 @@ namespace Capstone_Clinic.Pages.MedicalRecordPages;
 public class DetailsModel : PageModel
 {
     private readonly AppDbContext _context;
+
     public DetailsModel(AppDbContext context)
     {
         _context = context;
     }
 
     public MedicalRecord MedicalRecord { get; set; } = default!;
+
     public List<MedicalRecord> ConsultationHistory { get; set; } = new();
+
     public int TotalVisits { get; set; }
 
     public int CriticalVisits { get; set; }
 
     public string LatestStatus { get; set; } = "";
 
-    public Capstone_Clinic.Models.Student Student { get; set; } = default!;
+    public Capstone_Clinic.Models.Student? Student { get; set; }
+
     public int StudentAge { get; set; }
+
     public List<VitalSignLog> RecentVitalSigns { get; set; } = new();
+
     public async Task<IActionResult> OnGetAsync(int? id)
     {
         if (id == null)
@@ -32,25 +38,24 @@ public class DetailsModel : PageModel
             return NotFound();
         }
 
-        var medicalrecord = await _context.MedicalRecords
-    .FirstOrDefaultAsync(m => m.MedicalRecordId == id);
-        if (medicalrecord is null)
+        var medicalRecord = await _context.MedicalRecords
+            .Include(m => m.ClinicPatient)
+            .FirstOrDefaultAsync(m => m.MedicalRecordId == id);
+
+        if (medicalRecord == null)
         {
             return NotFound();
         }
-        else
+
+        MedicalRecord = medicalRecord;
+
+        // Student consultation
+        if (MedicalRecord.StudentId.HasValue)
         {
-            MedicalRecord = medicalrecord;
-            ConsultationHistory = await _context.MedicalRecords
-    .Where(m => m.StudentId == MedicalRecord.StudentId)
-    .OrderByDescending(m => m.VisitDate)
-    .ToListAsync();
-
             Student = await _context.Students
-                .FirstOrDefaultAsync(s => s.StudentId == MedicalRecord.StudentId)
-                ?? new Capstone_Clinic.Models.Student();
+                .FirstOrDefaultAsync(s => s.StudentId == MedicalRecord.StudentId);
 
-            if (Student.DateOfBirth != default)
+            if (Student != null && Student.DateOfBirth != default)
             {
                 StudentAge = DateTime.Today.Year - Student.DateOfBirth.Year;
 
@@ -60,36 +65,49 @@ public class DetailsModel : PageModel
                 }
             }
 
-            // Get every consultation (MedicalRecord) for this student
-            var medicalRecordIds = await _context.MedicalRecords
+            // Get every consultation for this student
+            ConsultationHistory = await _context.MedicalRecords
                 .Where(m => m.StudentId == MedicalRecord.StudentId)
-                .Select(m => m.MedicalRecordId)
+                .OrderByDescending(m => m.VisitDate)
                 .ToListAsync();
-
-            // Student-wide recent vital signs
-            RecentVitalSigns = await _context.VitalSignLogs
-                .Where(v => medicalRecordIds.Contains(v.MedicalRecordId))
-                .OrderByDescending(v => v.RecordedAt)
-                .Take(5)
-                .ToListAsync();
-
-            // Student-wide statistics
-            TotalVisits = await _context.VitalSignLogs
-                .CountAsync(v => medicalRecordIds.Contains(v.MedicalRecordId));
-
-            CriticalVisits = await _context.VitalSignLogs
-                .CountAsync(v =>
-                    medicalRecordIds.Contains(v.MedicalRecordId) &&
-                    v.Status == "Critical");
-
-            LatestStatus = await _context.VitalSignLogs
-                .Where(v => medicalRecordIds.Contains(v.MedicalRecordId))
-                .OrderByDescending(v => v.RecordedAt)
-                .Select(v => v.Status)
-                .FirstOrDefaultAsync() ?? "No Records";
         }
+        // Community consultation
+        else
+        {
+            // Get every consultation for this community patient
+            ConsultationHistory = await _context.MedicalRecords
+                .Where(m => m.ClinicPatientId == MedicalRecord.ClinicPatientId)
+                .OrderByDescending(m => m.VisitDate)
+                .ToListAsync();
+        }
+
+        // Get all medical record IDs belonging to this patient
+        var medicalRecordIds = ConsultationHistory
+            .Select(m => m.MedicalRecordId)
+            .ToList();
+
+        // Patient-wide recent vital signs
+        RecentVitalSigns = await _context.VitalSignLogs
+            .Where(v => medicalRecordIds.Contains(v.MedicalRecordId))
+            .OrderByDescending(v => v.RecordedAt)
+            .Take(5)
+            .ToListAsync();
+
+        // Patient-wide statistics
+        TotalVisits = await _context.VitalSignLogs
+            .CountAsync(v => medicalRecordIds.Contains(v.MedicalRecordId));
+
+        CriticalVisits = await _context.VitalSignLogs
+            .CountAsync(v =>
+                medicalRecordIds.Contains(v.MedicalRecordId) &&
+                v.Status == "Critical");
+
+        LatestStatus = await _context.VitalSignLogs
+            .Where(v => medicalRecordIds.Contains(v.MedicalRecordId))
+            .OrderByDescending(v => v.RecordedAt)
+            .Select(v => v.Status)
+            .FirstOrDefaultAsync() ?? "No Records";
 
         return Page();
     }
 }
-

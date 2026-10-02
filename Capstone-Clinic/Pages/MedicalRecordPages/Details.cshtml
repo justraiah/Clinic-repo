@@ -28,15 +28,32 @@
             📄 Medical Record
         </h2>
 
-        <h4 class="text-primary mb-1">
-            @Model.Student.FullName
-        </h4>
+        @if (Model.Student != null)
+        {
+            <h4 class="text-primary mb-1">
+                @Model.Student.FullName
+            </h4>
 
-        <p class="text-muted mb-2">
-            @Model.Student.StudentNumber •
-            @Model.Student.Course •
-            Year @Model.Student.YearLevel
-        </p>
+            <p class="text-muted mb-2">
+                @Model.Student.StudentNumber •
+                @Model.Student.Course •
+                Year @Model.Student.YearLevel
+            </p>
+        }
+        else if (Model.MedicalRecord.ClinicPatient != null)
+        {
+            <h4 class="text-primary mb-1">
+                @Model.MedicalRecord.ClinicPatient.FullName
+            </h4>
+
+            <p class="text-muted mb-2">
+                @Model.MedicalRecord.ClinicPatient.PatientType
+                @if (!string.IsNullOrWhiteSpace(Model.MedicalRecord.ClinicPatient.Identifier))
+                {
+                    <text> • @Model.MedicalRecord.ClinicPatient.Identifier</text>
+                }
+            </p>
+        }
 
         <small class="text-secondary">
             Last Visit:
@@ -117,11 +134,22 @@
                 ✏ Edit Record
             </a>
 
-            <a asp-page="./Create"
-               asp-route-studentId="@Model.Student.StudentId"
-               class="btn btn-primary px-4">
-                ➕ New Consultation
-            </a>
+            @if (Model.Student != null)
+            {
+                <a asp-page="./Create"
+                   asp-route-studentId="@Model.Student.StudentId"
+                   class="btn btn-primary px-4">
+                    ➕ New Consultation
+                </a>
+            }
+            else
+            {
+                <a asp-page="./Create"
+                   asp-route-clinicPatientId="@Model.MedicalRecord.ClinicPatientId"
+                   class="btn btn-primary px-4">
+                    ➕ New Consultation
+                </a>
+            }
 
             <a asp-page="/VitalSignLogPages/Create"
                asp-route-medicalRecordId="@Model.MedicalRecord.MedicalRecordId"
@@ -136,41 +164,86 @@
 
         </div>
 
-        <div class="card border-primary mb-4">
+        @if (Model.Student != null)
+        {
+            <div class="card border-primary mb-4">
 
-            <div class="card-header bg-primary text-white">
-                👤 Student Information
-            </div>
+                <div class="card-header bg-primary text-white">
+                    👤 Student Information
+                </div>
 
-            <div class="card-body">
+                <div class="card-body">
 
-                <div class="row">
+                    <div class="row">
 
-                    <div class="col-md-6 mb-3">
-                        <strong>Student Number</strong><br />
-                        @Model.Student.StudentNumber
-                    </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Student Number</strong><br />
+                            @Model.Student.StudentNumber
+                        </div>
 
-                    <div class="col-md-6 mb-3">
-                        <strong>Age</strong><br />
-                        @Model.StudentAge years old
-                    </div>
+                        <div class="col-md-6 mb-3">
+                            <strong>Age</strong><br />
+                            @Model.StudentAge years old
+                        </div>
 
-                    <div class="col-md-6 mb-3">
-                        <strong>Course</strong><br />
-                        @Model.Student.Course
-                    </div>
+                        <div class="col-md-6">
+                            <strong>Course</strong><br />
+                            @Model.Student.Course
+                        </div>
 
-                    <div class="col-md-6">
-                        <strong>Year Level</strong><br />
-                        @Model.Student.YearLevel
+                        <div class="col-md-6">
+                            <strong>Year Level</strong><br />
+                            @Model.Student.YearLevel
+                        </div>
+
                     </div>
 
                 </div>
 
             </div>
+        }
+        else if (Model.MedicalRecord.ClinicPatient != null)
+        {
+            <div class="card border-primary mb-4">
 
-        </div>
+                <div class="card-header bg-primary text-white">
+                    👤 Community Patient Information
+                </div>
+
+                <div class="card-body">
+
+                    <div class="row">
+
+                        <div class="col-md-6 mb-3">
+                            <strong>Patient Type</strong><br />
+                            @Model.MedicalRecord.ClinicPatient.PatientType
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <strong>Full Name</strong><br />
+                            @Model.MedicalRecord.ClinicPatient.FullName
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <strong>Identifier</strong><br />
+                            @(string.IsNullOrWhiteSpace(Model.MedicalRecord.ClinicPatient.Identifier)
+                                ? "—"
+                                : Model.MedicalRecord.ClinicPatient.Identifier)
+                        </div>
+
+                        <div class="col-md-6">
+                            <strong>Date of Birth</strong><br />
+                            @(Model.MedicalRecord.ClinicPatient.DateOfBirth.HasValue
+                                ? Model.MedicalRecord.ClinicPatient.DateOfBirth.Value.ToString("MMMM dd, yyyy")
+                                : "—")
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
         <div class="card border-danger mb-4">
 
             <div class="card-header bg-danger text-white">

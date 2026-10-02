@@ -26,28 +26,38 @@ public class IndexModel : PageModel
     {
 
         Alerts = await (
-            from alert in _context.Alerts
-            join vital in _context.VitalSignLogs
-                on alert.VitalLogId equals vital.VitalSignLogId
-            join medical in _context.MedicalRecords
-                on vital.MedicalRecordId equals medical.MedicalRecordId
-            join student in _context.Students
-                on medical.StudentId equals student.StudentId
+    from alert in _context.Alerts
+    join vital in _context.VitalSignLogs
+        on alert.VitalLogId equals vital.VitalSignLogId
+    join medical in _context.MedicalRecords
+        on vital.MedicalRecordId equals medical.MedicalRecordId
+    join clinicPatient in _context.ClinicPatients
+        on vital.ClinicPatientId equals clinicPatient.ClinicPatientId
+    join student in _context.Students
+        on medical.StudentId equals student.StudentId into studentGroup
+    from student in studentGroup.DefaultIfEmpty()
 
-            orderby alert.CreatedAt descending
+    orderby alert.CreatedAt descending
 
-            select new AlertViewModel
-            {
-                AlertId = alert.AlertId,
-                StudentNumber = student.StudentNumber,
-                StudentName = student.FullName,
-                AlertType = alert.AlertType,
-                Severity = vital.Status,
-                Status = alert.Status,
-                CreatedAt = alert.CreatedAt
-            }
+    select new AlertViewModel
+    {
+        AlertId = alert.AlertId,
 
-        ).ToListAsync();
+        StudentNumber = student != null
+            ? student.StudentNumber
+            : clinicPatient.Identifier ?? "",
+
+        StudentName = student != null
+            ? student.FullName
+            : clinicPatient.FullName ?? "Community Member",
+
+        AlertType = alert.AlertType,
+        Severity = vital.Status,
+        Status = alert.Status,
+        CreatedAt = alert.CreatedAt
+    }
+
+).ToListAsync();
         CriticalCount = await _context.Alerts
     .Join(_context.VitalSignLogs,
         a => a.VitalLogId,

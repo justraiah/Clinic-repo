@@ -13,14 +13,23 @@
         </h2>
 
         <p class="text-muted mb-0">
-            View and manage student medical records. Open a record to view consultation history, vital signs, prescriptions, and other clinic information.
+            View and manage community medical records. Open a record to view consultation history, vital signs, prescriptions, and other clinic information.
         </p>
     </div>
 
-    <a asp-page="/Student/Search"
-       class="btn btn-primary">
-        🔍 Student Lookup
-    </a>
+    <div class="d-flex gap-2">
+
+        <a asp-page="./Create"
+           class="btn btn-success">
+            ➕ New Consultation
+        </a>
+
+        <a asp-page="/Student/Search"
+           class="btn btn-primary">
+            🔍 Student Lookup
+        </a>
+
+    </div>
 
 </div>
 
@@ -35,7 +44,7 @@
                 <thead class="table-dark">
 
                     <tr>
-                        <th>Student</th>
+                        <th>Patient</th>
                         <th>Record Created</th>
                         <th>Last Updated</th>
                         <th class="text-center">Actions</th>
@@ -50,9 +59,11 @@
                         <tr>
                             <td>
                                 <strong>
-                                    @(Model.StudentDisplay.ContainsKey(item.StudentId)
-                                        ? Model.StudentDisplay[item.StudentId]
-                                        : "Unknown Student")
+                                    @(item.StudentId.HasValue && Model.StudentDisplay.ContainsKey(item.StudentId.Value)
+    ? Model.StudentDisplay[item.StudentId.Value]
+    : Model.CommunityPatientDisplay.ContainsKey(item.ClinicPatientId)
+        ? Model.CommunityPatientDisplay[item.ClinicPatientId]
+        : "Community Member")
                                 </strong>
                             </td>
                             <td>

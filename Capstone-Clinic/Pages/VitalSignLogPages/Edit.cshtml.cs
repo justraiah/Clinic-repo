@@ -70,6 +70,7 @@ public class EditModel : PageModel
         // Update only editable vital-sign fields.
         existingVital.Temperature = VitalSignLog.Temperature;
         existingVital.HeartRate = VitalSignLog.HeartRate;
+        existingVital.RespiratoryRate = VitalSignLog.RespiratoryRate;
         existingVital.OxygenSaturation = VitalSignLog.OxygenSaturation;
         existingVital.SystolicBP = VitalSignLog.SystolicBP;
         existingVital.DiastolicBP = VitalSignLog.DiastolicBP;

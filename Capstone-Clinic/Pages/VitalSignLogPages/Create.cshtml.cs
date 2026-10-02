@@ -35,14 +35,29 @@ public class CreateModel : PageModel
         if (medicalRecord == null)
             return;
 
-        var student = _context.Students
-            .FirstOrDefault(s => s.StudentId == medicalRecord.StudentId);
+        // Student medical record
+        if (medicalRecord.StudentId.HasValue)
+        {
+            var student = _context.Students
+                .FirstOrDefault(s => s.StudentId == medicalRecord.StudentId.Value);
 
-        if (student == null)
+            if (student == null)
+                return;
+
+            StudentNumber = student.StudentNumber;
+            StudentName = student.FullName;
+            return;
+        }
+
+        // Community patient medical record
+        var clinicPatient = _context.ClinicPatients
+            .FirstOrDefault(cp => cp.ClinicPatientId == medicalRecord.ClinicPatientId);
+
+        if (clinicPatient == null)
             return;
 
-        StudentNumber = student.StudentNumber;
-        StudentName = student.FullName;
+        StudentNumber = clinicPatient.Identifier ?? "";
+        StudentName = clinicPatient.FullName ?? "";
     }
 
     public IActionResult OnGet(int? medicalRecordId)

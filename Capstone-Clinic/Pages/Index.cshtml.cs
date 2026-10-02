@@ -47,15 +47,24 @@ namespace Capstone_Clinic.Pages
         on alert.VitalLogId equals vital.VitalSignLogId
     join medical in _context.MedicalRecords
         on vital.MedicalRecordId equals medical.MedicalRecordId
+    join clinicPatient in _context.ClinicPatients
+        on vital.ClinicPatientId equals clinicPatient.ClinicPatientId
     join student in _context.Students
-        on medical.StudentId equals student.StudentId
+        on medical.StudentId equals student.StudentId into studentGroup
+    from student in studentGroup.DefaultIfEmpty()
 
     orderby alert.CreatedAt descending
 
     select new ActivityViewModel
     {
-        StudentName = student.FullName,
-        StudentNumber = student.StudentNumber,
+        StudentName = student != null
+            ? student.FullName
+            : clinicPatient.FullName ?? "Community Member",
+
+        StudentNumber = student != null
+            ? student.StudentNumber
+            : clinicPatient.Identifier ?? "",
+
         Activity = alert.AlertType,
         Severity = alert.Status,
         Time = alert.CreatedAt

@@ -16,7 +16,7 @@
             </h2>
 
             <p class="text-muted mb-0">
-                Update the student's consultation details.
+                Update the patient's consultation details.
             </p>
 
         </div>
@@ -49,19 +49,21 @@
 
                 <div class="col-md-6">
 
-                    <label class="form-label">
-                        Student
-                    </label>
+    <label class="form-label">
+        Patient
+    </label>
 
-                    <input type="text"
-                           class="form-control"
-                           value="@Model.StudentNumber - @Model.StudentName"
-                           readonly />
+    <input type="text"
+           class="form-control"
+           value="@(Model.MedicalRecord.StudentId.HasValue
+               ? Model.StudentNumber + " - " + Model.StudentName
+               : Model.CommunityPatientName + " - " + Model.CommunityPatientIdentifier)"
+           readonly />
 
-                    <input type="hidden"
-                           asp-for="MedicalRecord.StudentId" />
+    <input type="hidden"
+           asp-for="MedicalRecord.StudentId" />
 
-                </div>
+</div>
 
                 <div class="col-md-6">
 
