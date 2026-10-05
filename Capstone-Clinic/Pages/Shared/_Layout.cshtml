@@ -103,6 +103,21 @@
                 border-bottom: 1px solid rgba(255,255,255,.08);
             }
 
+            .cms-brand-header {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .cms-brand-logo {
+                width: 52px;
+                height: 52px;
+                object-fit: cover;
+                border-radius: 50%;
+                flex-shrink: 0;
+                background: white;
+            }
+
             .cms-brand-title {
                 font-size: 1.05rem;
                 font-weight: 600;
@@ -369,12 +384,20 @@
             <aside class="cms-sidebar" id="cmsSidebar">
 
                 <div class="cms-brand">
-                    <div class="cms-brand-title">
-                        CdM Clinic
-                    </div>
+                    <div class="cms-brand-header">
+                        <img src="~/images/cdm-logo.jpg"
+                             alt="Colegio de Montalban Logo"
+                             class="cms-brand-logo" />
 
-                    <div class="cms-brand-subtitle">
-                        Clinic Monitoring System
+                        <div>
+                            <div class="cms-brand-title">
+                                CdM Clinic
+                            </div>
+
+                            <div class="cms-brand-subtitle">
+                                Clinic Monitoring System
+                            </div>
+                        </div>
                     </div>
                 </div>
 
