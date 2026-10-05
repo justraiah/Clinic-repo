@@ -5,21 +5,377 @@
     ViewData["Title"] = "Reports";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<style>
+    .reports-header {
+        margin-bottom: 24px;
+    }
 
-    <div>
+    .reports-title {
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: #1e3a5f;
+        margin-bottom: 5px;
+        position: relative;
+        padding-left: 14px;
+    }
 
-        <h2 class="fw-bold mb-1">
-            📊 Reports
-        </h2>
+    .reports-title::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 4px;
+        bottom: 4px;
+        width: 4px;
+        border-radius: 3px;
+        background: #2563eb;
+    }
 
-        <p class="text-muted mb-0">
-            Overview of clinic operations and community health statistics.
-        </p>
+    .reports-subtitle {
+        color: #64748b;
+        font-size: .88rem;
+        margin: 0 0 8px;
+    }
 
-        <div class="mt-2">
-            <span class="badge bg-primary-subtle text-primary border border-primary-subtle">
-                <i class="bi bi-calendar3 me-1"></i>
+    .period-badge {
+        display: inline-block;
+        padding: 5px 9px;
+        border-radius: 4px;
+        background: #eff6ff;
+        color: #1d4ed8;
+        border: 1px solid #dbeafe;
+        font-size: .68rem;
+        font-weight: 600;
+    }
+
+    .reports-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .reports-actions .btn {
+        font-size: .75rem;
+    }
+
+    .filter-panel {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        padding: 16px 20px;
+        margin-bottom: 20px;
+    }
+
+    .filter-label {
+        display: block;
+        color: #475569;
+        font-size: .72rem;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .filter-select {
+        max-width: 280px;
+        font-size: .8rem;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .summary-card {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 7px;
+        padding: 17px;
+        border-top: 3px solid #2563eb;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .03);
+    }
+
+    .summary-card.records {
+        border-top-color: #64748b;
+    }
+
+    .summary-card.vitals {
+        border-top-color: #16a34a;
+    }
+
+    .summary-card.alerts {
+        border-top-color: #dc2626;
+    }
+
+    .summary-label {
+        color: #64748b;
+        font-size: .72rem;
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
+
+    .summary-value {
+        color: #1f2933;
+        font-size: 1.35rem;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    .summary-value.alert-value {
+        color: #dc2626;
+    }
+
+    .summary-note {
+        margin-top: 5px;
+        color: #94a3b8;
+        font-size: .68rem;
+    }
+
+    .report-panel {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 18px;
+    }
+
+    .report-panel-header {
+        padding: 16px 20px;
+        background: #fbfcfe;
+        border-bottom: 1px solid #e2e6eb;
+        border-left: 3px solid #2563eb;
+    }
+
+    .report-panel-header.critical {
+        border-left-color: #dc2626;
+    }
+
+    .report-panel-title {
+        margin: 0;
+        color: #1f2933;
+        font-size: .95rem;
+        font-weight: 600;
+    }
+
+    .report-panel-description {
+        margin: 3px 0 0;
+        color: #94a3b8;
+        font-size: .74rem;
+    }
+
+    .report-panel-body {
+        padding: 20px;
+    }
+
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+
+    .stat-item {
+        padding: 15px;
+        background: #f8fafc;
+        border: 1px solid #e2e6eb;
+        border-radius: 6px;
+    }
+
+    .stat-item.normal {
+        border-top: 3px solid #16a34a;
+    }
+
+    .stat-item.warning {
+        border-top: 3px solid #d97706;
+    }
+
+    .stat-item.critical {
+        border-top: 3px solid #dc2626;
+    }
+
+    .stat-label {
+        color: #64748b;
+        font-size: .7rem;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .stat-value {
+        color: #1f2933;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .stat-value.normal-value {
+        color: #15803d;
+    }
+
+    .stat-value.warning-value {
+        color: #b45309;
+    }
+
+    .stat-value.critical-value {
+        color: #dc2626;
+    }
+
+    .report-table {
+        margin: 0;
+    }
+
+    .report-table thead th {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: .69rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        padding: 11px 14px;
+        border-bottom: 1px solid #e2e6eb;
+        white-space: nowrap;
+    }
+
+    .report-table tbody td {
+        color: #475569;
+        font-size: .77rem;
+        padding: 12px 14px;
+        border-bottom: 1px solid #eef0f2;
+        vertical-align: middle;
+    }
+
+    .report-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .report-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .count-value {
+        color: #334155;
+        font-weight: 600;
+    }
+
+    .critical-count {
+        display: inline-block;
+        min-width: 28px;
+        padding: 4px 7px;
+        border-radius: 4px;
+        background: #fee2e2;
+        color: #991b1b;
+        font-size: .68rem;
+        font-weight: 600;
+    }
+
+    .progress-item {
+        margin-bottom: 18px;
+    }
+
+    .progress-item:last-child {
+        margin-bottom: 0;
+    }
+
+    .progress-label {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 6px;
+        color: #475569;
+        font-size: .74rem;
+        font-weight: 600;
+    }
+
+    .progress {
+        height: 8px;
+        background: #eef0f2;
+        border-radius: 4px;
+    }
+
+    .progress-bar {
+        border-radius: 4px;
+    }
+
+    .normal-bar {
+        background: #16a34a;
+    }
+
+    .warning-bar {
+        background: #d97706;
+    }
+
+    .critical-bar {
+        background: #dc2626;
+    }
+
+    .empty-state {
+        padding: 40px 20px;
+        text-align: center;
+        color: #94a3b8;
+        font-size: .78rem;
+    }
+
+    .empty-state-title {
+        display: block;
+        margin-bottom: 4px;
+        color: #475569;
+        font-size: .85rem;
+        font-weight: 600;
+    }
+
+    .alert-link {
+        color: #1d4ed8;
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .alert-link:hover {
+        text-decoration: underline;
+    }
+
+    @@media (max-width: 991.98px) {
+        .summary-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .stat-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .reports-actions {
+            width: 100%;
+        }
+
+        .reports-actions .btn {
+            width: 100%;
+        }
+
+        .filter-select {
+            max-width: none;
+        }
+    }
+</style>
+
+
+<!-- Header -->
+
+<div class="reports-header">
+
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+
+        <div>
+
+            <h1 class="reports-title">
+                Reports
+            </h1>
+
+            <p class="reports-subtitle">
+                Overview of clinic operations and student health statistics.
+            </p>
+
+            <span class="period-badge">
                 Showing:
                 @(Model.Period switch
                 {
@@ -30,308 +386,561 @@
                     _ => "All Time"
                 })
             </span>
+
+        </div>
+
+        <div class="reports-actions">
+
+            <a asp-page="/Reports/TrendAnalysis/Index"
+               class="btn btn-primary">
+                Open Trend Analysis
+            </a>
+
         </div>
 
     </div>
 
 </div>
-<div class="mb-4">
 
-    <a asp-page="/Reports/TrendAnalysis/Index"
-       class="btn btn-outline-primary">
 
-        <i class="bi bi-graph-up-arrow me-2"></i>
-        Open Trend Analysis Dashboard
+<!-- Period Filter -->
 
-    </a>
+<div class="filter-panel">
 
-</div>
-<form method="get" class="row mb-4">
+    <form method="get">
 
-    <div class="col-md-3">
-
-        <label class="form-label fw-semibold">
+        <label class="filter-label">
             Report Period
         </label>
 
         <select asp-for="Period"
-                class="form-select"
+                class="form-select filter-select"
                 onchange="this.form.submit()">
 
-            <option value="All">All Time</option>
-            <option value="Today">Today</option>
-            <option value="Week">This Week</option>
-            <option value="Month">This Month</option>
-            <option value="Year">This Year</option>
+            <option value="All">
+                All Time
+            </option>
+
+            <option value="Today">
+                Today
+            </option>
+
+            <option value="Week">
+                This Week
+            </option>
+
+            <option value="Month">
+                This Month
+            </option>
+
+            <option value="Year">
+                This Year
+            </option>
 
         </select>
 
-    </div>
-
-</form>
-<div class="row">
-
-    <div class="col-md-3 mb-3">
-        <div class="card border-primary shadow-sm">
-            <div class="card-body text-center">
-                <h1 class="display-5 fw-bold text-primary">
-                    @Model.TotalStudents</h1>
-                <h6>Total Students</h6>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3 mb-3">
-        <div class="card border-success shadow-sm">
-            <div class="card-body text-center">
-                <h2 class="text-success">@Model.TotalMedicalRecords</h2>
-                <h6>Medical Records</h6>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3 mb-3">
-        <div class="card border-danger shadow-sm">
-            <div class="card-body text-center">
-                <h2 class="text-danger">@Model.TotalVitalSigns</h2>
-                <h6>Vital Sign Records</h6>
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-3 mb-3">
-        <div class="card border-warning shadow-sm">
-            <div class="card-body text-center">
-                <h2 class="text-warning">@Model.ActiveAlerts</h2>
-                <h6>Active Alerts</h6>
-            </div>
-        </div>
-    </div>
+    </form>
 
 </div>
-<hr class="my-4" />
 
-<h4 class="fw-bold mb-3">
-    ❤️ Vital Statistics
-</h4>
 
-<div class="row">
+<!-- Main Summary -->
 
-    <div class="col-md-4 mb-3">
-        <div class="card border-success shadow-sm">
-            <div class="card-body text-center">
-                <h2 class="text-success">@Model.NormalCount</h2>
-                <h6>Normal Readings</h6>
-            </div>
-        </div>
-    </div>
+<div class="summary-grid">
 
-    <div class="col-md-4 mb-3">
-        <div class="card border-warning shadow-sm">
-            <div class="card-body text-center">
-                <h2 class="text-warning">@Model.WarningCount</h2>
-                <h6>Warning Readings</h6>
-            </div>
-        </div>
-    </div>
+    <div class="summary-card">
 
-    <div class="col-md-4 mb-3">
-        <div class="card border-danger shadow-sm">
-            <div class="card-body text-center">
-                <h2 class="text-danger">@Model.CriticalCount</h2>
-                <h6>Critical Readings</h6>
-            </div>
-        </div>
-    </div>
-
-</div>
-<hr class="my-4" />
-
-<h4 class="fw-bold mb-3">
-    📋 Top Visit Reasons
-</h4>
-
-<div class="card shadow-sm h-100">
-
-    <div class="card-body">
-
-        <table class="table table-hover align-middle">
-
-            <thead class="table-dark">
-
-                <tr>
-                    <th>Visit Reason</th>
-                    <th class="text-center">Total Cases</th>
-                </tr>
-
-            </thead>
-
-                <tbody>
-
-                    @if (Model.TopVisitReasons.Any())
-                    {
-                        @foreach (var item in Model.TopVisitReasons)
-                        {
-                            <tr>
-                                <td>@item.VisitReason</td>
-
-                                <td class="text-center fw-bold">
-                                    @item.Count
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="2" class="text-center text-muted py-4">
-                                <i class="bi bi-inbox fs-4 d-block mb-2"></i>
-                                No visit reasons recorded for the selected period.
-                            </td>
-                        </tr>
-                    }
-
-                </tbody>
-
-        </table>
-
-    </div>
-
-</div>
-<div class="card mt-4">
-    <div class="card-header bg-danger text-white">
-        <h5 class="mb-0">Top Patients with Critical Visits</h5>
-    </div>
-
-    <div class="card-body p-0">
-        <table class="table table-striped mb-0">
-            <thead class="table-dark">
-                <tr>
-                    <th>Patient ID</th>
-                    <th>Patient</th>
-                    <th class="text-center">Critical Visits</th>
-                </tr>
-            </thead>
-
-                <tbody>
-
-                    @if (Model.TopCriticalStudents.Any())
-                    {
-                        @foreach (var student in Model.TopCriticalStudents)
-                        {
-                            <tr>
-                                <td>@student.StudentNumber</td>
-
-                                <td>@student.StudentName</td>
-
-                                <td class="text-center">
-                                    <span class="badge bg-danger">
-                                        @student.CriticalVisits
-                                    </span>
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
-                    {
-                        <tr>
-                            <td colspan="3" class="text-center text-muted py-4">
-                                <i class="bi bi-person-check fs-4 d-block mb-2"></i>
-                                No patients with critical visits for the selected period.
-                            </td>
-                        </tr>
-                    }
-
-                </tbody>
-        </table>
-    </div>
-</div>
-<hr class="my-4" />
-
-<h4 class="fw-bold mb-3">
-    📊 Vital Status Distribution
-</h4>
-
-<div class="card shadow-sm h-100">
-
-    <div class="card-body">
-
-        <h6>🟢 Normal (@Model.NormalCount)</h6>
-
-        <div class="progress mb-3" style="height:25px;">
-            <div class="progress-bar bg-success"
-                 role="progressbar"
-                 style="width:@Model.NormalPercentage%">
-                @Model.NormalPercentage.ToString("0.0")%
-            </div>
+        <div class="summary-label">
+            Total Students
         </div>
 
-        <h6>🟡 Warning (@Model.WarningCount)</h6>
-
-        <div class="progress mb-3" style="height:25px;">
-            <div class="progress-bar bg-warning text-dark"
-                 role="progressbar"
-                 style="width:@Model.WarningPercentage%">
-                @Model.WarningPercentage.ToString("0.0")%
-            </div>
+        <div class="summary-value">
+            @Model.TotalStudents
         </div>
 
-        <h6>🔴 Critical (@Model.CriticalCount)</h6>
+        <div class="summary-note">
+            Registered student records
+        </div>
 
-        <div class="progress" style="height:25px;">
-            <div class="progress-bar bg-danger"
-                 role="progressbar"
-                 style="width:@Model.CriticalPercentage%">
-                @Model.CriticalPercentage.ToString("0.0")%
-            </div>
+    </div>
+
+
+    <div class="summary-card records">
+
+        <div class="summary-label">
+            Medical Records
+        </div>
+
+        <div class="summary-value">
+            @Model.TotalMedicalRecords
+        </div>
+
+        <div class="summary-note">
+            Clinic records for selected period
+        </div>
+
+    </div>
+
+
+    <div class="summary-card vitals">
+
+        <div class="summary-label">
+            Vital Sign Records
+        </div>
+
+        <div class="summary-value">
+            @Model.TotalVitalSigns
+        </div>
+
+        <div class="summary-note">
+            Recorded vital measurements
+        </div>
+
+    </div>
+
+
+    <div class="summary-card alerts">
+
+        <div class="summary-label">
+            Active Alerts
+        </div>
+
+        <div class="summary-value alert-value">
+            @Model.ActiveAlerts
+        </div>
+
+        <div class="summary-note">
+            Alerts requiring attention
         </div>
 
     </div>
 
 </div>
-    <div class="card shadow-sm mt-4">
-        <div class="card-header bg-danger text-white">
-            🚨 Recent Critical Alerts
+
+
+<!-- Vital Statistics -->
+
+<div class="report-panel">
+
+    <div class="report-panel-header">
+
+        <h2 class="report-panel-title">
+            Vital Statistics
+        </h2>
+
+        <p class="report-panel-description">
+            Distribution of recorded vital-sign classifications.
+        </p>
+
+    </div>
+
+    <div class="report-panel-body">
+
+        <div class="stat-grid">
+
+            <div class="stat-item normal">
+
+                <div class="stat-label">
+                    Normal Readings
+                </div>
+
+                <div class="stat-value normal-value">
+                    @Model.NormalCount
+                </div>
+
+            </div>
+
+
+            <div class="stat-item warning">
+
+                <div class="stat-label">
+                    Warning Readings
+                </div>
+
+                <div class="stat-value warning-value">
+                    @Model.WarningCount
+                </div>
+
+            </div>
+
+
+            <div class="stat-item critical">
+
+                <div class="stat-label">
+                    Critical Readings
+                </div>
+
+                <div class="stat-value critical-value">
+                    @Model.CriticalCount
+                </div>
+
+            </div>
+
         </div>
 
-        <div class="card-body p-0">
-            <table class="table table-striped mb-0">
+    </div>
+
+</div>
+
+
+<!-- Top Visit Reasons -->
+
+<div class="report-panel">
+
+    <div class="report-panel-header">
+
+        <h2 class="report-panel-title">
+            Top Visit Reasons
+        </h2>
+
+        <p class="report-panel-description">
+            Most frequently recorded reasons for clinic visits.
+        </p>
+
+    </div>
+
+    <div class="table-responsive">
+
+        @if (Model.TopVisitReasons.Any())
+        {
+            <table class="table report-table align-middle">
+
                 <thead>
+
                     <tr>
-                        <th>Patient</th>
-                        <th>Alert</th>
-                        <th>Created</th>
+
+                        <th>
+                            Visit Reason
+                        </th>
+
+                        <th class="text-center">
+                            Total Cases
+                        </th>
+
                     </tr>
+
                 </thead>
 
                 <tbody>
 
-                    @if (Model.RecentCriticalAlerts.Any())
-                    {
-                        @foreach (var item in Model.RecentCriticalAlerts)
-                        {
-                            <tr>
-                                <td>@item.StudentName</td>
-
-                                <td>@item.AlertType</td>
-
-                                <td>
-                                    @item.CreatedAt.ToString("MMMM dd, yyyy hh:mm tt")
-                                </td>
-                            </tr>
-                        }
-                    }
-                    else
+                    @foreach (var item in Model.TopVisitReasons)
                     {
                         <tr>
-                            <td colspan="3" class="text-center text-muted py-4">
-                                <i class="bi bi-shield-check fs-4 d-block mb-2"></i>
-                                No critical alerts recorded for the selected period.
+
+                            <td>
+                                @item.VisitReason
                             </td>
+
+                            <td class="text-center count-value">
+                                @item.Count
+                            </td>
+
                         </tr>
                     }
 
                 </tbody>
+
             </table>
-        </div>
+        }
+        else
+        {
+            <div class="empty-state">
+
+                <span class="empty-state-title">
+                    No visit reasons recorded
+                </span>
+
+                No visit reasons were recorded for the selected period.
+
+            </div>
+        }
+
     </div>
+
+</div>
+
+
+<!-- Top Critical Students -->
+
+<div class="report-panel">
+
+    <div class="report-panel-header critical">
+
+        <h2 class="report-panel-title">
+            Top Students with Critical Visits
+        </h2>
+
+        <p class="report-panel-description">
+            Students with the highest number of critical vital-sign visits.
+        </p>
+
+    </div>
+
+    <div class="table-responsive">
+
+        @if (Model.TopCriticalStudents.Any())
+        {
+            <table class="table report-table align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Student Number
+                        </th>
+
+                        <th>
+                            Student
+                        </th>
+
+                        <th class="text-center">
+                            Critical Visits
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @foreach (var student in Model.TopCriticalStudents)
+                    {
+                        <tr>
+
+                            <td>
+                                @student.StudentNumber
+                            </td>
+
+                            <td>
+                                @student.StudentName
+                            </td>
+
+                            <td class="text-center">
+
+                                <span class="critical-count">
+                                    @student.CriticalVisits
+                                </span>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+        }
+        else
+        {
+            <div class="empty-state">
+
+                <span class="empty-state-title">
+                    No critical visits recorded
+                </span>
+
+                No students have critical visits for the selected period.
+
+            </div>
+        }
+
+    </div>
+
+</div>
+
+
+<!-- Vital Status Distribution -->
+
+<div class="report-panel">
+
+    <div class="report-panel-header">
+
+        <h2 class="report-panel-title">
+            Vital Status Distribution
+        </h2>
+
+        <p class="report-panel-description">
+            Percentage distribution of normal, warning, and critical readings.
+        </p>
+
+    </div>
+
+    <div class="report-panel-body">
+
+        <div class="progress-item">
+
+            <div class="progress-label">
+
+                <span>
+                    Normal
+                </span>
+
+                <span>
+                    @Model.NormalCount
+                    (@Model.NormalPercentage.ToString("0.0")%)
+                </span>
+
+            </div>
+
+            <div class="progress">
+
+                <div class="progress-bar normal-bar"
+                     role="progressbar"
+                     style="width:@Model.NormalPercentage%"
+                     aria-valuenow="@Model.NormalPercentage"
+                     aria-valuemin="0"
+                     aria-valuemax="100">
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="progress-item">
+
+            <div class="progress-label">
+
+                <span>
+                    Warning
+                </span>
+
+                <span>
+                    @Model.WarningCount
+                    (@Model.WarningPercentage.ToString("0.0")%)
+                </span>
+
+            </div>
+
+            <div class="progress">
+
+                <div class="progress-bar warning-bar"
+                     role="progressbar"
+                     style="width:@Model.WarningPercentage%"
+                     aria-valuenow="@Model.WarningPercentage"
+                     aria-valuemin="0"
+                     aria-valuemax="100">
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="progress-item">
+
+            <div class="progress-label">
+
+                <span>
+                    Critical
+                </span>
+
+                <span>
+                    @Model.CriticalCount
+                    (@Model.CriticalPercentage.ToString("0.0")%)
+                </span>
+
+            </div>
+
+            <div class="progress">
+
+                <div class="progress-bar critical-bar"
+                     role="progressbar"
+                     style="width:@Model.CriticalPercentage%"
+                     aria-valuenow="@Model.CriticalPercentage"
+                     aria-valuemin="0"
+                     aria-valuemax="100">
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Recent Critical Alerts -->
+
+<div class="report-panel">
+
+    <div class="report-panel-header critical">
+
+        <h2 class="report-panel-title">
+            Recent Critical Alerts
+        </h2>
+
+        <p class="report-panel-description">
+            Recent critical alerts recorded for the selected period.
+        </p>
+
+    </div>
+
+    <div class="table-responsive">
+
+        @if (Model.RecentCriticalAlerts.Any())
+        {
+            <table class="table report-table align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Student
+                        </th>
+
+                        <th>
+                            Alert
+                        </th>
+
+                        <th>
+                            Created
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+                <tbody>
+
+                    @foreach (var item in Model.RecentCriticalAlerts)
+                    {
+                        <tr>
+
+                            <td>
+                                @item.StudentName
+                            </td>
+
+                            <td>
+                                @item.AlertType
+                            </td>
+
+                            <td>
+                                @item.CreatedAt.ToString("MMMM dd, yyyy hh:mm tt")
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+        }
+        else
+        {
+            <div class="empty-state">
+
+                <span class="empty-state-title">
+                    No critical alerts
+                </span>
+
+                No critical alerts were recorded for the selected period.
+
+            </div>
+        }
+
+    </div>
+
+</div>

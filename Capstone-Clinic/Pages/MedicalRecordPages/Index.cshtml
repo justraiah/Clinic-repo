@@ -5,101 +5,336 @@
     ViewData["Title"] = "Medical Records";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<style>
+    .records-header {
+        margin-bottom: 24px;
+    }
+
+    .records-title {
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: #1f2933;
+        margin-bottom: 5px;
+    }
+
+    .records-subtitle {
+        color: #64748b;
+        font-size: .9rem;
+        margin: 0;
+        max-width: 850px;
+    }
+
+    .records-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .records-actions {
+        display: flex;
+        gap: 8px;
+    }
+
+    .records-panel {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .records-panel-header {
+        padding: 17px 20px;
+        border-bottom: 1px solid #e2e6eb;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .records-panel-title {
+        margin: 0;
+        font-size: .95rem;
+        font-weight: 600;
+        color: #1f2933;
+    }
+
+    .records-panel-description {
+        margin: 3px 0 0;
+        font-size: .76rem;
+        color: #94a3b8;
+    }
+
+    .records-count {
+        padding: 4px 8px;
+        border-radius: 4px;
+        background: #f1f5f9;
+        color: #64748b;
+        font-size: .68rem;
+        font-weight: 600;
+        white-space: nowrap;
+    }
+
+    .records-table {
+        margin: 0;
+    }
+
+    .records-table thead th {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: .7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        padding: 12px 16px;
+        border-bottom: 1px solid #e2e6eb;
+        white-space: nowrap;
+    }
+
+    .records-table tbody td {
+        padding: 14px 16px;
+        color: #475569;
+        font-size: .8rem;
+        border-bottom: 1px solid #eef0f2;
+        vertical-align: middle;
+    }
+
+    .records-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .records-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .patient-name {
+        color: #334155;
+        font-weight: 600;
+    }
+
+    .record-date {
+        color: #475569;
+    }
+
+    .record-never {
+        color: #94a3b8;
+        font-style: italic;
+    }
+
+    .record-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .record-actions .btn {
+        font-size: .72rem;
+    }
+
+    .empty-records {
+        padding: 55px 20px;
+        text-align: center;
+    }
+
+    .empty-records-title {
+        color: #334155;
+        font-size: .95rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .empty-records-text {
+        color: #94a3b8;
+        font-size: .8rem;
+        margin-bottom: 16px;
+    }
+
+    @@media (max-width: 767.98px) {
+
+        .records-toolbar {
+            display: block;
+        }
+
+        .records-actions {
+            margin-top: 14px;
+            flex-wrap: wrap;
+        }
+
+        .records-panel-header {
+            display: block;
+        }
+
+        .records-count {
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+        .record-actions {
+            justify-content: flex-start;
+            flex-wrap: wrap;
+        }
+    }
+</style>
+
+
+<!-- Page Header -->
+
+<div class="records-header">
+
+    <h1 class="records-title">
+        Medical Records
+    </h1>
+
+    <p class="records-subtitle">
+        View and manage patient medical records, consultation history, vital signs, prescriptions, and other clinic information.
+    </p>
+
+</div>
+
+
+<!-- Page Actions -->
+
+<div class="records-toolbar">
 
     <div>
-        <h2 class="fw-bold mb-1">
-            📄 Medical Records
-        </h2>
-
-        <p class="text-muted mb-0">
-            View and manage community medical records. Open a record to view consultation history, vital signs, prescriptions, and other clinic information.
-        </p>
+        <a asp-page="/Student/Search"
+           class="btn btn-outline-primary btn-sm">
+            Student Lookup
+        </a>
     </div>
 
-    <div class="d-flex gap-2">
+
+    <div class="records-actions">
 
         <a asp-page="./Create"
-           class="btn btn-success">
-            ➕ New Consultation
-        </a>
-
-        <a asp-page="/Student/Search"
-           class="btn btn-primary">
-            🔍 Student Lookup
+           class="btn btn-primary btn-sm">
+            New Consultation
         </a>
 
     </div>
 
 </div>
 
-<div class="card shadow-sm border-0">
 
-    <div class="card-body p-0">
+<!-- Records Table -->
 
+<div class="records-panel">
+
+    <div class="records-panel-header">
+
+        <div>
+
+            <h2 class="records-panel-title">
+                Patient Records
+            </h2>
+
+            <p class="records-panel-description">
+                All medical records currently registered in the clinic system.
+            </p>
+
+        </div>
+
+
+        <span class="records-count">
+            @Model.MedicalRecord.Count record(s)
+        </span>
+
+    </div>
+
+
+    @if (Model.MedicalRecord.Any())
+    {
         <div class="table-responsive">
 
-            <table class="table table-hover align-middle mb-0">
+            <table class="table records-table align-middle">
 
-                <thead class="table-dark">
+                <thead>
 
                     <tr>
                         <th>Patient</th>
                         <th>Record Created</th>
                         <th>Last Updated</th>
-                        <th class="text-center">Actions</th>
+                        <th class="text-end">Actions</th>
                     </tr>
 
                 </thead>
+
 
                 <tbody>
 
                     @foreach (var item in Model.MedicalRecord)
                     {
                         <tr>
-                            <td>
-                                <strong>
-                                    @(item.StudentId.HasValue && Model.StudentDisplay.ContainsKey(item.StudentId.Value)
-    ? Model.StudentDisplay[item.StudentId.Value]
-    : Model.CommunityPatientDisplay.ContainsKey(item.ClinicPatientId)
-        ? Model.CommunityPatientDisplay[item.ClinicPatientId]
-        : "Community Member")
-                                </strong>
-                            </td>
-                            <td>
-                                @item.VisitDate.ToString("MMM dd, yyyy")
-                            </td>
 
                             <td>
+
+                                <span class="patient-name">
+
+                                    @(item.StudentId.HasValue && Model.StudentDisplay.ContainsKey(item.StudentId.Value)
+                                        ? Model.StudentDisplay[item.StudentId.Value]
+                                        : Model.CommunityPatientDisplay.ContainsKey(item.ClinicPatientId)
+                                            ? Model.CommunityPatientDisplay[item.ClinicPatientId]
+                                            : "Community Member")
+
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
+                                <span class="record-date">
+                                    @item.VisitDate.ToString("MMM dd, yyyy")
+                                </span>
+
+                            </td>
+
+
+                            <td>
+
                                 @if (item.UpdatedAt == DateTime.MinValue)
                                 {
-                                    <span class="text-muted">Never</span>
+                                    <span class="record-never">
+                                        Never
+                                    </span>
                                 }
                                 else
                                 {
-                                    @item.UpdatedAt.ToString("MMM dd, yyyy")
+                                    <span class="record-date">
+                                        @item.UpdatedAt.ToString("MMM dd, yyyy")
+                                    </span>
                                 }
+
                             </td>
 
-                            <td class="text-center text-nowrap">
 
-                                <a asp-page="./Details"
-                                   asp-route-id="@item.MedicalRecordId"
-                                   class="btn btn-sm btn-info">
-                                    Open Record
-                                </a>
+                            <td>
 
-                                <a asp-page="./Edit"
-                                   asp-route-id="@item.MedicalRecordId"
-                                   class="btn btn-sm btn-warning">
-                                    Edit
-                                </a>
+                                <div class="record-actions">
 
-                                <a asp-page="./Delete"
-                                   asp-route-id="@item.MedicalRecordId"
-                                   class="btn btn-sm btn-danger">
-                                    Delete
-                                </a>
+                                    <a asp-page="./Details"
+                                       asp-route-id="@item.MedicalRecordId"
+                                       class="btn btn-sm btn-outline-primary">
+                                        Open
+                                    </a>
+
+
+                                    <a asp-page="./Edit"
+                                       asp-route-id="@item.MedicalRecordId"
+                                       class="btn btn-sm btn-outline-secondary">
+                                        Edit
+                                    </a>
+
+
+                                    <a asp-page="./Delete"
+                                       asp-route-id="@item.MedicalRecordId"
+                                       class="btn btn-sm btn-outline-danger">
+                                        Delete
+                                    </a>
+
+                                </div>
 
                             </td>
 
@@ -111,7 +346,25 @@
             </table>
 
         </div>
+    }
+    else
+    {
+        <div class="empty-records">
 
-    </div>
+            <div class="empty-records-title">
+                No medical records found
+            </div>
+
+            <div class="empty-records-text">
+                There are currently no patient medical records registered in the clinic system.
+            </div>
+
+            <a asp-page="./Create"
+               class="btn btn-primary btn-sm">
+                New Consultation
+            </a>
+
+        </div>
+    }
 
 </div>

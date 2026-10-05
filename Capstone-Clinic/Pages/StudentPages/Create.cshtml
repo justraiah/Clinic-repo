@@ -5,34 +5,203 @@
     ViewData["Title"] = "Add Student";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<style>
+    .student-header {
+        margin-bottom: 24px;
+    }
 
-    <div>
-        <h2 class="fw-bold mb-1">
-            👤 Add New Student
-        </h2>
+    .student-title {
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: #1e3a5f;
+        margin-bottom: 5px;
+        position: relative;
+        padding-left: 14px;
+    }
 
-        <p class="text-muted mb-0">
-            Register a student in the clinic monitoring system.
-        </p>
+    .student-title::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 4px;
+        bottom: 4px;
+        width: 4px;
+        border-radius: 3px;
+        background: #2563eb;
+    }
+
+    .student-subtitle {
+        color: #64748b;
+        font-size: .88rem;
+        margin: 0;
+    }
+
+    .student-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .student-actions .btn {
+        font-size: .78rem;
+    }
+
+    .record-panel {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 18px;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .03);
+    }
+
+    .record-panel-header {
+        padding: 16px 20px;
+        background: #fbfcfe;
+        border-bottom: 1px solid #e2e6eb;
+        border-left: 3px solid #2563eb;
+    }
+
+    .record-panel-header.requirements {
+        border-left-color: #64748b;
+    }
+
+    .record-panel-title {
+        margin: 0;
+        color: #1f2933;
+        font-size: .95rem;
+        font-weight: 600;
+    }
+
+    .record-panel-description {
+        margin: 3px 0 0;
+        color: #94a3b8;
+        font-size: .74rem;
+    }
+
+    .record-panel-body {
+        padding: 20px;
+    }
+
+    .form-label {
+        color: #475569;
+        font-size: .75rem;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .form-control,
+    .form-select {
+        font-size: .8rem;
+        border-color: #d9dee5;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 .15rem rgba(37, 99, 235, .10);
+    }
+
+    .form-text {
+        color: #94a3b8;
+        font-size: .72rem;
+        margin-top: 5px;
+    }
+
+    .validation-summary {
+        margin-bottom: 18px;
+    }
+
+    .student-footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 22px;
+        margin-bottom: 30px;
+    }
+
+    .student-footer .btn {
+        font-size: .78rem;
+    }
+
+    @@media (max-width: 767.98px) {
+
+        .student-actions {
+            width: 100%;
+        }
+
+        .student-actions .btn {
+            width: 100%;
+        }
+
+        .student-footer {
+            flex-direction: column;
+        }
+
+        .student-footer .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+
+<!-- Header -->
+
+<div class="student-header">
+
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+
+        <div>
+
+            <h1 class="student-title">
+                Add New Student
+            </h1>
+
+            <p class="student-subtitle">
+                Register a student in the clinic monitoring system.
+            </p>
+
+        </div>
+
+        <div class="student-actions">
+
+            <a asp-page="./Index"
+               class="btn btn-outline-secondary">
+                Back to Students
+            </a>
+
+        </div>
+
     </div>
-
-    <a asp-page="./Index"
-       class="btn btn-outline-secondary">
-        ← Back to Students
-    </a>
 
 </div>
 
-<div class="card shadow-sm border-0">
 
-    <div class="card-body p-4">
+<form method="post">
 
-        <form method="post">
+    <div asp-validation-summary="ModelOnly"
+         class="text-danger validation-summary">
+    </div>
 
-            <div asp-validation-summary="ModelOnly"
-                 class="text-danger mb-3">
-            </div>
+
+    <!-- Student Information -->
+
+    <div class="record-panel">
+
+        <div class="record-panel-header">
+
+            <h2 class="record-panel-title">
+                Student Information
+            </h2>
+
+            <p class="record-panel-description">
+                Enter the student's basic academic and identification details.
+            </p>
+
+        </div>
+
+
+        <div class="record-panel-body">
 
             <div class="row g-3">
 
@@ -48,10 +217,11 @@
                            placeholder="Example: 23-00148" />
 
                     <span asp-validation-for="Student.StudentNumber"
-                          class="text-danger">
+                          class="text-danger small">
                     </span>
 
                 </div>
+
 
                 <div class="col-md-6">
 
@@ -65,10 +235,12 @@
                            placeholder="Example: Juan Dela Cruz" />
 
                     <span asp-validation-for="Student.FullName"
-                          class="text-danger">
+                          class="text-danger small">
                     </span>
 
                 </div>
+
+
                 <div class="col-md-6">
 
                     <label asp-for="Student.DateOfBirth"
@@ -81,10 +253,11 @@
                            class="form-control" />
 
                     <span asp-validation-for="Student.DateOfBirth"
-                          class="text-danger">
+                          class="text-danger small">
                     </span>
 
                 </div>
+
 
                 <div class="col-md-6">
 
@@ -98,10 +271,11 @@
                            placeholder="Example: BSIT" />
 
                     <span asp-validation-for="Student.Course"
-                          class="text-danger">
+                          class="text-danger small">
                     </span>
 
                 </div>
+
 
                 <div class="col-md-6">
 
@@ -115,10 +289,38 @@
                            placeholder="Example: 3rd Year" />
 
                     <span asp-validation-for="Student.YearLevel"
-                          class="text-danger">
+                          class="text-danger small">
                     </span>
 
                 </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Medical Requirements -->
+
+    <div class="record-panel">
+
+        <div class="record-panel-header requirements">
+
+            <h2 class="record-panel-title">
+                Medical Requirements
+            </h2>
+
+            <p class="record-panel-description">
+                Record the current status of the student's medical requirements.
+            </p>
+
+        </div>
+
+
+        <div class="record-panel-body">
+
+            <div class="row">
 
                 <div class="col-md-6">
 
@@ -153,35 +355,41 @@
                     </div>
 
                     <span asp-validation-for="Student.MedicalRequirementStatus"
-                          class="text-danger">
+                          class="text-danger small">
                     </span>
 
                 </div>
 
             </div>
 
-            <div class="mt-4">
-
-                <button type="submit"
-                        class="btn btn-primary">
-                    ➕ Add Student
-                </button>
-
-                <a asp-page="./Index"
-                   class="btn btn-outline-secondary ms-1">
-                    Cancel
-                </a>
-
-            </div>
-
-        </form>
+        </div>
 
     </div>
 
-</div>
+
+    <!-- Actions -->
+
+    <div class="student-footer">
+
+        <button type="submit"
+                class="btn btn-primary">
+            Add Student
+        </button>
+
+        <a asp-page="./Index"
+           class="btn btn-outline-secondary">
+            Cancel
+        </a>
+
+    </div>
+
+</form>
+
 
 @section Scripts {
+
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
 }

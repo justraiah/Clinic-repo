@@ -5,66 +5,159 @@
     ViewData["Title"] = "Clinic Login";
 }
 
-<div class="row justify-content-center mt-5">
+<style>
+    .login-wrapper {
+        min-height: calc(100vh - 120px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 30px 15px;
+    }
 
-    <div class="col-md-5">
+    .login-panel {
+        width: 100%;
+        max-width: 430px;
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 9px;
+        overflow: hidden;
+        box-shadow: 0 4px 14px rgba(15, 23, 42, .06);
+    }
 
-        <div class="card shadow">
+    .login-header {
+        padding: 24px 26px;
+        background: #fbfcfe;
+        border-bottom: 1px solid #e2e6eb;
+        border-left: 4px solid #2563eb;
+    }
 
-            <div class="card-header bg-primary text-white text-center">
-                <h3 class="mb-0">
-                    🏥 Clinic Monitoring System
-                </h3>
-            </div>
+    .login-title {
+        margin: 0;
+        color: #1e3a5f;
+        font-size: 1.25rem;
+        font-weight: 600;
+    }
 
-            <div class="card-body">
+    .login-subtitle {
+        margin: 5px 0 0;
+        color: #64748b;
+        font-size: .78rem;
+    }
 
-                <h5 class="text-center mb-4">
-                    Staff Login
-                </h5>
+    .login-body {
+        padding: 26px;
+    }
 
-                <form method="post">
+    .login-heading {
+        margin: 0 0 20px;
+        color: #334155;
+        font-size: .95rem;
+        font-weight: 600;
+    }
 
-                    <div class="mb-3">
+    .form-label {
+        color: #475569;
+        font-size: .75rem;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
 
-                        <label asp-for="Username" class="form-label">
-                            Username
-                        </label>
+    .form-control {
+        font-size: .82rem;
+        border-color: #d9dee5;
+        padding: 9px 11px;
+    }
 
-                        <input asp-for="Username"
-                               class="form-control" />
+        .form-control:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 .15rem rgba(37, 99, 235, .10);
+        }
 
-                    </div>
+    .login-button {
+        width: 100%;
+        margin-top: 4px;
+        font-size: .8rem;
+        font-weight: 500;
+        padding: 9px 12px;
+    }
 
-                    <div class="mb-4">
+    .login-error {
+        margin-top: 16px;
+        margin-bottom: 0;
+        font-size: .78rem;
+    }
+</style>
 
-                        <label asp-for="Password" class="form-label">
-                            Password
-                        </label>
 
-                        <input asp-for="Password"
-                               type="password"
-                               class="form-control" />
+<div class="login-wrapper">
 
-                    </div>
+    <div class="login-panel">
 
-                    <button class="btn btn-primary w-100"
-                            type="submit">
+        <div class="login-header">
 
-                        Login
+            <h1 class="login-title">
+                Clinic Monitoring System
+            </h1>
 
-                    </button>
+            <p class="login-subtitle">
+                Colegio de Montalban Clinic
+            </p>
 
-                </form>
+        </div>
 
-                @if (!string.IsNullOrEmpty(Model.ErrorMessage))
-                {
-                    <div class="alert alert-danger mt-3">
-                        @Model.ErrorMessage
-                    </div>
-                }
 
-            </div>
+        <div class="login-body">
+
+            <h2 class="login-heading">
+                Staff Login
+            </h2>
+
+
+            <form method="post">
+
+                <div class="mb-3">
+
+                    <label asp-for="Username"
+                           class="form-label">
+                        Username
+                    </label>
+
+                    <input asp-for="Username"
+                           class="form-control"
+                           autocomplete="username" />
+
+                </div>
+
+
+                <div class="mb-4">
+
+                    <label asp-for="Password"
+                           class="form-label">
+                        Password
+                    </label>
+
+                    <input asp-for="Password"
+                           type="password"
+                           class="form-control"
+                           autocomplete="current-password" />
+
+                </div>
+
+
+                <button class="btn btn-primary login-button"
+                        type="submit">
+                    Login
+                </button>
+
+            </form>
+
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger login-error">
+                    @Model.ErrorMessage
+                </div>
+            }
 
         </div>
 

@@ -2,76 +2,248 @@
 @model Capstone_Clinic.Pages.MedicalRecordPages.DeleteModel
 
 @{
-    ViewData["Title"] = "Delete";
+    ViewData["Title"] = "Delete Medical Record";
 }
 
-<div class="container-xl mt-4">
+<style>
+    .delete-header {
+        margin-bottom: 24px;
+    }
 
-    <div class="mb-4">
+    .delete-title {
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: #1e3a5f;
+        margin-bottom: 5px;
+        position: relative;
+        padding-left: 14px;
+    }
 
-        <h2 class="fw-bold text-danger mb-1">
-            🗑 Delete Medical Record
+        .delete-title::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 4px;
+            bottom: 4px;
+            width: 4px;
+            border-radius: 3px;
+            background: #dc2626;
+        }
+
+    .delete-subtitle {
+        color: #64748b;
+        font-size: .88rem;
+        margin: 0;
+    }
+
+    .delete-panel {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 18px;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .03);
+    }
+
+    .delete-panel-header {
+        padding: 16px 20px;
+        background: #fbfcfe;
+        border-bottom: 1px solid #e2e6eb;
+        border-left: 3px solid #dc2626;
+    }
+
+    .delete-panel-title {
+        margin: 0;
+        color: #1f2933;
+        font-size: .95rem;
+        font-weight: 600;
+    }
+
+    .delete-panel-description {
+        margin: 3px 0 0;
+        color: #94a3b8;
+        font-size: .74rem;
+    }
+
+    .delete-panel-body {
+        padding: 20px;
+    }
+
+    .warning-box {
+        padding: 14px 16px;
+        margin-bottom: 20px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        border-left: 4px solid #d97706;
+        border-radius: 6px;
+        color: #7c2d12;
+        font-size: .82rem;
+        line-height: 1.5;
+    }
+
+    .record-summary {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 22px;
+    }
+
+    .record-summary-item {
+        padding: 14px;
+        background: #f8fafc;
+        border: 1px solid #e2e6eb;
+        border-radius: 6px;
+    }
+
+    .record-summary-label {
+        color: #64748b;
+        font-size: .68rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        margin-bottom: 5px;
+    }
+
+    .record-summary-value {
+        color: #334155;
+        font-size: .84rem;
+        font-weight: 500;
+        word-break: break-word;
+    }
+
+    .delete-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+        .delete-actions .btn {
+            font-size: .78rem;
+        }
+
+    @@media (max-width: 767.98px) {
+
+        .record-summary {
+            grid-template-columns: 1fr;
+        }
+
+        .delete-actions {
+            flex-direction: column;
+        }
+
+            .delete-actions .btn {
+                width: 100%;
+            }
+    }
+</style>
+
+
+<!-- Header -->
+
+<div class="delete-header">
+
+    <h1 class="delete-title">
+        Delete Medical Record
+    </h1>
+
+    <p class="delete-subtitle">
+        Review the consultation information before permanently deleting this record.
+    </p>
+
+</div>
+
+
+<!-- Confirmation -->
+
+<div class="delete-panel">
+
+    <div class="delete-panel-header">
+
+        <h2 class="delete-panel-title">
+            Confirm Deletion
         </h2>
 
-        <p class="text-muted">
+        <p class="delete-panel-description">
             This action cannot be undone.
         </p>
 
     </div>
 
-    <div class="card border-danger">
 
-        <div class="card-header bg-danger text-white">
-            Confirm Deletion
+    <div class="delete-panel-body">
+
+        <div class="warning-box">
+
+            <strong>Warning:</strong>
+            You are about to permanently delete this medical record and its consultation information.
+            Confirm that this is the correct record before continuing.
+
         </div>
 
-        <div class="card-body">
 
-            <div class="alert alert-warning mb-4">
+        <div class="record-summary">
 
-                <strong>Warning!</strong><br />
+            <div class="record-summary-item">
 
-                You are about to permanently delete this student's
-                medical record and consultation information.
+                <div class="record-summary-label">
+                    Student ID
+                </div>
+
+                <div class="record-summary-value">
+                    @Model.MedicalRecord.StudentId
+                </div>
 
             </div>
 
-            <table class="table table-borderless">
 
-                <tr>
-                    <th width="180">Student ID</th>
-                    <td>@Model.MedicalRecord.StudentId</td>
-                </tr>
+            <div class="record-summary-item">
 
-                <tr>
-                    <th>Visit Date</th>
-                    <td>@Model.MedicalRecord.VisitDate.ToString("MMMM dd, yyyy")</td>
-                </tr>
+                <div class="record-summary-label">
+                    Visit Date
+                </div>
 
-                <tr>
-                    <th>Chief Complaint</th>
-                    <td>@Model.MedicalRecord.ChiefComplaint</td>
-                </tr>
+                <div class="record-summary-value">
+                    @Model.MedicalRecord.VisitDate.ToString("MMMM dd, yyyy")
+                </div>
 
-            </table>
-            <form method="post">
+            </div>
 
-                <input type="hidden"
-                       asp-for="MedicalRecord.MedicalRecordId" />
+
+            <div class="record-summary-item">
+
+                <div class="record-summary-label">
+                    Chief Complaint
+                </div>
+
+                <div class="record-summary-value">
+                    @Model.MedicalRecord.ChiefComplaint
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <form method="post">
+
+            <input type="hidden"
+                   asp-for="MedicalRecord.MedicalRecordId" />
+
+            <div class="delete-actions">
 
                 <button type="submit"
                         class="btn btn-danger">
-                    🗑 Delete Medical Record
+                    Delete Medical Record
                 </button>
 
                 <a asp-page="./Index"
-                   class="btn btn-outline-secondary ms-2">
+                   class="btn btn-outline-secondary">
                     Cancel
                 </a>
 
-            </form>
+            </div>
 
-        </div>
+        </form>
 
     </div>
 

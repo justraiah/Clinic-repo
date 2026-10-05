@@ -1,12 +1,296 @@
 ﻿@page
 @model Capstone_Clinic.Pages.Student.SearchModel
+
 @{
     ViewData["Title"] = "Student Lookup";
 }
 
+<style>
+    .lookup-header {
+        margin-bottom: 24px;
+    }
+
+    .lookup-title {
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: #1e3a5f;
+        margin-bottom: 5px;
+        position: relative;
+        padding-left: 14px;
+    }
+
+    .lookup-title::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 4px;
+        bottom: 4px;
+        width: 4px;
+        border-radius: 3px;
+        background: #2563eb;
+    }
+
+    .lookup-subtitle {
+        color: #64748b;
+        font-size: .88rem;
+        margin: 0;
+    }
+
+    .lookup-panel {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 18px;
+    }
+
+    .lookup-panel-header {
+        padding: 16px 20px;
+        background: #fbfcfe;
+        border-bottom: 1px solid #e2e6eb;
+        border-left: 3px solid #2563eb;
+    }
+
+    .lookup-panel-title {
+        margin: 0;
+        font-size: .95rem;
+        font-weight: 600;
+        color: #1f2933;
+    }
+
+    .lookup-panel-description {
+        margin: 3px 0 0;
+        font-size: .74rem;
+        color: #94a3b8;
+    }
+
+    .lookup-panel-body {
+        padding: 20px;
+    }
+
+    .search-label {
+        display: block;
+        font-size: .75rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 6px;
+    }
+
+    .search-input {
+        height: 42px;
+        border-color: #d9dee5;
+        font-size: .85rem;
+    }
+
+    .search-input:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 .15rem rgba(37, 99, 235, .10);
+    }
+
+    .search-button {
+        height: 42px;
+        padding: 0 24px;
+        font-size: .78rem;
+    }
+
+    .student-result {
+        margin-top: 24px;
+        border-top: 1px solid #e2e6eb;
+        padding-top: 24px;
+    }
+
+    .student-result-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 16px;
+        margin-bottom: 18px;
+    }
+
+    .student-result-title {
+        margin: 0;
+        font-size: .95rem;
+        font-weight: 600;
+        color: #1f2933;
+    }
+
+    .student-result-subtitle {
+        margin: 4px 0 0;
+        font-size: .74rem;
+        color: #94a3b8;
+    }
+
+    .student-info-table {
+        margin: 0;
+        border: 1px solid #e2e6eb;
+    }
+
+    .student-info-table th {
+        width: 190px;
+        background: #f8fafc;
+        color: #64748b;
+        font-size: .74rem;
+        font-weight: 600;
+        padding: 12px 14px;
+        border-color: #e2e6eb;
+    }
+
+    .student-info-table td {
+        color: #334155;
+        font-size: .8rem;
+        padding: 12px 14px;
+        border-color: #e2e6eb;
+    }
+
+    .requirement-status {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: .68rem;
+        font-weight: 600;
+    }
+
+    .requirement-complete {
+        color: #166534;
+        background: #dcfce7;
+    }
+
+    .requirement-pending {
+        color: #92400e;
+        background: #fef3c7;
+    }
+
+    .requirement-incomplete {
+        color: #991b1b;
+        background: #fee2e2;
+    }
+
+    .requirement-none {
+        color: #475569;
+        background: #f1f5f9;
+    }
+
+    .requirement-note {
+        margin-top: 5px;
+        font-size: .7rem;
+        color: #94a3b8;
+    }
+
+    .clinic-actions {
+        margin-top: 24px;
+    }
+
+    .clinic-actions-title {
+        margin-bottom: 12px;
+        font-size: .85rem;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .clinic-action-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+    }
+
+    .clinic-action {
+        min-height: 76px;
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        padding: 12px 14px;
+        text-decoration: none;
+        border: 1px solid #d9dee5;
+        border-radius: 7px;
+        background: #ffffff;
+        transition: background .15s ease, border-color .15s ease, box-shadow .15s ease;
+    }
+
+    .clinic-action:hover {
+        background: #f8fafc;
+        border-color: #93c5fd;
+        box-shadow: 0 1px 3px rgba(15, 23, 42, .05);
+    }
+
+    .clinic-action-title {
+        font-size: .78rem;
+        font-weight: 600;
+        color: #334155;
+    }
+
+    .clinic-action-description {
+        margin-top: 3px;
+        font-size: .68rem;
+        color: #94a3b8;
+    }
+
+    .not-found {
+        margin-top: 24px;
+        padding: 18px;
+        border: 1px solid #fde68a;
+        border-left: 3px solid #d97706;
+        border-radius: 7px;
+        background: #fffbeb;
+    }
+
+    .not-found-title {
+        font-size: .85rem;
+        font-weight: 600;
+        color: #92400e;
+        margin-bottom: 4px;
+    }
+
+    .not-found-text {
+        font-size: .76rem;
+        color: #78350f;
+        margin-bottom: 14px;
+    }
+
+    .success-message {
+        margin-bottom: 20px;
+    }
+
+    @@media (max-width: 767.98px) {
+
+        .student-result-header {
+            display: block;
+        }
+
+        .student-result-header .btn {
+            margin-top: 12px;
+        }
+
+        .clinic-action-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .search-button {
+            width: 100%;
+        }
+    }
+</style>
+
+
+<!-- Page Header -->
+
+<div class="lookup-header">
+
+    <h1 class="lookup-title">
+        Student Lookup
+    </h1>
+
+    <p class="lookup-subtitle">
+        Find a student and access their clinic records.
+    </p>
+
+</div>
+
+
 @if (TempData["SuccessMessage"] != null)
 {
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
+    <div class="alert alert-success alert-dismissible fade show success-message"
+         role="alert">
 
         @TempData["SuccessMessage"]
 
@@ -18,187 +302,297 @@
     </div>
 }
 
-<div class="container mt-4">
 
-    <div class="card shadow">
+<!-- Search Panel -->
 
-        <div class="card-header bg-primary text-white">
-            <h4 class="mb-0">🔍 Student Lookup</h4>
-        </div>
+<div class="lookup-panel">
 
-        <div class="card-body">
+    <div class="lookup-panel-header">
 
-            <p class="text-muted">
-                <p class="text-muted">
-                    Search a student using their Student Number or full name.
-                </p>
-            </p>
+        <h2 class="lookup-panel-title">
+            Find Student
+        </h2>
 
-            <form method="post">
+        <p class="lookup-panel-description">
+            Search using the student's Student Number or full name.
+        </p>
 
-                <div class="row">
+    </div>
 
-                    <div class="col-md-9">
-                        <input asp-for="SearchStudentNumber"
-                               class="form-control"
-                               placeholder="Enter Student Number (e.g. 26-00001)" />
-                        <span asp-validation-for="SearchStudentNumber"
-                              class="text-danger small">
-                        </span>
-                    </div>
 
-                    <div class="col-md-3">
-                        <button class="btn btn-primary w-100">
-                            Search
-                        </button>
-                    </div>
+    <div class="lookup-panel-body">
+
+        <form method="post">
+
+            <div class="row g-2 align-items-end">
+
+                <div class="col-md-9">
+
+                    <label class="search-label">
+                        Student Number or Name
+                    </label>
+
+                    <input asp-for="SearchStudentNumber"
+                           class="form-control search-input"
+                           placeholder="Example: 23-00148 or Juan Dela Cruz" />
+
+                    <span asp-validation-for="SearchStudentNumber"
+                          class="text-danger small">
+                    </span>
 
                 </div>
 
-            </form>
 
-            <hr />
+                <div class="col-md-3">
 
-            @if (Model.Student != null)
-            {
-                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <button type="submit"
+                            class="btn btn-primary search-button w-100">
+                        Search Student
+                    </button>
 
-                    <h5 class="text-success mb-0">
-                        Student Information
-                    </h5>
+                </div>
+
+            </div>
+
+        </form>
+
+
+        @if (Model.Student != null)
+        {
+            <div class="student-result">
+
+                <div class="student-result-header">
+
+                    <div>
+
+                        <h2 class="student-result-title">
+                            Student Information
+                        </h2>
+
+                        <p class="student-result-subtitle">
+                            Patient information registered in the system.
+                        </p>
+
+                    </div>
+
 
                     <a asp-page="/StudentPages/Edit"
                        asp-route-id="@Model.Student.StudentId"
                        class="btn btn-sm btn-outline-primary">
-                        ✏️ Edit Student
+                        Edit Student
                     </a>
 
                 </div>
 
-                <table class="table table-bordered">
 
-                    <tr>
-                        <th width="220">Student Number</th>
-                        <td>@Model.Student.StudentNumber</td>
-                    </tr>
+                <div class="table-responsive">
 
-                    <tr>
-                        <th>Full Name</th>
-                        <td>@Model.Student.FullName</td>
-                    </tr>
+                    <table class="table student-info-table">
 
-                    <tr>
-                        <th>Course</th>
-                        <td>@Model.Student.Course</td>
-                    </tr>
+                        <tbody>
 
-                    <tr>
-                        <th>Year Level</th>
-                        <td>@Model.Student.YearLevel</td>
-                    </tr>
-                    <tr>
-                        <th>Medical Requirements</th>
+                            <tr>
 
-                        <td>
+                                <th>
+                                    Student Number
+                                </th>
 
-                            @if (Model.Student.MedicalRequirementStatus == "Complete")
-                            {
-                                <span class="badge bg-success">
-                                    🟢 Complete
-                                </span>
-                            }
-                            else if (Model.Student.MedicalRequirementStatus == "Pending Review")
-                            {
-                                <span class="badge bg-warning text-dark">
-                                    🟡 Pending Review
-                                </span>
-                            }
-                            else if (Model.Student.MedicalRequirementStatus == "Incomplete")
-                            {
-                                <span class="badge bg-danger">
-                                    🟠 Incomplete
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-secondary">
-                                    ⚪ Not Submitted
-                                </span>
-                            }
+                                <td>
+                                    @Model.Student.StudentNumber
+                                </td>
 
-                            <div class="form-text">
-                                This status does not restrict clinic services.
-                            </div>
+                            </tr>
 
-                        </td>
-                    </tr>
 
-                </table>
+                            <tr>
 
-                <div class="mt-4">
+                                <th>
+                                    Full Name
+                                </th>
 
-                    <h5 class="mt-4 text-primary">
-                        📋 Clinic Actions
-                    </h5>
+                                <td>
+                                    @Model.Student.FullName
+                                </td>
 
-                    <div class="d-grid gap-2">
+                            </tr>
 
-                        @if (Model.HasMedicalRecord)
-                        {
-                            <a class="btn btn-success"
-                               asp-page="/MedicalRecordPages/Details"
-                               asp-route-id="@Model.MedicalRecordId">
-                                📄 Open Medical Record
-                            </a>
 
-                            <a class="btn btn-danger"
-                               asp-page="/VitalSignLogPages/Create"
-                               asp-route-medicalRecordId="@Model.MedicalRecordId">
-                                ❤️ Record Vital Signs
-                            </a>
+                            <tr>
 
-                            <a class="btn btn-info text-white"
-                               asp-page="/VitalSignLogPages/Index"
-                               asp-route-medicalRecordId="@Model.MedicalRecordId">
-                                📈 View Vital History
-                            </a>
-                        }
-                        else
-                        {
-                            <a class="btn btn-primary"
-                               asp-page="/MedicalRecordPages/Create"
-                               asp-route-studentId="@Model.Student.StudentId">
-                                🩺 Start Consultation
-                            </a>
-                        }
+                                <th>
+                                    Course
+                                </th>
 
+                                <td>
+                                    @Model.Student.Course
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <th>
+                                    Year Level
+                                </th>
+
+                                <td>
+                                    @Model.Student.YearLevel
+                                </td>
+
+                            </tr>
+
+
+                            <tr>
+
+                                <th>
+                                    Medical Requirements
+                                </th>
+
+                                <td>
+
+                                    @if (Model.Student.MedicalRequirementStatus == "Complete")
+                                    {
+                                        <span class="requirement-status requirement-complete">
+                                            Complete
+                                        </span>
+                                    }
+                                    else if (Model.Student.MedicalRequirementStatus == "Pending Review")
+                                    {
+                                        <span class="requirement-status requirement-pending">
+                                            Pending Review
+                                        </span>
+                                    }
+                                    else if (Model.Student.MedicalRequirementStatus == "Incomplete")
+                                    {
+                                        <span class="requirement-status requirement-incomplete">
+                                            Incomplete
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="requirement-status requirement-none">
+                                            Not Submitted
+                                        </span>
+                                    }
+
+                                    <div class="requirement-note">
+                                        This status does not restrict clinic services.
+                                    </div>
+
+                                </td>
+
+                            </tr>
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+
+
+                <!-- Clinic Actions -->
+
+                <div class="clinic-actions">
+
+                    <div class="clinic-actions-title">
+                        Clinic Actions
                     </div>
 
+
+                    @if (Model.HasMedicalRecord)
+                    {
+                        <div class="clinic-action-grid">
+
+                            <a class="clinic-action"
+                               asp-page="/MedicalRecordPages/Details"
+                               asp-route-id="@Model.MedicalRecordId">
+
+                                <span class="clinic-action-title">
+                                    Open Medical Record
+                                </span>
+
+                                <span class="clinic-action-description">
+                                    View consultation history
+                                </span>
+
+                            </a>
+
+
+                            <a class="clinic-action"
+                               asp-page="/VitalSignLogPages/Create"
+                               asp-route-medicalRecordId="@Model.MedicalRecordId">
+
+                                <span class="clinic-action-title">
+                                    Record Vital Signs
+                                </span>
+
+                                <span class="clinic-action-description">
+                                    Add a new measurement
+                                </span>
+
+                            </a>
+
+
+                            <a class="clinic-action"
+                               asp-page="/VitalSignLogPages/Index"
+                               asp-route-medicalRecordId="@Model.MedicalRecordId">
+
+                                <span class="clinic-action-title">
+                                    View Vital History
+                                </span>
+
+                                <span class="clinic-action-description">
+                                    Review previous readings
+                                </span>
+
+                            </a>
+
+                        </div>
+                    }
+                    else
+                    {
+                        <a class="clinic-action"
+                           asp-page="/MedicalRecordPages/Create"
+                           asp-route-studentId="@Model.Student.StudentId">
+
+                            <span class="clinic-action-title">
+                                Start Consultation
+                            </span>
+
+                            <span class="clinic-action-description">
+                                Create the student's first clinic record
+                            </span>
+
+                        </a>
+                    }
+
                 </div>
-            }
 
-            @if (Model.StudentNotFound)
-            {
-                <div class="alert alert-warning mt-3">
+            </div>
+        }
 
-                    <h5 class="mb-2">
-                        ⚠️ Student Not Found
-                    </h5>
 
-                    <p class="mb-3">
-                        No student was found using that Student Number.
-                        You can register the student and continue with clinic care.
-                    </p>
+        @if (Model.StudentNotFound)
+        {
+            <div class="not-found">
 
-                    <a asp-page="/StudentPages/Create"
-                       class="btn btn-primary">
-                        ➕ Add New Student
-                    </a>
-
+                <div class="not-found-title">
+                    Student Not Found
                 </div>
-            }
 
-        </div>
+                <div class="not-found-text">
+                    No student was found using that Student Number or name.
+                    You can register the student and continue with clinic care.
+                </div>
+
+                <a asp-page="/StudentPages/Create"
+                   class="btn btn-sm btn-outline-warning">
+                    Add New Student
+                </a>
+
+            </div>
+        }
 
     </div>
 

@@ -5,65 +5,309 @@
     ViewData["Title"] = "Edit Medical Record";
 }
 
-<div class="container-xl mt-4">
+<style>
+    .edit-header {
+        margin-bottom: 24px;
+    }
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    .edit-title {
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: #1e3a5f;
+        margin-bottom: 5px;
+        position: relative;
+        padding-left: 14px;
+    }
+
+    .edit-title::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 4px;
+        bottom: 4px;
+        width: 4px;
+        border-radius: 3px;
+        background: #2563eb;
+    }
+
+    .edit-subtitle {
+        color: #64748b;
+        font-size: .88rem;
+        margin: 0;
+    }
+
+    .edit-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .edit-actions .btn {
+        font-size: .75rem;
+    }
+
+    .record-panel {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 18px;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .03);
+    }
+
+    .record-panel-header {
+        padding: 16px 20px;
+        background: #fbfcfe;
+        border-bottom: 1px solid #e2e6eb;
+        border-left: 3px solid #2563eb;
+    }
+
+    .record-panel-header.treatment {
+        border-left-color: #64748b;
+    }
+
+    .record-panel-header.notes {
+        border-left-color: #475569;
+    }
+
+    .record-panel-title {
+        margin: 0;
+        color: #1f2933;
+        font-size: .95rem;
+        font-weight: 600;
+    }
+
+    .record-panel-description {
+        margin: 3px 0 0;
+        color: #94a3b8;
+        font-size: .74rem;
+    }
+
+    .record-panel-body {
+        padding: 20px;
+    }
+
+    .patient-summary {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .patient-summary-item {
+        padding: 13px 14px;
+        background: #f8fafc;
+        border: 1px solid #e2e6eb;
+        border-radius: 6px;
+    }
+
+    .patient-summary-label {
+        color: #64748b;
+        font-size: .68rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        margin-bottom: 5px;
+    }
+
+    .patient-summary-value {
+        color: #334155;
+        font-size: .8rem;
+        font-weight: 500;
+        word-break: break-word;
+    }
+
+    .form-label {
+        color: #475569;
+        font-size: .75rem;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .form-control {
+        font-size: .8rem;
+        border-color: #d9dee5;
+    }
+
+    .form-control:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 .15rem rgba(37, 99, 235, .10);
+    }
+
+    textarea.form-control {
+        resize: vertical;
+    }
+
+    .validation-summary {
+        margin-bottom: 18px;
+    }
+
+    .edit-footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 22px;
+        margin-bottom: 30px;
+    }
+
+    .edit-footer .btn {
+        font-size: .78rem;
+    }
+
+    @@media (max-width: 767.98px) {
+
+        .patient-summary {
+            grid-template-columns: 1fr;
+        }
+
+        .edit-actions {
+            width: 100%;
+        }
+
+        .edit-actions .btn {
+            width: 100%;
+        }
+
+        .edit-footer {
+            flex-direction: column;
+        }
+
+        .edit-footer .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+
+<!-- Header -->
+
+<div class="edit-header">
+
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
 
         <div>
 
-            <h2 class="fw-bold mb-1">
-                ✏️ Edit Consultation
-            </h2>
+            <h1 class="edit-title">
+                Edit Consultation
+            </h1>
 
-            <p class="text-muted mb-0">
-                Update the patient's consultation details.
+            <p class="edit-subtitle">
+                Update the patient's consultation and clinical information.
             </p>
 
         </div>
 
-        <a asp-page="./Details"
-           asp-route-id="@Model.MedicalRecord.MedicalRecordId"
-           class="btn btn-outline-secondary">
-            ← Back to Medical Record
-        </a>
+        <div class="edit-actions">
+
+            <a asp-page="./Details"
+               asp-route-id="@Model.MedicalRecord.MedicalRecordId"
+               class="btn btn-outline-secondary">
+                Back to Medical Record
+            </a>
+
+        </div>
 
     </div>
 
-    <div class="card border-primary">
+</div>
 
-        <div class="card-body">
 
-        <form method="post">
+<form method="post">
 
-            <div asp-validation-summary="ModelOnly"
-                 class="text-danger mb-3">
-            </div>
+    <div asp-validation-summary="ModelOnly"
+         class="text-danger validation-summary">
+    </div>
 
-            <input type="hidden"
-                   asp-for="MedicalRecord.MedicalRecordId" />
-
-            <input type="hidden"
-                   asp-for="MedicalRecord.CreatedAt" />
-
-            <div class="row g-3">
-
-                <div class="col-md-6">
-
-    <label class="form-label">
-        Patient
-    </label>
-
-    <input type="text"
-           class="form-control"
-           value="@(Model.MedicalRecord.StudentId.HasValue
-               ? Model.StudentNumber + " - " + Model.StudentName
-               : Model.CommunityPatientName + " - " + Model.CommunityPatientIdentifier)"
-           readonly />
 
     <input type="hidden"
-           asp-for="MedicalRecord.StudentId" />
+           asp-for="MedicalRecord.MedicalRecordId" />
 
-</div>
+    <input type="hidden"
+           asp-for="MedicalRecord.CreatedAt" />
+
+
+    <!-- Patient Information -->
+
+    <div class="record-panel">
+
+        <div class="record-panel-header">
+
+            <h2 class="record-panel-title">
+                Patient Information
+            </h2>
+
+            <p class="record-panel-description">
+                Patient information associated with this medical record.
+            </p>
+
+        </div>
+
+
+        <div class="record-panel-body">
+
+            <div class="patient-summary">
+
+                <div class="patient-summary-item">
+
+                    <div class="patient-summary-label">
+                        Patient
+                    </div>
+
+                    <div class="patient-summary-value">
+                        @(Model.MedicalRecord.StudentId.HasValue
+                            ? Model.StudentNumber + " - " + Model.StudentName
+                            : Model.CommunityPatientName + " - " + Model.CommunityPatientIdentifier)
+                    </div>
+
+                </div>
+
+
+                <div class="patient-summary-item">
+
+                    <div class="patient-summary-label">
+                        Patient Type
+                    </div>
+
+                    <div class="patient-summary-value">
+
+                        @(Model.MedicalRecord.StudentId.HasValue
+                            ? "Student"
+                            : "Community Patient")
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <input type="hidden"
+                   asp-for="MedicalRecord.StudentId" />
+
+        </div>
+
+    </div>
+
+
+    <!-- Consultation -->
+
+    <div class="record-panel">
+
+        <div class="record-panel-header">
+
+            <h2 class="record-panel-title">
+                Consultation
+            </h2>
+
+            <p class="record-panel-description">
+                Update the reason for the visit and clinical assessment.
+            </p>
+
+        </div>
+
+
+        <div class="record-panel-body">
+
+            <div class="row g-3">
 
                 <div class="col-md-6">
 
@@ -77,61 +321,96 @@
                            type="date" />
 
                     <span asp-validation-for="MedicalRecord.VisitDate"
-                          class="text-danger">
+                          class="text-danger small">
                     </span>
 
                 </div>
 
+
                 <div class="col-md-6">
+
+                    <label asp-for="MedicalRecord.PainScale"
+                           class="form-label">
+                        Pain Scale (0–10)
+                    </label>
+
+                    <input asp-for="MedicalRecord.PainScale"
+                           class="form-control"
+                           type="number"
+                           min="0"
+                           max="10" />
+
+                    <span asp-validation-for="MedicalRecord.PainScale"
+                          class="text-danger small">
+                    </span>
+
+                </div>
+
+
+                <div class="col-12">
 
                     <label asp-for="MedicalRecord.ChiefComplaint"
                            class="form-label">
                         Chief Complaint
                     </label>
 
-                    <input asp-for="MedicalRecord.ChiefComplaint"
-                           class="form-control" />
+                    <textarea asp-for="MedicalRecord.ChiefComplaint"
+                              class="form-control"
+                              rows="3"
+                              placeholder="Describe the patient's main complaint or reason for consultation."></textarea>
 
                     <span asp-validation-for="MedicalRecord.ChiefComplaint"
-                          class="text-danger">
+                          class="text-danger small">
                     </span>
 
                 </div>
 
-                    <div class="col-md-6">
 
-                        <label asp-for="MedicalRecord.PainScale"
-                               class="form-label">
-                            Pain Scale (0–10)
-                        </label>
-
-                        <input asp-for="MedicalRecord.PainScale"
-                               class="form-control"
-                               type="number"
-                               min="0"
-                               max="10" />
-
-                        <span asp-validation-for="MedicalRecord.PainScale"
-                              class="text-danger">
-                        </span>
-
-                    </div>
-
-                <div class="col-md-6">
+                <div class="col-12">
 
                     <label asp-for="MedicalRecord.Diagnosis"
                            class="form-label">
                         Diagnosis
                     </label>
 
-                    <input asp-for="MedicalRecord.Diagnosis"
-                           class="form-control" />
+                    <textarea asp-for="MedicalRecord.Diagnosis"
+                              class="form-control"
+                              rows="3"
+                              placeholder="Enter the clinical diagnosis or assessment."></textarea>
 
                     <span asp-validation-for="MedicalRecord.Diagnosis"
-                          class="text-danger">
+                          class="text-danger small">
                     </span>
 
                 </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Treatment -->
+
+    <div class="record-panel">
+
+        <div class="record-panel-header treatment">
+
+            <h2 class="record-panel-title">
+                Treatment
+            </h2>
+
+            <p class="record-panel-description">
+                Update medications and allergy information.
+            </p>
+
+        </div>
+
+
+        <div class="record-panel-body">
+
+            <div class="row g-3">
 
                 <div class="col-md-6">
 
@@ -140,14 +419,17 @@
                         Medications
                     </label>
 
-                    <input asp-for="MedicalRecord.Medications"
-                           class="form-control" />
+                    <textarea asp-for="MedicalRecord.Medications"
+                              class="form-control"
+                              rows="4"
+                              placeholder="Enter prescribed or administered medications."></textarea>
 
                     <span asp-validation-for="MedicalRecord.Medications"
-                          class="text-danger">
+                          class="text-danger small">
                     </span>
 
                 </div>
+
 
                 <div class="col-md-6">
 
@@ -156,58 +438,81 @@
                         Allergies
                     </label>
 
-                    <input asp-for="MedicalRecord.Allergies"
-                           class="form-control" />
+                    <textarea asp-for="MedicalRecord.Allergies"
+                              class="form-control"
+                              rows="4"
+                              placeholder="Enter known allergies or indicate none if applicable."></textarea>
 
                     <span asp-validation-for="MedicalRecord.Allergies"
-                          class="text-danger">
-                    </span>
-
-                </div>
-
-                <div class="col-12">
-
-                    <label asp-for="MedicalRecord.ClinicalNotes"
-                           class="form-label">
-                        Clinical Notes
-                    </label>
-
-                    <textarea asp-for="MedicalRecord.ClinicalNotes"
-                              class="form-control"
-                              rows="4"></textarea>
-
-                    <span asp-validation-for="MedicalRecord.ClinicalNotes"
-                          class="text-danger">
+                          class="text-danger small">
                     </span>
 
                 </div>
 
             </div>
 
-            <div class="mt-4">
-
-                <button type="submit"
-                        class="btn btn-primary">
-                    💾 Save Changes
-                </button>
-
-                <a asp-page="./Details"
-                   asp-route-id="@Model.MedicalRecord.MedicalRecordId"
-                   class="btn btn-secondary">
-                    Cancel
-                </a>
-
-            </div>
-
-        </form>
+        </div>
 
     </div>
 
-</div>
-</div>
+
+    <!-- Clinical Notes -->
+
+    <div class="record-panel">
+
+        <div class="record-panel-header notes">
+
+            <h2 class="record-panel-title">
+                Clinical Notes
+            </h2>
+
+            <p class="record-panel-description">
+                Update additional clinical observations or notes.
+            </p>
+
+        </div>
+
+
+        <div class="record-panel-body">
+
+            <textarea asp-for="MedicalRecord.ClinicalNotes"
+                      class="form-control"
+                      rows="5"
+                      placeholder="Enter additional clinical observations or notes."></textarea>
+
+            <span asp-validation-for="MedicalRecord.ClinicalNotes"
+                  class="text-danger small">
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- Actions -->
+
+    <div class="edit-footer">
+
+        <button type="submit"
+                class="btn btn-primary">
+            Save Changes
+        </button>
+
+        <a asp-page="./Details"
+           asp-route-id="@Model.MedicalRecord.MedicalRecordId"
+           class="btn btn-outline-secondary">
+            Cancel
+        </a>
+
+    </div>
+
+</form>
+
 
 @section Scripts {
+
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
 }

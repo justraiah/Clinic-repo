@@ -2,129 +2,443 @@
 @model Capstone_Clinic.Pages.VitalSignLogPages.EditModel
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Edit Vital Signs";
 }
 
-<h1>Edit Vital Signs</h1>
+<style>
+    .vital-edit-header {
+        margin-bottom: 24px;
+    }
 
-<p class="text-muted">
-    Update the recorded vital sign information.
-</p>
-<hr />
+    .vital-edit-title {
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: #1e3a5f;
+        margin-bottom: 5px;
+        position: relative;
+        padding-left: 14px;
+    }
 
-<div class="row">
-    <div class="col-md-4">
-        <form method="post">
+    .vital-edit-title::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 4px;
+        bottom: 4px;
+        width: 4px;
+        border-radius: 3px;
+        background: #2563eb;
+    }
 
-            <input type="hidden" asp-for="VitalSignLog.VitalSignLogId" />
-            <input type="hidden" asp-for="VitalSignLog.StaffId" />
+    .vital-edit-subtitle {
+        color: #64748b;
+        font-size: .88rem;
+        margin: 0;
+    }
 
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    .form-panel {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 18px;
+    }
 
-            <div class="mb-3">
-                <label asp-for="VitalSignLog.MedicalRecordId" class="form-label">
-                    Medical Record ID
-                </label>
+    .form-panel-header {
+        padding: 16px 20px;
+        background: #fbfcfe;
+        border-bottom: 1px solid #e2e6eb;
+        border-left: 3px solid #2563eb;
+    }
 
-                <input asp-for="VitalSignLog.MedicalRecordId"
-                       class="form-control"
-                       readonly />
-            </div>
+    .form-panel-title {
+        margin: 0;
+        color: #1f2933;
+        font-size: .95rem;
+        font-weight: 600;
+    }
 
-            <div class="mb-3">
-                <label class="form-label">
-                    Temperature (°C)
-                </label>
+    .form-panel-description {
+        margin: 3px 0 0;
+        color: #94a3b8;
+        font-size: .74rem;
+    }
 
-                <input asp-for="VitalSignLog.Temperature"
-                       class="form-control"
-                       min="30"
-                       max="45"
-                       step="0.1" />
-            </div>
+    .form-panel-body {
+        padding: 20px;
+    }
 
-            <div class="mb-3">
-                <label class="form-label">
-                    Heart Rate (BPM)
-                </label>
+    .measurement-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
 
-                <input asp-for="VitalSignLog.HeartRate"
-                       class="form-control"
-                       min="20"
-                       max="250" />
-            </div>
+    .measurement-field {
+        padding: 15px;
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 7px;
+    }
 
-            <div class="mb-3">
-                <label asp-for="VitalSignLog.RespiratoryRate" class="form-label">
-                    Respiratory Rate (breaths/min)
-                </label>
+    .measurement-field label {
+        color: #475569;
+        font-size: .76rem;
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
 
-                <input asp-for="VitalSignLog.RespiratoryRate"
-                       class="form-control"
-                       type="number"
-                       min="1"
-                       max="100" />
+    .measurement-field .form-control {
+        font-size: .82rem;
+        border-color: #d8dee6;
+    }
 
-                <span asp-validation-for="VitalSignLog.RespiratoryRate"
-                      class="text-danger"></span>
-            </div>
+    .measurement-field .form-control:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 .15rem rgba(37, 99, 235, .10);
+    }
 
-            <div class="mb-3">
-                <label class="form-label">
-                    SpO₂ (%)
-                </label>
+    .record-panel {
+        border-top: 3px solid #64748b;
+    }
 
-                <input asp-for="VitalSignLog.OxygenSaturation"
-                       class="form-control"
-                       min="0"
-                       max="100" />
-            </div>
+    .record-info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
 
-            <label class="form-label">
-                Blood Pressure
-            </label>
+    .record-info {
+        padding: 14px 15px;
+        background: #f8fafc;
+        border: 1px solid #e2e6eb;
+        border-radius: 6px;
+    }
 
-            <div class="row mb-3">
+    .record-label {
+        color: #64748b;
+        font-size: .7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        margin-bottom: 5px;
+    }
 
-                <div class="col">
-                    <input asp-for="VitalSignLog.SystolicBP"
-                           class="form-control"
-                           placeholder="Systolic" />
-                </div>
+    .record-value {
+        color: #334155;
+        font-size: .82rem;
+        font-weight: 500;
+    }
 
-                <div class="col">
-                    <input asp-for="VitalSignLog.DiastolicBP"
-                           class="form-control"
-                           placeholder="Diastolic" />
-                </div>
+    .readonly-note {
+        color: #94a3b8;
+        font-size: .7rem;
+        margin-top: 6px;
+    }
 
-            </div>
+    .form-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 24px;
+    }
 
-            <div class="mb-3">
-                <label class="form-label">
-                    Recorded At
-                </label>
+    .form-actions .btn {
+        font-size: .75rem;
+    }
 
-                <input asp-for="VitalSignLog.RecordedAt"
-                       class="form-control"
-                       readonly />
-            </div>
+    .text-danger.field-validation-error,
+    .validation-summary-errors {
+        font-size: .72rem;
+    }
 
-            <button type="submit"
-                    class="btn btn-warning">
-                Update Vital Signs
-            </button>
+    @@media (max-width: 767.98px) {
+        .measurement-grid,
+        .record-info-grid {
+            grid-template-columns: 1fr;
+        }
 
-            <a asp-page="./Index"
-               asp-route-medicalRecordId="@Model.VitalSignLog.MedicalRecordId"
-               class="btn btn-secondary">
-                Cancel
-            </a>
+        .form-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
 
-        </form>
+
+<!-- Header -->
+
+<div class="vital-edit-header">
+
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+
+        <div>
+
+            <h1 class="vital-edit-title">
+                Edit Vital Signs
+            </h1>
+
+            <p class="vital-edit-subtitle">
+                Update the recorded vital sign information.
+            </p>
+
+        </div>
+
+        <a asp-page="./Index"
+           asp-route-medicalRecordId="@Model.VitalSignLog.MedicalRecordId"
+           class="btn btn-outline-secondary">
+            Back to History
+        </a>
+
     </div>
+
 </div>
 
+
+<form method="post">
+
+    <!-- Hidden identifiers -->
+
+    <input type="hidden"
+           asp-for="VitalSignLog.VitalSignLogId" />
+
+    <input type="hidden"
+           asp-for="VitalSignLog.StaffId" />
+
+
+    <div asp-validation-summary="ModelOnly"
+         class="text-danger mb-3">
+    </div>
+
+
+    <!-- Record Information -->
+
+    <div class="form-panel record-panel">
+
+        <div class="form-panel-header">
+
+            <h2 class="form-panel-title">
+                Record Information
+            </h2>
+
+            <p class="form-panel-description">
+                Identifiers and recording information for this vital-sign record.
+            </p>
+
+        </div>
+
+        <div class="form-panel-body">
+
+            <div class="record-info-grid">
+
+                <div class="record-info">
+
+                    <div class="record-label">
+                        Medical Record ID
+                    </div>
+
+                    <div class="record-value">
+                        @Model.VitalSignLog.MedicalRecordId
+                    </div>
+
+                    <div class="readonly-note">
+                        This value cannot be changed.
+                    </div>
+
+                    <input type="hidden"
+                           asp-for="VitalSignLog.MedicalRecordId" />
+
+                </div>
+
+                <div class="record-info">
+
+                    <div class="record-label">
+                        Recorded At
+                    </div>
+
+                    <div class="record-value">
+                        @Model.VitalSignLog.RecordedAt.ToString("MMMM dd, yyyy hh:mm tt")
+                    </div>
+
+                    <div class="readonly-note">
+                        Original recording time.
+                    </div>
+
+                    <input type="hidden"
+                           asp-for="VitalSignLog.RecordedAt" />
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Vital Measurements -->
+
+    <div class="form-panel">
+
+        <div class="form-panel-header">
+
+            <h2 class="form-panel-title">
+                Vital Measurements
+            </h2>
+
+            <p class="form-panel-description">
+                Update the recorded physiological measurements.
+            </p>
+
+        </div>
+
+        <div class="form-panel-body">
+
+            <div class="measurement-grid">
+
+                <div class="measurement-field">
+
+                    <label asp-for="VitalSignLog.Temperature"
+                           class="form-label">
+                        Temperature (°C)
+                    </label>
+
+                    <input asp-for="VitalSignLog.Temperature"
+                           class="form-control"
+                           min="30"
+                           max="45"
+                           step="0.1" />
+
+                    <span asp-validation-for="VitalSignLog.Temperature"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <div class="measurement-field">
+
+                    <label asp-for="VitalSignLog.HeartRate"
+                           class="form-label">
+                        Heart Rate (BPM)
+                    </label>
+
+                    <input asp-for="VitalSignLog.HeartRate"
+                           class="form-control"
+                           min="20"
+                           max="250" />
+
+                    <span asp-validation-for="VitalSignLog.HeartRate"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <div class="measurement-field">
+
+                    <label asp-for="VitalSignLog.RespiratoryRate"
+                           class="form-label">
+                        Respiratory Rate (breaths/min)
+                    </label>
+
+                    <input asp-for="VitalSignLog.RespiratoryRate"
+                           class="form-control"
+                           type="number"
+                           min="1"
+                           max="100" />
+
+                    <span asp-validation-for="VitalSignLog.RespiratoryRate"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <div class="measurement-field">
+
+                    <label asp-for="VitalSignLog.OxygenSaturation"
+                           class="form-label">
+                        SpO₂ (%)
+                    </label>
+
+                    <input asp-for="VitalSignLog.OxygenSaturation"
+                           class="form-control"
+                           min="0"
+                           max="100" />
+
+                    <span asp-validation-for="VitalSignLog.OxygenSaturation"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <div class="measurement-field">
+
+                    <label asp-for="VitalSignLog.SystolicBP"
+                           class="form-label">
+                        Systolic Pressure (mmHg)
+                    </label>
+
+                    <input asp-for="VitalSignLog.SystolicBP"
+                           class="form-control"
+                           placeholder="e.g. 120" />
+
+                    <span asp-validation-for="VitalSignLog.SystolicBP"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <div class="measurement-field">
+
+                    <label asp-for="VitalSignLog.DiastolicBP"
+                           class="form-label">
+                        Diastolic Pressure (mmHg)
+                    </label>
+
+                    <input asp-for="VitalSignLog.DiastolicBP"
+                           class="form-control"
+                           placeholder="e.g. 80" />
+
+                    <span asp-validation-for="VitalSignLog.DiastolicBP"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Actions -->
+
+    <div class="form-actions">
+
+        <button type="submit"
+                class="btn btn-primary">
+            Update Vital Signs
+        </button>
+
+        <a asp-page="./Index"
+           asp-route-medicalRecordId="@Model.VitalSignLog.MedicalRecordId"
+           class="btn btn-outline-secondary">
+            Cancel
+        </a>
+
+    </div>
+
+</form>
+
+
 @section Scripts {
-    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+
 }

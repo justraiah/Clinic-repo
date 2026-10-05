@@ -55,7 +55,18 @@ public class DeleteModel : PageModel
         if (vitalsignlog != null)
         {
             VitalSignLog = vitalsignlog;
+
+            var relatedAlerts = await _context.Alerts
+                .Where(a => a.VitalLogId == vitalsignlog.VitalSignLogId)
+                .ToListAsync();
+
+            if (relatedAlerts.Count > 0)
+            {
+                _context.Alerts.RemoveRange(relatedAlerts);
+            }
+
             _context.VitalSignLogs.Remove(VitalSignLog);
+
             await _context.SaveChangesAsync();
         }
 

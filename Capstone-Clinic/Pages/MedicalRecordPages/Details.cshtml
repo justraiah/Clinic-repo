@@ -5,6 +5,299 @@
     ViewData["Title"] = "Medical Record";
 }
 
+    <style>
+        .record-header {
+            margin-bottom: 24px;
+        }
+
+        .record-title {
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: #1e3a5f;
+        margin-bottom: 5px;
+        position: relative;
+        padding-left: 14px;
+    }
+
+    .record-title::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 4px;
+        bottom: 4px;
+        width: 4px;
+        border-radius: 3px;
+        background: #2563eb;
+    }
+
+        .record-subtitle {
+            color: #64748b;
+            font-size: .88rem;
+            margin: 0;
+        }
+
+        .record-meta {
+            color: #94a3b8;
+            font-size: .75rem;
+            margin-top: 8px;
+        }
+
+        .record-panel {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 20px;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+    }
+
+        .record-panel-header {
+        padding: 16px 20px;
+        border-bottom: 1px solid #e2e6eb;
+        background: #fbfcfe;
+        border-left: 3px solid #2563eb;
+    }
+
+    .record-panel-title {
+        margin: 0;
+        color: #1f2933;
+        font-size: .95rem;
+        font-weight: 600;
+    }
+
+    .record-panel-description {
+        margin: 3px 0 0;
+        color: #94a3b8;
+        font-size: .74rem;
+    }
+
+    .record-panel-body {
+        padding: 20px;
+    }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .summary-card {
+    background: #ffffff;
+    border: 1px solid #e2e6eb;
+    border-radius: 7px;
+    padding: 17px;
+    border-top: 3px solid #2563eb;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+    }
+
+    .summary-label {
+        color: #64748b;
+        font-size: .72rem;
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
+
+    .summary-value {
+        color: #1f2933;
+        font-size: 1.35rem;
+        font-weight: 600;
+    }
+
+    .summary-value.critical {
+        color: #dc2626;
+    }
+    .summary-card:has(.summary-value.critical) {
+    border-top-color: #dc2626;
+    }
+
+    .summary-value.warning {
+        color: #b45309;
+    }
+
+    .summary-value.normal {
+        color: #15803d;
+    }
+
+    .summary-description {
+        margin-top: 3px;
+        color: #94a3b8;
+        font-size: .68rem;
+    }
+
+    .record-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 20px;
+    }
+
+    .record-actions .btn {
+        font-size: .75rem;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0;
+        border: 1px solid #e2e6eb;
+        border-radius: 7px;
+        overflow: hidden;
+    }
+
+    .info-item {
+        padding: 14px 16px;
+        border-bottom: 1px solid #e2e6eb;
+    }
+
+    .info-item:nth-child(odd) {
+        border-right: 1px solid #e2e6eb;
+    }
+
+    .info-item:nth-last-child(-n+2) {
+        border-bottom: 0;
+    }
+
+    .info-label {
+        color: #64748b;
+        font-size: .7rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .info-value {
+        color: #334155;
+        font-size: .82rem;
+    }
+
+    .vitals-table {
+        margin: 0;
+    }
+
+    .vitals-table thead th,
+    .history-table thead th {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: .69rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        padding: 11px 12px;
+        border-bottom: 1px solid #e2e6eb;
+        white-space: nowrap;
+    }
+
+    .vitals-table tbody td,
+    .history-table tbody td {
+        color: #475569;
+        font-size: .76rem;
+        padding: 12px;
+        border-bottom: 1px solid #eef0f2;
+        vertical-align: middle;
+    }
+
+    .vitals-table tbody tr:last-child td,
+    .history-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .vitals-table tbody tr:hover,
+    .history-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: .65rem;
+        font-weight: 600;
+    }
+
+    .status-critical {
+        color: #991b1b;
+        background: #fee2e2;
+    }
+
+    .status-warning {
+        color: #92400e;
+        background: #fef3c7;
+    }
+
+    .status-normal {
+        color: #166534;
+        background: #dcfce7;
+    }
+
+    .record-field {
+        margin-bottom: 18px;
+    }
+
+    .record-field:last-child {
+        margin-bottom: 0;
+    }
+
+    .record-field-label {
+        display: block;
+        color: #64748b;
+        font-size: .72rem;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .record-field-value {
+        width: 100%;
+        min-height: 42px;
+        padding: 10px 12px;
+        border: 1px solid #e2e6eb;
+        border-radius: 6px;
+        background: #f8fafc;
+        color: #334155;
+        font-size: .8rem;
+        line-height: 1.5;
+    }
+
+    .record-field-value.multiline {
+        min-height: 72px;
+        white-space: pre-wrap;
+    }
+
+    .empty-history {
+        padding: 25px 10px;
+        text-align: center;
+        color: #94a3b8;
+        font-size: .78rem;
+    }
+
+    @@media (max-width: 767.98px) {
+
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .info-item:nth-child(odd) {
+            border-right: 0;
+        }
+
+        .info-item:nth-last-child(-n+2) {
+            border-bottom: 1px solid #e2e6eb;
+        }
+
+        .info-item:last-child {
+            border-bottom: 0;
+        }
+
+        .record-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show mb-4"
@@ -20,182 +313,240 @@
     </div>
 }
 
-<div class="container-xl mt-4">
 
-    <div class="mb-4">
+<!-- Patient Header -->
 
-        <h2 class="fw-bold mb-1">
-            📄 Medical Record
-        </h2>
+<div class="record-header">
 
-        @if (Model.Student != null)
-        {
-            <h4 class="text-primary mb-1">
-                @Model.Student.FullName
-            </h4>
+    <h1 class="record-title">
+        Medical Record
+    </h1>
 
-            <p class="text-muted mb-2">
-                @Model.Student.StudentNumber •
-                @Model.Student.Course •
-                Year @Model.Student.YearLevel
-            </p>
-        }
-        else if (Model.MedicalRecord.ClinicPatient != null)
-        {
-            <h4 class="text-primary mb-1">
-                @Model.MedicalRecord.ClinicPatient.FullName
-            </h4>
-
-            <p class="text-muted mb-2">
-                @Model.MedicalRecord.ClinicPatient.PatientType
+    @if (Model.Student != null)
+    {
+        <p class="record-subtitle">
+            @Model.Student.FullName
+            <span class="text-muted">
+                · @Model.Student.StudentNumber
+                · @Model.Student.Course
+                · Year @Model.Student.YearLevel
+            </span>
+        </p>
+    }
+    else if (Model.MedicalRecord.ClinicPatient != null)
+    {
+        <p class="record-subtitle">
+            @Model.MedicalRecord.ClinicPatient.FullName
+            <span class="text-muted">
+                · @Model.MedicalRecord.ClinicPatient.PatientType
                 @if (!string.IsNullOrWhiteSpace(Model.MedicalRecord.ClinicPatient.Identifier))
                 {
-                    <text> • @Model.MedicalRecord.ClinicPatient.Identifier</text>
+                    <text> · @Model.MedicalRecord.ClinicPatient.Identifier</text>
                 }
-            </p>
+            </span>
+        </p>
+    }
+
+    <div class="record-meta">
+        Last Visit:
+        @Model.MedicalRecord.VisitDate.ToString("MMMM dd, yyyy")
+    </div>
+
+</div>
+
+
+<!-- Record Summary -->
+
+<div class="summary-grid">
+
+    <div class="summary-card">
+
+        <div class="summary-label">
+            Critical Visits
+        </div>
+
+        <div class="summary-value critical">
+            @Model.CriticalVisits
+        </div>
+
+        <div class="summary-description">
+            Visits with critical vital readings
+        </div>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div class="summary-label">
+            Total Vital Records
+        </div>
+
+        <div class="summary-value">
+            @Model.TotalVisits
+        </div>
+
+        <div class="summary-description">
+            Vital-sign measurements recorded
+        </div>
+
+    </div>
+
+
+    <div class="summary-card">
+
+        <div class="summary-label">
+            Latest Status
+        </div>
+
+        @if (Model.LatestStatus == "Critical")
+        {
+            <div class="summary-value critical">
+                Critical
+            </div>
+        }
+        else if (Model.LatestStatus == "Warning")
+        {
+            <div class="summary-value warning">
+                Warning
+            </div>
+        }
+        else if (Model.LatestStatus == "Normal")
+        {
+            <div class="summary-value normal">
+                Normal
+            </div>
+        }
+        else
+        {
+            <div class="summary-value">
+                No Records
+            </div>
         }
 
-        <small class="text-secondary">
-            Last Visit:
-            @Model.MedicalRecord.VisitDate.ToString("MMMM dd, yyyy")
-        </small>
-        <div class="row mt-4 mb-4">
-
-            <div class="col-md-4">
-                <div class="card border-danger shadow-sm">
-                    <div class="card-body text-center">
-
-                        <h2 class="text-danger">
-                            @Model.CriticalVisits
-                        </h2>
-
-                        <h6>Critical Visits</h6>
-
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card border-warning shadow-sm">
-                    <div class="card-body text-center">
-
-                        <h2 class="text-warning">
-                            @Model.TotalVisits
-                        </h2>
-
-                        <h6>Total Vital Records</h6>
-
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card border-success shadow-sm">
-                    <div class="card-body text-center">
-
-                        @if (Model.LatestStatus == "Critical")
-                        {
-                            <h2 class="text-danger">
-                                🔴 Critical
-                            </h2>
-                        }
-                        else if (Model.LatestStatus == "Warning")
-                        {
-                            <h2 class="text-warning">
-                                🟡 Warning
-                            </h2>
-                        }
-                        else if (Model.LatestStatus == "Normal")
-                        {
-                            <h2 class="text-success">
-                                🟢 Normal
-                            </h2>
-                        }
-                        else
-                        {
-                            <h2 class="text-secondary">
-                                No Records
-                            </h2>
-                        }
-
-                        <h6>Latest Status</h6>
-
-                    </div>
-                </div>
-            </div>
-
+        <div class="summary-description">
+            Most recent vital-sign classification
         </div>
 
-        <div class="d-flex flex-wrap gap-3 mt-4 mb-4">
+    </div>
 
-            <a asp-page="./Edit"
-               asp-route-id="@Model.MedicalRecord.MedicalRecordId"
-               class="btn btn-warning px-4">
-                ✏ Edit Record
-            </a>
+</div>
 
-            @if (Model.Student != null)
-            {
-                <a asp-page="./Create"
-                   asp-route-studentId="@Model.Student.StudentId"
-                   class="btn btn-primary px-4">
-                    ➕ New Consultation
-                </a>
-            }
-            else
-            {
-                <a asp-page="./Create"
-                   asp-route-clinicPatientId="@Model.MedicalRecord.ClinicPatientId"
-                   class="btn btn-primary px-4">
-                    ➕ New Consultation
-                </a>
-            }
 
-            <a asp-page="/VitalSignLogPages/Create"
-               asp-route-medicalRecordId="@Model.MedicalRecord.MedicalRecordId"
-               class="btn btn-success px-4">
-                ❤️ Record Vital Signs
-            </a>
+<!-- Actions -->
 
-            <a asp-page="/Student/Search"
-               class="btn btn-outline-secondary px-4">
-                ← Back to Student Lookup
-            </a>
+<div class="record-actions">
 
-        </div>
+    <a asp-page="./Edit"
+       asp-route-id="@Model.MedicalRecord.MedicalRecordId"
+       class="btn btn-outline-secondary">
+        Edit Record
+    </a>
+
+
+    @if (Model.Student != null)
+    {
+        <a asp-page="./Create"
+           asp-route-studentId="@Model.Student.StudentId"
+           class="btn btn-primary">
+            New Consultation
+        </a>
+    }
+    else
+    {
+        <a asp-page="./Create"
+           asp-route-clinicPatientId="@Model.MedicalRecord.ClinicPatientId"
+           class="btn btn-primary">
+            New Consultation
+        </a>
+    }
+
+
+    <a asp-page="/VitalSignLogPages/Create"
+       asp-route-medicalRecordId="@Model.MedicalRecord.MedicalRecordId"
+       class="btn btn-outline-primary">
+        Record Vital Signs
+    </a>
+
+
+    <a asp-page="/Student/Search"
+       class="btn btn-outline-secondary">
+        Back to Student Lookup
+    </a>
+
+</div>
+
+
+<!-- Patient Information -->
+
+<div class="record-panel">
+
+    <div class="record-panel-header">
+
+        <h2 class="record-panel-title">
+            Patient Information
+        </h2>
+
+        <p class="record-panel-description">
+            Registered patient information associated with this medical record.
+        </p>
+
+    </div>
+
+
+    <div class="record-panel-body">
 
         @if (Model.Student != null)
         {
-            <div class="card border-primary mb-4">
+            <div class="info-grid">
 
-                <div class="card-header bg-primary text-white">
-                    👤 Student Information
+                <div class="info-item">
+
+                    <div class="info-label">
+                        Student Number
+                    </div>
+
+                    <div class="info-value">
+                        @Model.Student.StudentNumber
+                    </div>
+
                 </div>
 
-                <div class="card-body">
 
-                    <div class="row">
+                <div class="info-item">
 
-                        <div class="col-md-6 mb-3">
-                            <strong>Student Number</strong><br />
-                            @Model.Student.StudentNumber
-                        </div>
+                    <div class="info-label">
+                        Age
+                    </div>
 
-                        <div class="col-md-6 mb-3">
-                            <strong>Age</strong><br />
-                            @Model.StudentAge years old
-                        </div>
+                    <div class="info-value">
+                        @Model.StudentAge years old
+                    </div>
 
-                        <div class="col-md-6">
-                            <strong>Course</strong><br />
-                            @Model.Student.Course
-                        </div>
+                </div>
 
-                        <div class="col-md-6">
-                            <strong>Year Level</strong><br />
-                            @Model.Student.YearLevel
-                        </div>
 
+                <div class="info-item">
+
+                    <div class="info-label">
+                        Course
+                    </div>
+
+                    <div class="info-value">
+                        @Model.Student.Course
+                    </div>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <div class="info-label">
+                        Year Level
+                    </div>
+
+                    <div class="info-value">
+                        @Model.Student.YearLevel
                     </div>
 
                 </div>
@@ -204,312 +555,440 @@
         }
         else if (Model.MedicalRecord.ClinicPatient != null)
         {
-            <div class="card border-primary mb-4">
+            <div class="info-grid">
 
-                <div class="card-header bg-primary text-white">
-                    👤 Community Patient Information
+                <div class="info-item">
+
+                    <div class="info-label">
+                        Patient Type
+                    </div>
+
+                    <div class="info-value">
+                        @Model.MedicalRecord.ClinicPatient.PatientType
+                    </div>
+
                 </div>
 
-                <div class="card-body">
 
-                    <div class="row">
+                <div class="info-item">
 
-                        <div class="col-md-6 mb-3">
-                            <strong>Patient Type</strong><br />
-                            @Model.MedicalRecord.ClinicPatient.PatientType
-                        </div>
+                    <div class="info-label">
+                        Full Name
+                    </div>
 
-                        <div class="col-md-6 mb-3">
-                            <strong>Full Name</strong><br />
-                            @Model.MedicalRecord.ClinicPatient.FullName
-                        </div>
+                    <div class="info-value">
+                        @Model.MedicalRecord.ClinicPatient.FullName
+                    </div>
 
-                        <div class="col-md-6 mb-3">
-                            <strong>Identifier</strong><br />
-                            @(string.IsNullOrWhiteSpace(Model.MedicalRecord.ClinicPatient.Identifier)
-                                ? "—"
-                                : Model.MedicalRecord.ClinicPatient.Identifier)
-                        </div>
+                </div>
 
-                        <div class="col-md-6">
-                            <strong>Date of Birth</strong><br />
-                            @(Model.MedicalRecord.ClinicPatient.DateOfBirth.HasValue
-                                ? Model.MedicalRecord.ClinicPatient.DateOfBirth.Value.ToString("MMMM dd, yyyy")
-                                : "—")
-                        </div>
 
+                <div class="info-item">
+
+                    <div class="info-label">
+                        Identifier
+                    </div>
+
+                    <div class="info-value">
+                        @(string.IsNullOrWhiteSpace(Model.MedicalRecord.ClinicPatient.Identifier)
+                            ? "—"
+                            : Model.MedicalRecord.ClinicPatient.Identifier)
+                    </div>
+
+                </div>
+
+
+                <div class="info-item">
+
+                    <div class="info-label">
+                        Date of Birth
+                    </div>
+
+                    <div class="info-value">
+                        @(Model.MedicalRecord.ClinicPatient.DateOfBirth.HasValue
+                            ? Model.MedicalRecord.ClinicPatient.DateOfBirth.Value.ToString("MMMM dd, yyyy")
+                            : "—")
                     </div>
 
                 </div>
 
             </div>
         }
-        <div class="card border-danger mb-4">
-
-            <div class="card-header bg-danger text-white">
-                ❤️ Recent Vital Signs
-            </div>
-
-            <div class="card-body">
-
-                @if (Model.RecentVitalSigns.Any())
-                {
-                    <table class="table table-hover align-middle">
-
-                        <thead>
-
-                            <tr>
-                                <th>Date</th>
-                                <th>Temp</th>
-                                <th>HR</th>
-                                <th>RR</th>
-                                <th>SpO₂</th>
-                                <th>Blood Pressure</th>
-                                <th>Status</th>
-                            </tr>
-
-                        </thead>
-
-                        <tbody>
-
-                            @foreach (var vital in Model.RecentVitalSigns)
-                            {
-                                <tr>
-
-                                    <td>
-                                        @vital.RecordedAt.ToString("MMMM dd, yyyy")
-                                    </td>
-
-                                    <td>
-                                        @vital.Temperature °C
-                                    </td>
-
-                                    <td>
-                                        @vital.HeartRate BPM
-                                    </td>
-                                    
-                                    <td>
-                                        @vital.RespiratoryRate breaths/min
-
-                                    <td>
-                                        @vital.OxygenSaturation %
-                                    </td>
-
-                                    <td>
-                                        @vital.SystolicBP/@vital.DiastolicBP
-                                    </td>
-                                    <td>
-                                        @if (vital.Status == "Critical")
-                                        {
-                                            <span class="badge bg-danger">🔴 Critical</span>
-                                        }
-                                        else if (vital.Status == "Warning")
-                                        {
-                                            <span class="badge bg-warning text-dark">🟡 Warning</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-success">🟢 Normal</span>
-                                        }
-                                    </td>
-                                </tr>
-                            }
-
-                        </tbody>
-
-                    </table>
-
-                    <a asp-page="/VitalSignLogPages/Index"
-                       asp-route-medicalRecordId="@Model.MedicalRecord.MedicalRecordId"
-                       class="btn btn-outline-danger">
-                        📈 View Full History
-                    </a>
-                }
-                else
-                {
-                    <p class="text-muted mb-0">
-                        No vital sign records available.
-                    </p>
-                }
-
-            </div>
-
-        </div>
-
-    <div class="card border-success mb-4">
-
-        <div class="card-header bg-success text-white">
-            🏥 Consultation
-        </div>
-
-        <div class="card-body">
-
-            <div class="mb-3">
-                <label class="form-label fw-semibold">
-                    Visit Date
-                </label>
-
-                <input class="form-control"
-                       value="@Model.MedicalRecord.VisitDate.ToString("MMMM dd, yyyy")"
-                       readonly />
-            </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">
-                        Chief Complaint
-                    </label>
-
-                    <textarea class="form-control"
-                              rows="2"
-                              readonly>@Model.MedicalRecord.ChiefComplaint</textarea>
-                </div>
-
-                <div class="mb-3">
-                    <label class="form-label fw-semibold">
-                        Pain Scale (0–10)
-                    </label>
-
-                    <input class="form-control"
-                           value="@Model.MedicalRecord.PainScale"
-                           readonly />
-                </div>
-
-                <div class="mb-0">
-                <label class="form-label fw-semibold">
-                    Diagnosis
-                </label>
-
-                <textarea class="form-control"
-                          rows="2"
-                          readonly>@Model.MedicalRecord.Diagnosis</textarea>
-            </div>
-
-        </div>
-
-    </div>  
-
-    <div class="card border-warning mb-4">
-
-        <div class="card-header bg-warning text-dark">
-            💊 Treatment
-        </div>
-
-        <div class="card-body">
-
-            <div class="mb-3">
-                <label class="form-label fw-semibold">
-                    Medications
-                </label>
-
-                <textarea class="form-control"
-                          rows="3"
-                          readonly>@Model.MedicalRecord.Medications</textarea>
-            </div>
-
-            <div class="mb-0">
-                <label class="form-label fw-semibold">
-                    Allergies
-                </label>
-
-                <textarea class="form-control"
-                          rows="2"
-                          readonly>@Model.MedicalRecord.Allergies</textarea>
-            </div>
-
-        </div>
 
     </div>
-    <div class="card border-secondary mb-4">
 
-        <div class="card-header bg-secondary text-white">
-            📝 Clinical Notes
-        </div>
-
-        <div class="card-body">
-
-            <textarea class="form-control"
-                      rows="6"
-                      readonly>@Model.MedicalRecord.ClinicalNotes</textarea>
-
-        </div>
-
-    </div>
-        <div class="card border-info mb-4">
-
-            <div class="card-header bg-info text-white">
-                📚 Consultation History
-            </div>
-
-            <div class="card-body">
-
-                @if (Model.ConsultationHistory.Any())
-                {
-                    <table class="table table-hover align-middle">
-
-                        <thead>
-
-                            <tr>
-                                <th>Visit Date</th>
-                                <th>Chief Complaint</th>
-                                <th>Diagnosis</th>
-                                <th></th>
-                            </tr>
-
-                        </thead>
-
-                        <tbody>
-
-                            @foreach (var consultation in Model.ConsultationHistory)
-                            {
-                                <tr>
-
-                                    <td>
-                                        @consultation.VisitDate.ToString("MMMM dd, yyyy")
-                                    </td>
-
-                                    <td>
-                                        @consultation.ChiefComplaint
-                                    </td>
-
-                                    <td>
-                                        @consultation.Diagnosis
-                                    </td>
-
-                                    <td class="text-end">
-
-                                        @if (consultation.MedicalRecordId != Model.MedicalRecord.MedicalRecordId)
-                                        {
-                                            <a asp-page="./Details"
-                                               asp-route-id="@consultation.MedicalRecordId"
-                                               class="btn btn-sm btn-outline-primary">
-                                                Open
-                                            </a>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-secondary">
-                                                Current
-                                            </span>
-                                        }
-
-                                    </td>
-
-                                </tr>
-                            }
-
-                        </tbody>
-
-                    </table>
-                }
-                else
-                {
-                    <p class="text-muted mb-0">
-                        No previous consultations.
-                    </p>
-                }
-
-            </div>
-
-        </div>
 </div>
+
+
+<!-- Recent Vital Signs -->
+
+<div class="record-panel">
+
+    <div class="record-panel-header">
+
+        <h2 class="record-panel-title">
+            Recent Vital Signs
+        </h2>
+
+        <p class="record-panel-description">
+            Latest vital-sign measurements recorded for this patient.
+        </p>
+
+    </div>
+
+
+    <div class="record-panel-body p-0">
+
+        @if (Model.RecentVitalSigns.Any())
+        {
+            <div class="table-responsive">
+
+                <table class="table vitals-table align-middle">
+
+                    <thead>
+
+                        <tr>
+                            <th>Date</th>
+                            <th>Temp</th>
+                            <th>HR</th>
+                            <th>RR</th>
+                            <th>SpO₂</th>
+                            <th>Blood Pressure</th>
+                            <th>Status</th>
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @foreach (var vital in Model.RecentVitalSigns)
+                        {
+                            <tr>
+
+                                <td>
+                                    @vital.RecordedAt.ToString("MMM dd, yyyy")
+                                </td>
+
+                                <td>
+                                    @vital.Temperature °C
+                                </td>
+
+                                <td>
+                                    @vital.HeartRate BPM
+                                </td>
+
+                                <td>
+                                    @vital.RespiratoryRate breaths/min
+                                </td>
+
+                                <td>
+                                    @vital.OxygenSaturation %
+                                </td>
+
+                                <td>
+                                    @vital.SystolicBP/@vital.DiastolicBP
+                                </td>
+
+                                <td>
+
+                                    @if (vital.Status == "Critical")
+                                    {
+                                        <span class="status-badge status-critical">
+                                            Critical
+                                        </span>
+                                    }
+                                    else if (vital.Status == "Warning")
+                                    {
+                                        <span class="status-badge status-warning">
+                                            Warning
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge status-normal">
+                                            Normal
+                                        </span>
+                                    }
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+
+            <div class="p-3 border-top">
+
+                <a asp-page="/VitalSignLogPages/Index"
+                   asp-route-medicalRecordId="@Model.MedicalRecord.MedicalRecordId"
+                   class="btn btn-sm btn-outline-primary">
+                    View Full Vital History
+                </a>
+
+            </div>
+
+        }
+        else
+        {
+            <div class="empty-history">
+                No vital sign records available.
+            </div>
+        }
+
+    </div>
+
+</div>
+
+
+<!-- Consultation -->
+
+<div class="record-panel">
+
+    <div class="record-panel-header">
+
+        <h2 class="record-panel-title">
+            Consultation
+        </h2>
+
+        <p class="record-panel-description">
+            Clinical information recorded during this visit.
+        </p>
+
+    </div>
+
+
+    <div class="record-panel-body">
+
+        <div class="record-field">
+
+            <span class="record-field-label">
+                Visit Date
+            </span>
+
+            <div class="record-field-value">
+                @Model.MedicalRecord.VisitDate.ToString("MMMM dd, yyyy")
+            </div>
+
+        </div>
+
+
+        <div class="record-field">
+
+            <span class="record-field-label">
+                Chief Complaint
+            </span>
+
+            <div class="record-field-value multiline">
+                @Model.MedicalRecord.ChiefComplaint
+            </div>
+
+        </div>
+
+
+        <div class="record-field">
+
+            <span class="record-field-label">
+                Pain Scale (0–10)
+            </span>
+
+            <div class="record-field-value">
+                @Model.MedicalRecord.PainScale
+            </div>
+
+        </div>
+
+
+        <div class="record-field">
+
+            <span class="record-field-label">
+                Diagnosis
+            </span>
+
+            <div class="record-field-value multiline">
+                @Model.MedicalRecord.Diagnosis
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Treatment -->
+
+<div class="record-panel">
+
+    <div class="record-panel-header">
+
+        <h2 class="record-panel-title">
+            Treatment
+        </h2>
+
+        <p class="record-panel-description">
+            Medications and allergy information associated with the visit.
+        </p>
+
+    </div>
+
+
+    <div class="record-panel-body">
+
+        <div class="record-field">
+
+            <span class="record-field-label">
+                Medications
+            </span>
+
+            <div class="record-field-value multiline">
+                @Model.MedicalRecord.Medications
+            </div>
+
+        </div>
+
+
+        <div class="record-field">
+
+            <span class="record-field-label">
+                Allergies
+            </span>
+
+            <div class="record-field-value multiline">
+                @Model.MedicalRecord.Allergies
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Clinical Notes -->
+
+<div class="record-panel">
+
+    <div class="record-panel-header">
+
+        <h2 class="record-panel-title">
+            Clinical Notes
+        </h2>
+
+        <p class="record-panel-description">
+            Additional observations and notes recorded by clinic staff.
+        </p>
+
+    </div>
+
+
+    <div class="record-panel-body">
+
+        <div class="record-field-value multiline">
+            @Model.MedicalRecord.ClinicalNotes
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Consultation History -->
+
+<div class="record-panel">
+
+    <div class="record-panel-header">
+
+        <h2 class="record-panel-title">
+            Consultation History
+        </h2>
+
+        <p class="record-panel-description">
+            Previous consultations associated with this patient.
+        </p>
+
+    </div>
+
+
+    <div class="record-panel-body p-0">
+
+        @if (Model.ConsultationHistory.Any())
+        {
+            <div class="table-responsive">
+
+                <table class="table history-table align-middle">
+
+                    <thead>
+
+                        <tr>
+                            <th>Visit Date</th>
+                            <th>Chief Complaint</th>
+                            <th>Diagnosis</th>
+                            <th class="text-end">Action</th>
+                        </tr>
+
+                    </thead>
+
+
+                    <tbody>
+
+                        @foreach (var consultation in Model.ConsultationHistory)
+                        {
+                            <tr>
+
+                                <td>
+                                    @consultation.VisitDate.ToString("MMM dd, yyyy")
+                                </td>
+
+                                <td>
+                                    @consultation.ChiefComplaint
+                                </td>
+
+                                <td>
+                                    @consultation.Diagnosis
+                                </td>
+
+                                <td class="text-end">
+
+                                    @if (consultation.MedicalRecordId != Model.MedicalRecord.MedicalRecordId)
+                                    {
+                                        <a asp-page="./Details"
+                                           asp-route-id="@consultation.MedicalRecordId"
+                                           class="btn btn-sm btn-outline-primary">
+                                            Open
+                                        </a>
+                                    }
+                                    else
+                                    {
+                                        <span class="status-badge"
+                                              style="background:#f1f5f9;color:#475569;">
+                                            Current
+                                        </span>
+                                    }
+
+                                </td>
+
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+
+            </div>
+        }
+        else
+        {
+            <div class="empty-history">
+                No previous consultations.
+            </div>
+        }
+
+    </div>
+
 </div>

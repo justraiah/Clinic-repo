@@ -5,61 +5,263 @@
     ViewData["Title"] = "Delete Vital Sign Record";
 }
 
-<h1>Delete Vital Sign Record</h1>
+<style>
+    .delete-header {
+        margin-bottom: 24px;
+    }
 
-<p class="text-muted">
-    Review the information below before permanently deleting this record.
-</p>
+    .delete-title {
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: #1e3a5f;
+        margin-bottom: 5px;
+        position: relative;
+        padding-left: 14px;
+    }
 
-<hr/>
-<div class="card border-danger shadow-sm">
+        .delete-title::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 4px;
+            bottom: 4px;
+            width: 4px;
+            border-radius: 3px;
+            background: #dc2626;
+        }
 
-    <div class="card-header bg-danger text-white">
-        <h4 class="mb-0">Delete Vital Sign Record</h4>
-    </div>
+    .delete-subtitle {
+        color: #64748b;
+        font-size: .88rem;
+        margin: 0;
+    }
 
-    <div class="card-body">
+    .delete-panel {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 18px;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .03);
+    }
 
-        <p class="text-danger">
-            < <strong>⚠ Warning!</strong><br />
+    .delete-panel-header {
+        padding: 16px 20px;
+        background: #fbfcfe;
+        border-bottom: 1px solid #e2e6eb;
+        border-left: 3px solid #dc2626;
+    }
 
-                You are about to permanently delete this vital sign record.
-                This action cannot be undone.
+    .delete-panel-title {
+        margin: 0;
+        color: #1f2933;
+        font-size: .95rem;
+        font-weight: 600;
+    }
+
+    .delete-panel-description {
+        margin: 3px 0 0;
+        color: #94a3b8;
+        font-size: .74rem;
+    }
+
+    .delete-panel-body {
+        padding: 20px;
+    }
+
+    .warning-box {
+        padding: 14px 16px;
+        margin-bottom: 20px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        border-left: 4px solid #d97706;
+        border-radius: 6px;
+        color: #7c2d12;
+        font-size: .82rem;
+        line-height: 1.5;
+    }
+
+    .vital-summary {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 22px;
+    }
+
+    .vital-summary-item {
+        padding: 14px;
+        background: #f8fafc;
+        border: 1px solid #e2e6eb;
+        border-radius: 6px;
+    }
+
+    .vital-summary-label {
+        color: #64748b;
+        font-size: .68rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        margin-bottom: 5px;
+    }
+
+    .vital-summary-value {
+        color: #334155;
+        font-size: .84rem;
+        font-weight: 500;
+        word-break: break-word;
+    }
+
+    .delete-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+        .delete-actions .btn {
+            font-size: .78rem;
+        }
+
+    @@media (max-width: 767.98px) {
+
+        .vital-summary {
+            grid-template-columns: 1fr;
+        }
+
+        .delete-actions {
+            flex-direction: column;
+        }
+
+            .delete-actions .btn {
+                width: 100%;
+            }
+    }
+</style>
+
+
+<!-- Header -->
+
+<div class="delete-header">
+
+    <h1 class="delete-title">
+        Delete Vital Sign Record
+    </h1>
+
+    <p class="delete-subtitle">
+        Review the vital sign information before permanently deleting this record.
+    </p>
+
+</div>
+
+
+<!-- Confirmation -->
+
+<div class="delete-panel">
+
+    <div class="delete-panel-header">
+
+        <h2 class="delete-panel-title">
+            Confirm Deletion
+        </h2>
+
+        <p class="delete-panel-description">
+            This action cannot be undone.
         </p>
 
-        <dl class="row">
+    </div>
 
-            <dt class="col-sm-4">Medical Record ID</dt>
-            <dd class="col-sm-8">
-                @Model.VitalSignLog.MedicalRecordId
-            </dd>
 
-            <dt class="col-sm-4">Temperature</dt>
-            <dd class="col-sm-8">
-                @($"{Model.VitalSignLog.Temperature:F1} °C")
-            </dd>
+    <div class="delete-panel-body">
 
-            <dt class="col-sm-4">Heart Rate</dt>
-            <dd class="col-sm-8">
-                @($"{Model.VitalSignLog.HeartRate} BPM")
-            </dd>
+        <div class="warning-box">
 
-            <dt class="col-sm-4">SpO₂</dt>
-            <dd class="col-sm-8">
-                @($"{Model.VitalSignLog.OxygenSaturation}%")
-            </dd>
+            <strong>Warning:</strong>
+            You are about to permanently delete this vital sign record.
+            Confirm that this is the correct record before continuing.
 
-            <dt class="col-sm-4">Blood Pressure</dt>
-            <dd class="col-sm-8">
-                @($"{Model.VitalSignLog.SystolicBP}/{Model.VitalSignLog.DiastolicBP} mmHg")
-            </dd>
+        </div>
 
-            <dt class="col-sm-4">Recorded At</dt>
-            <dd class="col-sm-8">
-                @Model.VitalSignLog.RecordedAt.ToString("MMMM dd, yyyy hh:mm tt")
-            </dd>
 
-        </dl>
+        <div class="vital-summary">
+
+            <div class="vital-summary-item">
+
+                <div class="vital-summary-label">
+                    Medical Record ID
+                </div>
+
+                <div class="vital-summary-value">
+                    @Model.VitalSignLog.MedicalRecordId
+                </div>
+
+            </div>
+
+
+            <div class="vital-summary-item">
+
+                <div class="vital-summary-label">
+                    Temperature
+                </div>
+
+                <div class="vital-summary-value">
+                    @($"{Model.VitalSignLog.Temperature:F1} °C")
+                </div>
+
+            </div>
+
+
+            <div class="vital-summary-item">
+
+                <div class="vital-summary-label">
+                    Heart Rate
+                </div>
+
+                <div class="vital-summary-value">
+                    @($"{Model.VitalSignLog.HeartRate} BPM")
+                </div>
+
+            </div>
+
+
+            <div class="vital-summary-item">
+
+                <div class="vital-summary-label">
+                    SpO₂
+                </div>
+
+                <div class="vital-summary-value">
+                    @($"{Model.VitalSignLog.OxygenSaturation}%")
+                </div>
+
+            </div>
+
+
+            <div class="vital-summary-item">
+
+                <div class="vital-summary-label">
+                    Blood Pressure
+                </div>
+
+                <div class="vital-summary-value">
+                    @($"{Model.VitalSignLog.SystolicBP}/{Model.VitalSignLog.DiastolicBP} mmHg")
+                </div>
+
+            </div>
+
+
+            <div class="vital-summary-item">
+
+                <div class="vital-summary-label">
+                    Recorded At
+                </div>
+
+                <div class="vital-summary-value">
+                    @Model.VitalSignLog.RecordedAt.ToString("MMMM dd, yyyy hh:mm tt")
+                </div>
+
+            </div>
+
+        </div>
+
 
         <form method="post">
 
@@ -69,16 +271,20 @@
             <input type="hidden"
                    asp-for="MedicalRecordId" />
 
+            <div class="delete-actions">
+
                 <button type="submit"
                         class="btn btn-danger">
-                    🗑 Delete Vital Sign Record
+                    Delete Vital Sign Record
                 </button>
 
                 <a asp-page="./Index"
                    asp-route-medicalRecordId="@Model.MedicalRecordId"
-                   class="btn btn-outline-secondary ms-2">
+                   class="btn btn-outline-secondary">
                     Cancel
                 </a>
+
+            </div>
 
         </form>
 

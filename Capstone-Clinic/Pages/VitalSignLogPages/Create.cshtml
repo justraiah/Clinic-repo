@@ -5,279 +5,601 @@
     ViewData["Title"] = "Record Vital Signs";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<style>
+    .vital-create-header {
+        margin-bottom: 24px;
+    }
 
-    <div>
-        <h2 class="fw-bold mb-1">
-            ❤️ Record Vital Signs
-        </h2>
+    .vital-create-title {
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: #1e3a5f;
+        margin-bottom: 5px;
+        position: relative;
+        padding-left: 14px;
+    }
 
-        <p class="text-muted mb-0">
-            Record the patient's vital signs during the consultation.
-        </p>
+    .vital-create-title::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 4px;
+        bottom: 4px;
+        width: 4px;
+        border-radius: 3px;
+        background: #2563eb;
+    }
+
+    .vital-create-subtitle {
+        color: #64748b;
+        font-size: .88rem;
+        margin: 0;
+    }
+
+    .form-panel {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 18px;
+    }
+
+    .form-panel-header {
+        padding: 16px 20px;
+        background: #fbfcfe;
+        border-bottom: 1px solid #e2e6eb;
+        border-left: 3px solid #2563eb;
+    }
+
+    .form-panel-title {
+        margin: 0;
+        color: #1f2933;
+        font-size: .95rem;
+        font-weight: 600;
+    }
+
+    .form-panel-description {
+        margin: 3px 0 0;
+        color: #94a3b8;
+        font-size: .74rem;
+    }
+
+    .form-panel-body {
+        padding: 20px;
+    }
+
+    .patient-panel {
+        background: #f8fafc;
+        border: 1px solid #e2e6eb;
+        border-radius: 7px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+
+    .patient-label {
+        color: #64748b;
+        font-size: .7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        margin-bottom: 5px;
+    }
+
+    .patient-value {
+        color: #1e3a5f;
+        font-size: .9rem;
+        font-weight: 600;
+    }
+
+    .measurement-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+
+    .measurement-field {
+        padding: 15px;
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 7px;
+    }
+
+    .measurement-field label {
+        color: #475569;
+        font-size: .76rem;
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
+
+    .measurement-field .form-control {
+        font-size: .82rem;
+        border-color: #d8dee6;
+    }
+
+    .measurement-field .form-control:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 .15rem rgba(37, 99, 235, .10);
+    }
+
+    .sensor-section {
+        border-top: 3px solid #2563eb;
+    }
+
+    .manual-section {
+        border-top: 3px solid #64748b;
+    }
+
+    .sensor-note {
+        color: #64748b;
+        font-size: .74rem;
+        margin-bottom: 14px;
+    }
+
+    .sensor-action {
+        margin-top: 14px;
+    }
+
+    .sensor-action .btn {
+        font-size: .78rem;
+    }
+
+    .manual-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+
+    .manual-grid .full-width {
+        grid-column: 1 / -1;
+    }
+
+    .form-label {
+        color: #475569;
+        font-size: .76rem;
+        font-weight: 600;
+    }
+
+    .form-control {
+        font-size: .82rem;
+        border-color: #d8dee6;
+    }
+
+    .form-control:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 .15rem rgba(37, 99, 235, .10);
+    }
+
+    .text-danger.field-validation-error,
+    .validation-summary-errors {
+        font-size: .72rem;
+    }
+
+    .form-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 20px;
+    }
+
+    .form-actions .btn {
+        font-size: .75rem;
+    }
+
+    .sensor-loading {
+        border: 1px solid #bfdbfe;
+        background: #eff6ff;
+        color: #1e40af;
+        font-size: .76rem;
+    }
+
+    @@media (max-width: 767.98px) {
+        .measurement-grid,
+        .manual-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .manual-grid .full-width {
+            grid-column: auto;
+        }
+
+        .form-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+
+<!-- Header -->
+
+<div class="vital-create-header">
+
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+
+        <div>
+
+            <h1 class="vital-create-title">
+                Record Vital Signs
+            </h1>
+
+            <p class="vital-create-subtitle">
+                Record the patient's vital signs during the consultation.
+            </p>
+
+        </div>
+
+        <a asp-page="/MedicalRecordPages/Details"
+           asp-route-id="@Model.VitalSignLog.MedicalRecordId"
+           class="btn btn-outline-secondary">
+            Back to Medical Record
+        </a>
+
     </div>
 
-    <a asp-page="/MedicalRecordPages/Details"
-       asp-route-id="@Model.VitalSignLog.MedicalRecordId"
-       class="btn btn-outline-secondary">
-        ← Back to Medical Record
-    </a>
-
 </div>
-<div class="row justify-content-center">
-    <div class="col-lg-8">
 
-        <div class="card shadow">
 
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0">
-                    Vital Signs Recording
-                </h4>
-            </div>
+<form method="post"
+      asp-page="/VitalSignLogPages/Create">
 
-            <div class="card-body">
 
-                <form method="post"
-                      asp-page="/VitalSignLogPages/Create">
-            <h5 class="mb-3 text-primary">
-                📡 Sensor Readings
-            </h5>
-                    @if (TempData["SuccessMessage"] != null)
-                    {
-                        <div class="alert alert-success">
-                            @TempData["SuccessMessage"]
-                        </div>
-                    }
+    <!-- Patient Information -->
 
-                    @if (TempData["ErrorMessage"] != null)
-                    {
-                        <div class="alert alert-danger">
-                            @TempData["ErrorMessage"]
-                        </div>
-                    }
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="form-panel">
 
-                    @if (!string.IsNullOrEmpty(Model.StudentName))
-                    {
-                        <div class="card border-primary mb-4">
+        <div class="form-panel-header">
 
-                            <div class="card-header bg-primary text-white">
-                                👤 Patient Information
+            <h2 class="form-panel-title">
+                Patient Information
+            </h2>
+
+            <p class="form-panel-description">
+                Patient associated with this vital-sign record.
+            </p>
+
+        </div>
+
+        <div class="form-panel-body">
+
+            @if (!string.IsNullOrEmpty(Model.StudentName))
+            {
+                <div class="patient-panel">
+
+                    <div class="row g-3">
+
+                        <div class="col-md-5">
+
+                            <div class="patient-label">
+                                Patient Identifier
                             </div>
 
-                            <div class="card-body">
-
-                                <div class="mb-3">
-                                    <label class="form-label fw-semibold">
-                                        Patient Identifier
-                                    </label>
-
-                                    <input class="form-control"
-                                           value="@Model.StudentNumber"
-                                           readonly />
-                                </div>
-
-                                <div class="mb-0">
-                                    <label class="form-label fw-semibold">
-                                        Patient Name
-                                    </label>
-
-                                    <input class="form-control"
-                                           value="@Model.StudentName"
-                                           readonly />
-                                </div>
-
-                                <input type="hidden"
-                                       asp-for="VitalSignLog.MedicalRecordId" />
-
+                            <div class="patient-value">
+                                @Model.StudentNumber
                             </div>
 
                         </div>
-                    }
-                    else
-                    {
-                        <div class="mb-3">
-                            <label asp-for="SelectedStudentId" class="form-label">
-                                Student
-                            </label>
 
-                            <select asp-for="SelectedStudentId"
-                                    asp-items="Model.StudentList"
-                                    class="form-select">
+                        <div class="col-md-7">
 
-                                <option value="">-- Select Student --</option>
+                            <div class="patient-label">
+                                Patient Name
+                            </div>
 
-                            </select>
-
-                            <span asp-validation-for="SelectedStudentId"
-                                  class="text-danger"></span>
-                        </div>
-                    }
-
-            <div class="mb-3">
-                <label asp-for="VitalSignLog.HeartRate" class="form-label">
-                    Heart Rate (BPM)
-                </label>
-                <input asp-for="VitalSignLog.HeartRate"
-                       class="form-control"
-                       @* readonly *@
-                               type="number"
-                               min="30"
-                               max="220"
-                       placeholder="Press 'Read Sensor'" />
-                <span asp-validation-for="VitalSignLog.HeartRate" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
-                <label asp-for="VitalSignLog.OxygenSaturation" class="form-label">
-                    SpO₂ (%)
-                </label>
-                <input asp-for="VitalSignLog.OxygenSaturation"
-                       class="form-control"
-                       @* readonly *@
-                               type="number"
-                               min="70"
-                               max="100"
-                       placeholder="Press 'Read Sensor'" />
-                <span asp-validation-for="VitalSignLog.OxygenSaturation" class="text-danger"></span>
-            </div>
-
-                    <div class="mb-4">
-
-                        <button type="submit"
-                                asp-page-handler="ReadSensor"
-                                class="btn btn-primary w-100"
-                                id="readSensorBtn">
-
-                            📡 Read Heart Rate & SpO₂
-
-                        </button>
-                        <div id="sensorLoading"
-                             class="alert alert-info mt-3 d-none">
-
-                            <div class="d-flex align-items-center">
-
-                                <div class="spinner-border spinner-border-sm me-2"
-                                     role="status">
-                                </div>
-
-                                <div>
-
-                                    <strong>Reading sensor...</strong><br />
-
-                                    Please keep your finger on the sensor.
-
-                                </div>
-
+                            <div class="patient-value">
+                                @Model.StudentName
                             </div>
 
                         </div>
 
                     </div>
 
-            <hr />
+                </div>
 
-            <h5 class="mb-3 text-success">
-                ✍️ Manual Measurements
-            </h5>
+                <input type="hidden"
+                       asp-for="VitalSignLog.MedicalRecordId" />
+            }
+            else
+            {
+                <div class="mb-0">
 
-                    <div class="form-group mb-3">
+                    <label asp-for="SelectedStudentId"
+                           class="form-label">
+                        Student
+                    </label>
 
-                        <label asp-for="VitalSignLog.VisitReason" class="form-label">
-                            Visit Reason
-                        </label>
+                    <select asp-for="SelectedStudentId"
+                            asp-items="Model.StudentList"
+                            class="form-select">
 
-                        <input asp-for="VitalSignLog.VisitReason"
-                               class="form-control"
-                               placeholder="Example: Fever, Headache, Medical Clearance" />
+                        <option value="">
+                            -- Select Student --
+                        </option>
 
-                        <span asp-validation-for="VitalSignLog.VisitReason"
-                              class="text-danger">
-                        </span>
+                    </select>
 
-                    </div>
-            <div class="mb-3">
-                <label asp-for="VitalSignLog.Temperature" class="form-label">
-                    Temperature (°C)
-                </label>
+                    <span asp-validation-for="SelectedStudentId"
+                          class="text-danger">
+                    </span>
 
-                <input asp-for="VitalSignLog.Temperature"
-                       class="form-control" />
+                </div>
+            }
 
-                <span asp-validation-for="VitalSignLog.Temperature"
-                      class="text-danger"></span>
+        </div>
+
+    </div>
+
+
+    <!-- Messages -->
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">
+            @TempData["SuccessMessage"]
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">
+            @TempData["ErrorMessage"]
+        </div>
+    }
+
+    <div asp-validation-summary="ModelOnly"
+         class="text-danger mb-3">
+    </div>
+
+
+    <!-- Sensor Readings -->
+
+    <div class="form-panel sensor-section">
+
+        <div class="form-panel-header">
+
+            <h2 class="form-panel-title">
+                Sensor Readings
+            </h2>
+
+            <p class="form-panel-description">
+                Heart rate and oxygen saturation can be obtained from the connected sensor.
+            </p>
+
+        </div>
+
+        <div class="form-panel-body">
+
+            <div class="sensor-note">
+                Use the sensor reading function when the device is available.
+                Values may also be entered manually if necessary.
             </div>
-                    <div class="mb-3">
-                        <label asp-for="VitalSignLog.RespiratoryRate" class="form-label">
-                            Respiratory Rate (breaths/min)
-                        </label>
 
-                        <input asp-for="VitalSignLog.RespiratoryRate"
-                               class="form-control"
-                               type="number"
-                               min="1"
-                               max="100"
-                               placeholder="e.g. 16" />
+            <div class="measurement-grid">
 
-                        <span asp-validation-for="VitalSignLog.RespiratoryRate"
-                              class="text-danger"></span>
-                    </div>
+                <div class="measurement-field">
 
-                    <div class="row mb-3">
+                    <label asp-for="VitalSignLog.HeartRate"
+                           class="form-label">
+                        Heart Rate (BPM)
+                    </label>
 
-                        <div class="col-md-6">
-                            <label asp-for="VitalSignLog.SystolicBP"
-                                   class="form-label fw-semibold">
-                                Systolic Pressure (mmHg)
-                            </label>
+                    <input asp-for="VitalSignLog.HeartRate"
+                           class="form-control"
+                           type="number"
+                           min="30"
+                           max="220"
+                           placeholder="e.g. 70" />
 
-                            <input asp-for="VitalSignLog.SystolicBP"
-                                   class="form-control"
-                                   placeholder="e.g. 120" />
+                    <span asp-validation-for="VitalSignLog.HeartRate"
+                          class="text-danger">
+                    </span>
 
-                            <span asp-validation-for="VitalSignLog.SystolicBP"
-                                  class="text-danger"></span>
-                        </div>
+                </div>
 
-                        <div class="col-md-6">
-                            <label asp-for="VitalSignLog.DiastolicBP"
-                                   class="form-label fw-semibold">
-                                Diastolic Pressure (mmHg)
-                            </label>
+                <div class="measurement-field">
 
-                            <input asp-for="VitalSignLog.DiastolicBP"
-                                   class="form-control"
-                                   placeholder="e.g. 80" />
+                    <label asp-for="VitalSignLog.OxygenSaturation"
+                           class="form-label">
+                        SpO₂ (%)
+                    </label>
 
-                            <span asp-validation-for="VitalSignLog.DiastolicBP"
-                                  class="text-danger"></span>
-                        </div>
+                    <input asp-for="VitalSignLog.OxygenSaturation"
+                           class="form-control"
+                           type="number"
+                           min="70"
+                           max="100"
+                           placeholder="e.g. 99" />
 
-                    </div>
+                    <span asp-validation-for="VitalSignLog.OxygenSaturation"
+                          class="text-danger">
+                    </span>
 
+                </div>
 
-
-            <div class="mb-3">
-                <input type="hidden" asp-for="VitalSignLog.StaffId" value="1" />
             </div>
-            <button type="submit" class="btn btn-success px-4">
-                💾 Save Vital Signs
-            </button>
 
-                    <a asp-page="/MedicalRecordPages/Details"
-                       asp-route-id="@Model.VitalSignLog.MedicalRecordId"
-                       class="btn btn-secondary">
-                        Cancel
-                    </a>
+            <div class="sensor-action">
 
-                </form>
+                <button type="submit"
+                        asp-page-handler="ReadSensor"
+                        class="btn btn-primary"
+                        id="readSensorBtn">
+
+                    Read Heart Rate &amp; SpO₂
+
+                </button>
+
+            </div>
+
+            <div id="sensorLoading"
+                 class="alert sensor-loading mt-3 d-none">
+
+                <div class="d-flex align-items-center">
+
+                    <div class="spinner-border spinner-border-sm me-2"
+                         role="status">
+                    </div>
+
+                    <div>
+
+                        <strong>Reading sensor...</strong><br />
+
+                        Please keep your finger on the sensor.
+
+                    </div>
+
+                </div>
 
             </div>
 
         </div>
 
     </div>
-</div>
+
+
+    <!-- Manual Measurements -->
+
+    <div class="form-panel manual-section">
+
+        <div class="form-panel-header">
+
+            <h2 class="form-panel-title">
+                Manual Measurements
+            </h2>
+
+            <p class="form-panel-description">
+                Enter the remaining measurements and consultation information.
+            </p>
+
+        </div>
+
+        <div class="form-panel-body">
+
+            <div class="manual-grid">
+
+                <div class="full-width">
+
+                    <label asp-for="VitalSignLog.VisitReason"
+                           class="form-label">
+                        Visit Reason
+                    </label>
+
+                    <input asp-for="VitalSignLog.VisitReason"
+                           class="form-control"
+                           placeholder="Example: Fever, Headache, Medical Clearance" />
+
+                    <span asp-validation-for="VitalSignLog.VisitReason"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <label asp-for="VitalSignLog.Temperature"
+                           class="form-label">
+                        Temperature (°C)
+                    </label>
+
+                    <input asp-for="VitalSignLog.Temperature"
+                           class="form-control"
+                           placeholder="e.g. 36.5" />
+
+                    <span asp-validation-for="VitalSignLog.Temperature"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <label asp-for="VitalSignLog.RespiratoryRate"
+                           class="form-label">
+                        Respiratory Rate (breaths/min)
+                    </label>
+
+                    <input asp-for="VitalSignLog.RespiratoryRate"
+                           class="form-control"
+                           type="number"
+                           min="1"
+                           max="100"
+                           placeholder="e.g. 16" />
+
+                    <span asp-validation-for="VitalSignLog.RespiratoryRate"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <label asp-for="VitalSignLog.SystolicBP"
+                           class="form-label">
+                        Systolic Pressure (mmHg)
+                    </label>
+
+                    <input asp-for="VitalSignLog.SystolicBP"
+                           class="form-control"
+                           placeholder="e.g. 120" />
+
+                    <span asp-validation-for="VitalSignLog.SystolicBP"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+
+                <div>
+
+                    <label asp-for="VitalSignLog.DiastolicBP"
+                           class="form-label">
+                        Diastolic Pressure (mmHg)
+                    </label>
+
+                    <input asp-for="VitalSignLog.DiastolicBP"
+                           class="form-control"
+                           placeholder="e.g. 80" />
+
+                    <span asp-validation-for="VitalSignLog.DiastolicBP"
+                          class="text-danger">
+                    </span>
+
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Hidden Staff -->
+
+    <input type="hidden"
+           asp-for="VitalSignLog.StaffId"
+           value="1" />
+
+
+    <!-- Actions -->
+
+    <div class="form-actions mb-4">
+
+        <button type="submit"
+                class="btn btn-primary px-4">
+            Save Vital Signs
+        </button>
+
+        <a asp-page="/MedicalRecordPages/Details"
+           asp-route-id="@Model.VitalSignLog.MedicalRecordId"
+           class="btn btn-outline-secondary">
+            Cancel
+        </a>
+
+    </div>
+
+</form>
+
 
 @section Scripts {
 
@@ -287,7 +609,13 @@
 
     <script>
 
-        document.querySelector("form").addEventListener("submit", function () {
+        document.querySelector("form").addEventListener("submit", function (event) {
+
+            const submitter = event.submitter;
+
+            if (!submitter || submitter.id !== "readSensorBtn") {
+                return;
+            }
 
             const button = document.getElementById("readSensorBtn");
 
@@ -296,12 +624,13 @@
                 button.disabled = true;
 
                 button.innerHTML =
-                    "⏳ Reading Sensor...";
+                    "Reading Sensor...";
 
-                document
-                    .getElementById("sensorLoading")
-                    .classList
-                    .remove("d-none");
+                const loading = document.getElementById("sensorLoading");
+
+                if (loading) {
+                    loading.classList.remove("d-none");
+                }
 
             }
 

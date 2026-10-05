@@ -2,78 +2,402 @@
 @model Capstone_Clinic.Pages.StudentPages.DetailsModel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Student Details";
 }
 
-<h1>Details</h1>
+<style>
+    .student-header {
+        margin-bottom: 24px;
+    }
 
-<div>
-    <h4>Student</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Student.StudentNumber)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Student.StudentNumber)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Student.FullName)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Student.FullName)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Student.Course)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Student.Course)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Student.YearLevel)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Student.YearLevel)
-        </dd>
-    </dl>
-    <hr />
+    .student-title {
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: #1e3a5f;
+        margin-bottom: 5px;
+        position: relative;
+        padding-left: 14px;
+    }
 
-    <h4>Student Account</h4>
+    .student-title::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 4px;
+        bottom: 4px;
+        width: 4px;
+        border-radius: 3px;
+        background: #2563eb;
+    }
 
-    @if (Model.StudentAccount == null)
-    {
-        <div class="alert alert-warning">
-            <strong>No student account.</strong>
-            This student does not have a portal account yet.
+    .student-subtitle {
+        color: #64748b;
+        font-size: .88rem;
+        margin: 0;
+    }
+
+    .student-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .student-actions .btn {
+        font-size: .78rem;
+    }
+
+    .record-panel {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 18px;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .03);
+    }
+
+    .record-panel-header {
+        padding: 16px 20px;
+        background: #fbfcfe;
+        border-bottom: 1px solid #e2e6eb;
+        border-left: 3px solid #2563eb;
+    }
+
+    .record-panel-header.account {
+        border-left-color: #64748b;
+    }
+
+    .record-panel-title {
+        margin: 0;
+        color: #1f2933;
+        font-size: .95rem;
+        font-weight: 600;
+    }
+
+    .record-panel-description {
+        margin: 3px 0 0;
+        color: #94a3b8;
+        font-size: .74rem;
+    }
+
+    .record-panel-body {
+        padding: 20px;
+    }
+
+    .student-summary {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .student-summary-item {
+        padding: 14px;
+        background: #f8fafc;
+        border: 1px solid #e2e6eb;
+        border-radius: 6px;
+    }
+
+    .student-summary-label {
+        color: #64748b;
+        font-size: .68rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        margin-bottom: 5px;
+    }
+
+    .student-summary-value {
+        color: #334155;
+        font-size: .84rem;
+        font-weight: 500;
+        word-break: break-word;
+    }
+
+    .account-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .account-item {
+        padding: 14px;
+        background: #f8fafc;
+        border: 1px solid #e2e6eb;
+        border-radius: 6px;
+    }
+
+    .account-label {
+        color: #64748b;
+        font-size: .68rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        margin-bottom: 5px;
+    }
+
+    .account-value {
+        color: #334155;
+        font-size: .84rem;
+        font-weight: 500;
+        word-break: break-word;
+    }
+
+    .account-status {
+        margin-top: 2px;
+    }
+
+    .no-account {
+        margin: 0;
+        border: 1px solid #f3d58a;
+        background: #fffbeb;
+        color: #854d0e;
+        font-size: .82rem;
+    }
+
+    .no-account strong {
+        font-weight: 600;
+    }
+
+    .student-footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 22px;
+        margin-bottom: 30px;
+    }
+
+    .student-footer .btn {
+        font-size: .78rem;
+    }
+
+    @@media (max-width: 767.98px) {
+
+        .student-summary,
+        .account-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .student-actions {
+            width: 100%;
+        }
+
+        .student-actions .btn {
+            width: 100%;
+        }
+
+        .student-footer {
+            flex-direction: column;
+        }
+
+        .student-footer .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+
+<!-- Header -->
+
+<div class="student-header">
+
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+
+        <div>
+
+            <h1 class="student-title">
+                Student Details
+            </h1>
+
+            <p class="student-subtitle">
+                View student information and portal account status.
+            </p>
+
         </div>
-    }
-    else
-    {
-        <dl class="row">
-            <dt class="col-sm-2">
-                Email
-            </dt>
-            <dd class="col-sm-10">
-                @Model.StudentAccount.Email
-            </dd>
 
-            <dt class="col-sm-2">
-                Status
-            </dt>
-            <dd class="col-sm-10">
-                @if (Model.StudentAccount.IsActive)
-                {
-                    <span class="badge bg-success">Active</span>
-                }
-                else
-                {
-                    <span class="badge bg-secondary">Inactive</span>
-                }
-            </dd>
-        </dl>
-    }
+        <div class="student-actions">
+
+            <a asp-page="./Edit"
+               asp-route-id="@Model.Student.StudentId"
+               class="btn btn-primary">
+                Edit Student
+            </a>
+
+        </div>
+
+    </div>
+
 </div>
-<div>
-    <a asp-page="./Edit" asp-route-id="@Model.Student.StudentId">Edit</a> |
-    <a asp-page="./Index">Back to List</a>
+
+
+<!-- Student Information -->
+
+<div class="record-panel">
+
+    <div class="record-panel-header">
+
+        <h2 class="record-panel-title">
+            Student Information
+        </h2>
+
+        <p class="record-panel-description">
+            Basic academic information for this student.
+        </p>
+
+    </div>
+
+
+    <div class="record-panel-body">
+
+        <div class="student-summary">
+
+            <div class="student-summary-item">
+
+                <div class="student-summary-label">
+                    Student Number
+                </div>
+
+                <div class="student-summary-value">
+                    @Html.DisplayFor(model => model.Student.StudentNumber)
+                </div>
+
+            </div>
+
+
+            <div class="student-summary-item">
+
+                <div class="student-summary-label">
+                    Full Name
+                </div>
+
+                <div class="student-summary-value">
+                    @Html.DisplayFor(model => model.Student.FullName)
+                </div>
+
+            </div>
+
+
+            <div class="student-summary-item">
+
+                <div class="student-summary-label">
+                    Course
+                </div>
+
+                <div class="student-summary-value">
+                    @Html.DisplayFor(model => model.Student.Course)
+                </div>
+
+            </div>
+
+
+            <div class="student-summary-item">
+
+                <div class="student-summary-label">
+                    Year Level
+                </div>
+
+                <div class="student-summary-value">
+                    @Html.DisplayFor(model => model.Student.YearLevel)
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Student Account -->
+
+<div class="record-panel">
+
+    <div class="record-panel-header account">
+
+        <h2 class="record-panel-title">
+            Student Account
+        </h2>
+
+        <p class="record-panel-description">
+            Portal account information associated with this student.
+        </p>
+
+    </div>
+
+
+    <div class="record-panel-body">
+
+        @if (Model.StudentAccount == null)
+        {
+            <div class="alert no-account">
+
+                <strong>No student account.</strong>
+                This student does not have a portal account yet.
+
+            </div>
+        }
+        else
+        {
+            <div class="account-grid">
+
+                <div class="account-item">
+
+                    <div class="account-label">
+                        Email
+                    </div>
+
+                    <div class="account-value">
+                        @Model.StudentAccount.Email
+                    </div>
+
+                </div>
+
+
+                <div class="account-item">
+
+                    <div class="account-label">
+                        Account Status
+                    </div>
+
+                    <div class="account-value account-status">
+
+                        @if (Model.StudentAccount.IsActive)
+                        {
+                            <span class="badge bg-success">
+                                Active
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-secondary">
+                                Inactive
+                            </span>
+                        }
+
+                    </div>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</div>
+
+
+<!-- Footer Actions -->
+
+<div class="student-footer">
+
+    <a asp-page="./Edit"
+       asp-route-id="@Model.Student.StudentId"
+       class="btn btn-primary">
+        Edit Student
+    </a>
+
+    <a asp-page="./Index"
+       class="btn btn-outline-secondary">
+        Back to Student List
+    </a>
+
 </div>

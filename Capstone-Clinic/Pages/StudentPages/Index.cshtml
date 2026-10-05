@@ -2,58 +2,441 @@
 @model Capstone_Clinic.Pages.StudentPages.IndexModel
 
 @{
-    ViewData["Title"] = "Index";
+    ViewData["Title"] = "Students";
 }
 
-<h1>Index</h1>
+<style>
+    .students-header {
+        margin-bottom: 24px;
+    }
 
-<p>
-    <a asp-page="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.Student[0].StudentNumber)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Student[0].FullName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Student[0].Course)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Student[0].YearLevel)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model.Student) {
-        <tr>
-            <td>
-                @Html.DisplayFor(model => item.StudentNumber)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.FullName)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.Course)
-            </td>
-            <td>
-                @Html.DisplayFor(model => item.YearLevel)
-            </td>
-            <td>
-                <a asp-page="./Edit" asp-route-id="@item.StudentId">Edit</a> |
-                <a asp-page="./Details" asp-route-id="@item.StudentId">Details</a> |
-                    <a asp-page="./Delete"
-                       asp-route-id="@item.StudentId"
-                       class="btn btn-danger btn-sm"
-                       onclick="return confirm('Are you sure you want to delete this student?');">
-                        Delete
+    .students-title {
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: #1e3a5f;
+        margin-bottom: 5px;
+        position: relative;
+        padding-left: 14px;
+    }
+
+    .students-title::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 4px;
+        bottom: 4px;
+        width: 4px;
+        border-radius: 3px;
+        background: #2563eb;
+    }
+
+    .students-subtitle {
+        color: #64748b;
+        font-size: .88rem;
+        margin: 0;
+    }
+
+    .students-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .students-actions .btn {
+        font-size: .75rem;
+    }
+
+    .students-summary {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .summary-card {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 7px;
+        padding: 17px;
+        border-top: 3px solid #2563eb;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .03);
+    }
+
+    .summary-card.directory-card {
+        border-top-color: #64748b;
+    }
+
+    .summary-label {
+        color: #64748b;
+        font-size: .72rem;
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
+
+    .summary-value {
+        color: #1f2933;
+        font-size: 1.35rem;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+    .summary-note {
+        margin-top: 5px;
+        color: #94a3b8;
+        font-size: .68rem;
+    }
+
+    .students-panel {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .students-panel-header {
+        padding: 16px 20px;
+        background: #fbfcfe;
+        border-bottom: 1px solid #e2e6eb;
+        border-left: 3px solid #2563eb;
+    }
+
+    .students-panel-title {
+        margin: 0;
+        color: #1f2933;
+        font-size: .95rem;
+        font-weight: 600;
+    }
+
+    .students-panel-description {
+        margin: 3px 0 0;
+        color: #94a3b8;
+        font-size: .74rem;
+    }
+
+    .students-table {
+        margin: 0;
+    }
+
+    .students-table thead th {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: .69rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        padding: 11px 14px;
+        border-bottom: 1px solid #e2e6eb;
+        white-space: nowrap;
+    }
+
+    .students-table tbody td {
+        color: #475569;
+        font-size: .78rem;
+        padding: 12px 14px;
+        border-bottom: 1px solid #eef0f2;
+        vertical-align: middle;
+    }
+
+    .students-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .students-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .student-number {
+        color: #334155;
+        font-weight: 600;
+    }
+
+    .student-name {
+        color: #1f2933;
+        font-weight: 500;
+    }
+
+    .student-course {
+        color: #64748b;
+    }
+
+    .student-year {
+        color: #475569;
+    }
+
+    .action-group {
+        display: flex;
+        justify-content: flex-end;
+        flex-wrap: wrap;
+        gap: 5px;
+        white-space: nowrap;
+    }
+
+    .action-group .btn {
+        font-size: .68rem;
+    }
+
+    .empty-state {
+        padding: 45px 20px;
+        text-align: center;
+        color: #94a3b8;
+        font-size: .78rem;
+    }
+
+    .empty-state-title {
+        display: block;
+        margin-bottom: 4px;
+        color: #475569;
+        font-size: .9rem;
+        font-weight: 600;
+    }
+
+    @@media (max-width: 767.98px) {
+
+        .students-summary {
+            grid-template-columns: 1fr;
+        }
+
+        .students-actions {
+            width: 100%;
+        }
+
+        .students-actions .btn {
+            width: 100%;
+        }
+
+        .action-group {
+            justify-content: flex-start;
+        }
+    }
+</style>
+
+
+<!-- Header -->
+
+<div class="students-header">
+
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+
+        <div>
+
+            <h1 class="students-title">
+                Students
+            </h1>
+
+            <p class="students-subtitle">
+                Manage registered students and access their clinic information.
+            </p>
+
+        </div>
+
+        <div class="students-actions">
+
+            <a asp-page="/Student/Search"
+               class="btn btn-outline-primary">
+                Student Lookup
+            </a>
+
+            <a asp-page="./Create"
+               class="btn btn-primary">
+                Add New Student
+            </a>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Summary -->
+
+<div class="students-summary">
+
+    <div class="summary-card">
+
+        <div class="summary-label">
+            Registered Students
+        </div>
+
+        <div class="summary-value">
+            @Model.Student.Count
+        </div>
+
+        <div class="summary-note">
+            Students currently in the clinic directory
+        </div>
+
+    </div>
+
+
+    <div class="summary-card directory-card">
+
+        <div class="summary-label">
+            Directory
+        </div>
+
+        <div class="summary-value">
+            Student Records
+        </div>
+
+        <div class="summary-note">
+            View, edit, or manage individual student information
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Student Directory -->
+
+<div class="students-panel">
+
+    <div class="students-panel-header">
+
+        <h2 class="students-panel-title">
+            Student Directory
+        </h2>
+
+        <p class="students-panel-description">
+            Registered students available for clinic services.
+        </p>
+
+    </div>
+
+
+    <div class="table-responsive">
+
+        @if (Model.Student.Any())
+        {
+            <table class="table students-table align-middle">
+
+                <thead>
+
+                    <tr>
+
+                        <th>
+                            Student Number
+                        </th>
+
+                        <th>
+                            Full Name
+                        </th>
+
+                        <th>
+                            Course
+                        </th>
+
+                        <th>
+                            Year Level
+                        </th>
+
+                        <th class="text-end">
+                            Actions
+                        </th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @foreach (var item in Model.Student)
+                    {
+                        <tr>
+
+                            <td>
+
+                                <div class="student-number">
+                                    @item.StudentNumber
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="student-name">
+                                    @item.FullName
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="student-course">
+                                    @item.Course
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="student-year">
+                                    @item.YearLevel
+                                </div>
+
+                            </td>
+
+
+                            <td>
+
+                                <div class="action-group">
+
+                                    <a asp-page="./Details"
+                                       asp-route-id="@item.StudentId"
+                                       class="btn btn-sm btn-outline-primary">
+                                        View
+                                    </a>
+
+                                    <a asp-page="./Edit"
+                                       asp-route-id="@item.StudentId"
+                                       class="btn btn-sm btn-outline-secondary">
+                                        Edit
+                                    </a>
+
+                                    <a asp-page="./Delete"
+                                       asp-route-id="@item.StudentId"
+                                       class="btn btn-sm btn-outline-danger">
+                                        Delete
+                                    </a>
+
+                                </div>
+
+                            </td>
+
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
+        }
+        else
+        {
+            <div class="empty-state">
+
+                <span class="empty-state-title">
+                    No students registered
+                </span>
+
+                There are currently no students in the clinic directory.
+
+                <div class="mt-3">
+
+                    <a asp-page="./Create"
+                       class="btn btn-sm btn-primary">
+                        Add New Student
                     </a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+
+                </div>
+
+            </div>
+        }
+
+    </div>
+
+</div>

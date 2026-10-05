@@ -2,124 +2,490 @@
 @model Capstone_Clinic.Pages.AlertPages.DetailsModel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Alert Details";
+
+    var severityClass = Model.VitalSign.Status switch
+    {
+        "Critical" => "severity-critical",
+        "Warning" => "severity-warning",
+        _ => "severity-normal"
+    };
+
+    var severityPanelClass = Model.VitalSign.Status switch
+    {
+        "Critical" => "severity-panel-critical",
+        "Warning" => "severity-panel-warning",
+        _ => "severity-panel-normal"
+    };
+
+    var statusClass = Model.Alert.Status == "Active"
+        ? "alert-active"
+        : "alert-acknowledged";
+
+    var isStudent = Model.MedicalRecord.StudentId.HasValue;
 }
 
-<h2 class="fw-bold mb-4">
-    🚨 Alert Details
-</h2>
+<style>
+    .alert-details-header {
+        margin-bottom: 24px;
+    }
 
-<div class="card shadow-sm">
+    .alert-details-title {
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: #1e3a5f;
+        margin-bottom: 5px;
+        position: relative;
+        padding-left: 14px;
+    }
 
-    <div class="card-header bg-danger text-white">
-        <h5 class="mb-0">
-            Alert Information
-        </h5>
+        .alert-details-title::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 4px;
+            bottom: 4px;
+            width: 4px;
+            border-radius: 3px;
+            background: #dc2626;
+        }
+
+    .alert-details-subtitle {
+        color: #64748b;
+        font-size: .88rem;
+        margin: 0;
+    }
+
+    .details-panel {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 18px;
+    }
+
+    .details-panel-header {
+        padding: 16px 20px;
+        background: #fbfcfe;
+        border-bottom: 1px solid #e2e6eb;
+        border-left: 3px solid #dc2626;
+    }
+
+    .details-panel-title {
+        margin: 0;
+        color: #1f2933;
+        font-size: .95rem;
+        font-weight: 600;
+    }
+
+    .details-panel-description {
+        margin: 3px 0 0;
+        color: #94a3b8;
+        font-size: .74rem;
+    }
+
+    .details-panel-body {
+        padding: 20px;
+    }
+
+    .severity-panel {
+        border-radius: 7px;
+        padding: 15px 17px;
+        border: 1px solid #e2e6eb;
+        background: #ffffff;
+    }
+
+    .severity-panel-normal {
+        border-left: 4px solid #16a34a;
+    }
+
+    .severity-panel-warning {
+        border-left: 4px solid #d97706;
+    }
+
+    .severity-panel-critical {
+        border-left: 4px solid #dc2626;
+    }
+
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .info-item {
+        padding: 14px 15px;
+        background: #f8fafc;
+        border: 1px solid #e2e6eb;
+        border-radius: 6px;
+    }
+
+    .info-label {
+        color: #64748b;
+        font-size: .7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        margin-bottom: 5px;
+    }
+
+    .info-value {
+        color: #334155;
+        font-size: .82rem;
+        font-weight: 500;
+        line-height: 1.4;
+        word-break: break-word;
+    }
+
+    .severity-label {
+        color: #64748b;
+        font-size: .7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        margin-bottom: 6px;
+    }
+
+    .severity-value {
+        font-size: 1.05rem;
+        font-weight: 600;
+    }
+
+    .severity-critical {
+        color: #dc2626;
+    }
+
+    .severity-warning {
+        color: #b45309;
+    }
+
+    .severity-normal {
+        color: #15803d;
+    }
+
+    .alert-active {
+        color: #dc2626;
+    }
+
+    .alert-acknowledged {
+        color: #15803d;
+    }
+
+    .vital-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+    }
+
+    .vital-card {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 7px;
+        padding: 15px;
+        border-top: 3px solid #2563eb;
+    }
+
+    .vital-label {
+        color: #64748b;
+        font-size: .7rem;
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
+
+    .vital-value {
+        color: #1f2933;
+        font-size: 1rem;
+        font-weight: 600;
+    }
+
+    .message-box {
+        padding: 15px 16px;
+        background: #fff7ed;
+        border: 1px solid #fed7aa;
+        border-left: 4px solid #d97706;
+        border-radius: 6px;
+        color: #7c2d12;
+        font-size: .82rem;
+        line-height: 1.5;
+    }
+
+    .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 24px;
+    }
+
+        .actions .btn {
+            font-size: .75rem;
+        }
+
+    @@media (max-width: 991.98px) {
+        .vital-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        .info-grid,
+        .vital-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+
+<!-- Header -->
+
+<div class="alert-details-header">
+
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+
+        <div>
+
+            <h1 class="alert-details-title">
+                Alert Details
+            </h1>
+
+            <p class="alert-details-subtitle">
+                Review the alert and the vital-sign measurements that triggered it.
+            </p>
+
+        </div>
+
+        <a asp-page="./Index"
+           class="btn btn-outline-secondary">
+            Back to Alerts
+        </a>
+
     </div>
 
-    <div class="card-body">
+</div>
 
-        <div class="row">
 
-            <div class="col-md-6 mb-3">
-                <strong>👤 Student</strong><br />
-                @Model.Student.StudentNumber - @Model.Student.FullName
+<!-- Alert Overview -->
+
+<div class="details-panel">
+
+    <div class="details-panel-header">
+
+        <h2 class="details-panel-title">
+            Alert Information
+        </h2>
+
+        <p class="details-panel-description">
+            Details of the detected vital-sign alert.
+        </p>
+
+    </div>
+
+    <div class="details-panel-body">
+
+        <div class="row g-3">
+
+            <div class="col-md-8">
+
+                <div class="info-grid">
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Patient
+                        </div>
+
+                        <div class="info-value">
+
+                            @if (isStudent)
+                            {
+                                @Model.Student.StudentNumber
+                                <span> — </span>
+                                @Model.Student.FullName
+                            }
+                            else
+                            {
+                                <span>Community Patient</span>
+                            }
+
+                        </div>
+
+                    </div>
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Visit Reason
+                        </div>
+
+                        <div class="info-value">
+                            @(string.IsNullOrWhiteSpace(Model.VitalSign.VisitReason)
+                                ? "—"
+                                : Model.VitalSign.VisitReason)
+                        </div>
+
+                    </div>
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Alert Type
+                        </div>
+
+                        <div class="info-value">
+                            @Model.Alert.AlertType
+                        </div>
+
+                    </div>
+
+                    <div class="info-item">
+
+                        <div class="info-label">
+                            Created
+                        </div>
+
+                        <div class="info-value">
+                            @Model.Alert.CreatedAt.ToString("MMMM dd, yyyy hh:mm tt")
+                        </div>
+
+                    </div>
+
+                </div>
+
             </div>
 
-            <div class="col-md-6 mb-3">
-                <strong>🩺 Visit Reason</strong><br />
-                @Model.VitalSign.VisitReason
-            </div>
 
-            <div class="col-md-6 mb-3">
-                <strong>🚨 Alert Type</strong><br />
-                @Model.Alert.AlertType
-            </div>
+            <div class="col-md-4">
 
-            <div class="col-md-6 mb-3">
-                <strong>📅 Created</strong><br />
-                @Model.Alert.CreatedAt.ToString("MMMM dd, yyyy hh:mm tt")
-            </div>
+                <div class="severity-panel @severityPanelClass">
 
-            <div class="col-md-6 mb-3">
-                <strong>📊 Status</strong><br />
+                    <div class="severity-label">
+                        Severity
+                    </div>
 
-                @if (Model.Alert.Status == "Active")
-                {
-                    <span class="badge bg-danger">
-                        Active
-                    </span>
-                }
-                else
-                {
-                    <span class="badge bg-success">
-                        Acknowledged
-                    </span>
-                }
+                    <div class="severity-value @severityClass">
+                        @Model.VitalSign.Status
+                    </div>
 
-            </div>
+                    <div class="mt-3">
 
-            <div class="col-md-6 mb-3">
-                <strong>⚠ Severity</strong><br />
+                        <div class="severity-label">
+                            Alert Status
+                        </div>
 
-                @if (Model.VitalSign.Status == "Critical")
-                {
-                    <span class="badge bg-danger">
-                        🔴 Critical
-                    </span>
-                }
-                else if (Model.VitalSign.Status == "Warning")
-                {
-                    <span class="badge bg-warning text-dark">
-                        🟡 Warning
-                    </span>
-                }
-                else
-                {
-                    <span class="badge bg-success">
-                        🟢 Normal
-                    </span>
-                }
+                        <div class="severity-value @statusClass">
+                            @Model.Alert.Status
+                        </div>
+
+                    </div>
+
+                </div>
 
             </div>
 
         </div>
 
-        <hr />
+    </div>
 
-        <h5 class="mb-3">
-            ❤️ Recorded Vital Signs
-        </h5>
+</div>
 
-        <div class="row">
 
-            <div class="col-md-3">
-                <strong>Temperature</strong><br />
-                @($"{Model.VitalSign.Temperature:F1} °C")
+<!-- Recorded Vital Signs -->
+
+<div class="details-panel">
+
+    <div class="details-panel-header">
+
+        <h2 class="details-panel-title">
+            Recorded Vital Signs
+        </h2>
+
+        <p class="details-panel-description">
+            Measurements associated with this alert.
+        </p>
+
+    </div>
+
+    <div class="details-panel-body">
+
+        <div class="vital-grid">
+
+            <div class="vital-card">
+
+                <div class="vital-label">
+                    Temperature
+                </div>
+
+                <div class="vital-value">
+                    @($"{Model.VitalSign.Temperature:F1} °C")
+                </div>
+
             </div>
 
-            <div class="col-md-3">
-                <strong>Heart Rate</strong><br />
-                @($"{Model.VitalSign.HeartRate} BPM")
+            <div class="vital-card">
+
+                <div class="vital-label">
+                    Heart Rate
+                </div>
+
+                <div class="vital-value">
+                    @($"{Model.VitalSign.HeartRate} BPM")
+                </div>
+
             </div>
 
-            <div class="col-md-3">
-                <strong>SpO₂</strong><br />
-                @($"{Model.VitalSign.OxygenSaturation}%")
+            <div class="vital-card">
+
+                <div class="vital-label">
+                    SpO₂
+                </div>
+
+                <div class="vital-value">
+                    @($"{Model.VitalSign.OxygenSaturation}%")
+                </div>
+
             </div>
 
-            <div class="col-md-3">
-                <strong>Blood Pressure</strong><br />
-                @($"{Model.VitalSign.SystolicBP}/{Model.VitalSign.DiastolicBP}")
+            <div class="vital-card">
+
+                <div class="vital-label">
+                    Blood Pressure
+                </div>
+
+                <div class="vital-value">
+                    @($"{Model.VitalSign.SystolicBP}/{Model.VitalSign.DiastolicBP} mmHg")
+                </div>
+
             </div>
 
         </div>
 
-        <hr />
+    </div>
 
-        <strong>📝 Alert Message</strong>
+</div>
 
-        <div class="alert alert-warning mt-2 mb-0">
+
+<!-- Alert Message -->
+
+<div class="details-panel">
+
+    <div class="details-panel-header">
+
+        <h2 class="details-panel-title">
+            Alert Message
+        </h2>
+
+        <p class="details-panel-description">
+            Explanation associated with the detected condition.
+        </p>
+
+    </div>
+
+    <div class="details-panel-body">
+
+        <div class="message-box">
             @Model.Alert.AlertMessage
         </div>
 
@@ -127,11 +493,14 @@
 
 </div>
 
-<div class="mt-4">
+
+<!-- Actions -->
+
+<div class="actions">
 
     <a asp-page="./Index"
-       class="btn btn-secondary">
-        ← Back to Alerts
+       class="btn btn-outline-secondary">
+        Back to Alerts
     </a>
 
 </div>

@@ -3,217 +3,474 @@
 @using Capstone_Clinic.Helpers
 
 @{
-    ViewData["Title"] = "Alerts Dashboard";
+    ViewData["Title"] = "Alerts";
 }
 
-<h2 class="mb-3">🚨 Alerts</h2>
+<style>
+    .alerts-header {
+        margin-bottom: 28px;
+    }
 
-<p class="text-muted">
-    View all active and historical alerts generated from abnormal vital signs.
-</p>
+    .alerts-title {
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: #1f2933;
+        margin-bottom: 5px;
+    }
 
-<div class="card shadow">
+    .alerts-subtitle {
+        color: #64748b;
+        font-size: .9rem;
+        margin: 0;
+    }
 
-    <div class="card-header bg-danger text-white">
+    .alert-stat {
+        height: 100%;
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        padding: 18px;
+    }
 
-        <h5 class="mb-1">
-            🚨 Clinic Alerts
-        </h5>
+    .alert-stat-label {
+        font-size: .75rem;
+        color: #64748b;
+        font-weight: 500;
+        margin-bottom: 7px;
+    }
 
-        <small>
-            Monitor abnormal patient vital signs and clinic alerts.
-        </small>
+    .alert-stat-value {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #1f2933;
+    }
 
-    </div>
-    <div class="row mb-4">
+    .alert-stat-value.critical {
+        color: #b91c1c;
+    }
 
-        <div class="col-md-4">
-            <div class="card border-danger shadow-sm">
-                <div class="card-body text-center">
-                    <h2 class="text-danger">
-                        @Model.CriticalCount
-                    </h2>
+    .alert-stat-value.warning {
+        color: #a16207;
+    }
 
-                    <h6>🔴 Critical Alerts</h6>
+    .alert-stat-value.acknowledged {
+        color: #15803d;
+    }
 
-                    <small class="text-muted">
-                        Immediate attention required
-                    </small>
-                </div>
-            </div>
-        </div>
+    .alert-stat-description {
+        margin-top: 5px;
+        font-size: .72rem;
+        color: #94a3b8;
+    }
 
-        <div class="col-md-4">
-            <div class="card border-warning shadow-sm">
-                <div class="card-body text-center">
-                    <h2 class="text-warning">
-                        @Model.WarningCount
-                    </h2>
+    .alerts-panel {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        overflow: hidden;
+    }
 
-                    <h6>🟡 Warning Alerts</h6>
+    .alerts-panel-header {
+        padding: 17px 20px;
+        border-bottom: 1px solid #e2e6eb;
+    }
 
-                    <small class="text-muted">
-                        Requires monitoring
-                    </small>
-                </div>
-            </div>
-        </div>
+    .alerts-panel-title {
+        margin: 0;
+        font-size: .95rem;
+        font-weight: 600;
+        color: #1f2933;
+    }
 
-        <div class="col-md-4">
-            <div class="card border-success shadow-sm">
-                <div class="card-body text-center">
-    <h2 class="text-success">
-        @Model.AcknowledgedCount
-    </h2>
+    .alerts-panel-description {
+        margin: 3px 0 0;
+        font-size: .76rem;
+        color: #94a3b8;
+    }
 
-    <h6>✅ Acknowledged</h6>
+    .alerts-table {
+        margin: 0;
+    }
 
-    <small class="text-muted">
-        Reviewed by clinic staff
-    </small>
+    .alerts-table thead th {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: .7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        padding: 12px 14px;
+        border-bottom: 1px solid #e2e6eb;
+        white-space: nowrap;
+    }
+
+    .alerts-table tbody td {
+        color: #475569;
+        font-size: .8rem;
+        padding: 14px;
+        border-bottom: 1px solid #eef0f2;
+        vertical-align: middle;
+    }
+
+    .alerts-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
+
+    .alerts-table tbody tr:hover {
+        background: #f8fafc;
+    }
+
+    .critical-row {
+        border-left: 3px solid #dc2626;
+    }
+
+    .warning-row {
+        border-left: 3px solid #d97706;
+    }
+
+    .patient-number {
+        display: block;
+        font-size: .78rem;
+        font-weight: 600;
+        color: #1f2933;
+    }
+
+    .patient-name {
+        display: block;
+        margin-top: 2px;
+        font-size: .72rem;
+        color: #64748b;
+    }
+
+    .severity-badge,
+    .status-badge {
+        display: inline-block;
+        min-width: 72px;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: .68rem;
+        font-weight: 600;
+        text-align: center;
+    }
+
+    .severity-critical {
+        color: #991b1b;
+        background: #fee2e2;
+    }
+
+    .severity-warning {
+        color: #92400e;
+        background: #fef3c7;
+    }
+
+    .severity-normal {
+        color: #166534;
+        background: #dcfce7;
+    }
+
+    .status-active {
+        color: #991b1b;
+        background: #fee2e2;
+    }
+
+    .status-acknowledged {
+        color: #166534;
+        background: #dcfce7;
+    }
+
+    .status-default {
+        color: #475569;
+        background: #f1f5f9;
+    }
+
+    .alert-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: 6px;
+        white-space: nowrap;
+    }
+
+    .alerts-empty {
+        padding: 50px 20px;
+        text-align: center;
+    }
+
+    .alerts-empty-title {
+        color: #334155;
+        font-size: .95rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .alerts-empty-text {
+        color: #94a3b8;
+        font-size: .8rem;
+        margin: 0;
+    }
+</style>
+
+
+<!-- Page Header -->
+
+<div class="alerts-header">
+
+    <h1 class="alerts-title">
+        Alerts
+    </h1>
+
+    <p class="alerts-subtitle">
+        Monitor abnormal vital signs and review clinic alerts.
+    </p>
+
 </div>
+
+
+<!-- Alert Summary -->
+
+<div class="row g-3 mb-4">
+
+    <div class="col-md-4">
+
+        <div class="alert-stat">
+
+            <div class="alert-stat-label">
+                Critical Alerts
             </div>
+
+            <div class="alert-stat-value critical">
+                @Model.CriticalCount
+            </div>
+
+            <div class="alert-stat-description">
+                Active alerts requiring immediate attention
+            </div>
+
         </div>
 
     </div>
-    <div class="card-body">
-        @if (Model.Alerts.Any()){
 
-        <table class="table table-hover align-middle">
 
-            <thead class="table-light">
-                <tr>
-                    <th>Student</th>
-                    <th>Alert</th>
-                    <th>Severity</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                    <th></th>
-                </tr>
-            </thead>
+    <div class="col-md-4">
 
-            <tbody>
+        <div class="alert-stat">
 
-                @foreach (var item in Model.Alerts)
-                {
-                    string rowClass = "";
+            <div class="alert-stat-label">
+                Warning Alerts
+            </div>
 
-                    if (item.Severity == "Critical")
+            <div class="alert-stat-value warning">
+                @Model.WarningCount
+            </div>
+
+            <div class="alert-stat-description">
+                Active alerts requiring monitoring
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-md-4">
+
+        <div class="alert-stat">
+
+            <div class="alert-stat-label">
+                Acknowledged
+            </div>
+
+            <div class="alert-stat-value acknowledged">
+                @Model.AcknowledgedCount
+            </div>
+
+            <div class="alert-stat-description">
+                Alerts reviewed by clinic staff
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Alerts Table -->
+
+<div class="alerts-panel">
+
+    <div class="alerts-panel-header">
+
+        <h2 class="alerts-panel-title">
+            Alert History
+        </h2>
+
+        <p class="alerts-panel-description">
+            Active and historical alerts generated from abnormal vital signs.
+        </p>
+
+    </div>
+
+
+    @if (Model.Alerts.Any())
+    {
+        <div class="table-responsive">
+
+            <table class="table alerts-table align-middle">
+
+                <thead>
+
+                    <tr>
+                        <th>Patient</th>
+                        <th>Alert</th>
+                        <th>Severity</th>
+                        <th>Status</th>
+                        <th>Created</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    @foreach (var item in Model.Alerts)
                     {
-                        rowClass = "table-danger";
-                    }
-                    else if (item.Severity == "Warning")
-                    {
-                        rowClass = "table-warning";
-                    }
+                        string rowClass = "";
 
-                    <tr class="@rowClass">
-                        
+                        if (item.Severity == "Critical")
+                        {
+                            rowClass = "critical-row";
+                        }
+                        else if (item.Severity == "Warning")
+                        {
+                            rowClass = "warning-row";
+                        }
 
-                        <td>
-                            <strong>@item.StudentNumber</strong><br />
-                            <small>@item.StudentName</small>
-                        </td>
+                        <tr class="@rowClass">
 
-                        <td>
-                            @item.AlertType
-                        </td>
+                            <td>
 
-                        <td>
-
-                            @if (item.Severity == "Critical")
-                            {
-                                <span class="badge bg-danger">
-                                    🔴 Critical
+                                <span class="patient-number">
+                                    @item.StudentNumber
                                 </span>
-                            }
-                            else if (item.Severity == "Warning")
-                            {
-                                <span class="badge bg-warning text-dark">
-                                    🟡 Warning
-                                </span>
-                            }
-                            else
-                            {
-                                <span class="badge bg-success">
-                                    🟢 Normal
-                                </span>
-                            }
 
-                        </td>
-
-                        <td>
-
-                            @if (item.Status == "Active")
-                            {
-                                <span class="badge bg-danger">
-                                    Active
+                                <span class="patient-name">
+                                    @item.StudentName
                                 </span>
-                            }
-                            else if (item.Status == "Acknowledged")
-                            {
-                                <span class="badge bg-success">
-                                    Acknowledged
-                                </span>
-                            }   
-                            else
-                            {
-                                <span class="badge bg-secondary">
-                                    @item.Status
-                                </span>
-                            }
 
-                        </td>
+                            </td>
+
+
+                            <td>
+                                @item.AlertType
+                            </td>
+
+
+                            <td>
+
+                                @if (item.Severity == "Critical")
+                                {
+                                    <span class="severity-badge severity-critical">
+                                        Critical
+                                    </span>
+                                }
+                                else if (item.Severity == "Warning")
+                                {
+                                    <span class="severity-badge severity-warning">
+                                        Warning
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="severity-badge severity-normal">
+                                        Normal
+                                    </span>
+                                }
+
+                            </td>
+
+
+                            <td>
+
+                                @if (item.Status == "Active")
+                                {
+                                    <span class="status-badge status-active">
+                                        Active
+                                    </span>
+                                }
+                                else if (item.Status == "Acknowledged")
+                                {
+                                    <span class="status-badge status-acknowledged">
+                                        Acknowledged
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge status-default">
+                                        @item.Status
+                                    </span>
+                                }
+
+                            </td>
+
 
                             <td>
                                 @TimeHelper.GetTimeAgo(item.CreatedAt)
                             </td>
 
-                        <td>
 
-                            <a asp-page="./Details"
-                               asp-route-id="@item.AlertId"
-                               class="btn btn-sm btn-outline-primary">
-                                View
-                            </a>
+                            <td>
 
-                            @if (item.Status == "Active")
-                            {
-                                <form method="post"
-                                      asp-page-handler="Acknowledge"
-                                      asp-route-id="@item.AlertId"
-                                      style="display:inline">
+                                <div class="alert-actions">
 
-                                    <button type="submit"
-                                            class="btn btn-sm btn-success">
-                                        ✓ Acknowledge
-                                    </button>
+                                    <a asp-page="./Details"
+                                       asp-route-id="@item.AlertId"
+                                       class="btn btn-sm btn-outline-primary">
+                                        View
+                                    </a>
 
-                                </form>
-                            }
 
-                        </td>
+                                    @if (item.Status == "Active")
+                                    {
+                                        <form method="post"
+                                              asp-page-handler="Acknowledge"
+                                              asp-route-id="@item.AlertId"
+                                              class="d-inline">
 
-                    </tr>
-                }
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-outline-success">
+                                                Acknowledge
+                                            </button>
 
-            </tbody>
+                                        </form>
+                                    }
 
-        </table>
-        }
-        else
-        {
-        <div class="alert alert-success text-center shadow-sm">
+                                </div>
 
-                <h5>🎉 System Status: Normal</h5>
+                            </td>
 
-                <p class="mb-0">
-                    No active patient alerts at this time.
-                </p>
+                        </tr>
+                    }
+
+                </tbody>
+
+            </table>
 
         </div>
-        }
+    }
+    else
+    {
+        <div class="alerts-empty">
 
-    </div>
+            <div class="alerts-empty-title">
+                No alerts recorded
+            </div>
+
+            <p class="alerts-empty-text">
+                The clinic system currently has no alert records.
+            </p>
+
+        </div>
+    }
 
 </div>

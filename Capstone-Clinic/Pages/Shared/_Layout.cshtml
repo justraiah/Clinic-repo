@@ -1,229 +1,596 @@
-﻿
-
-<!DOCTYPE html>
-<html lang="en">
-@using Microsoft.EntityFrameworkCore
+﻿@using Microsoft.EntityFrameworkCore
 @inject Capstone_Clinic.Data.AppDbContext DbContext
 
 @{
     var currentPage = ViewContext.RouteData.Values["page"]?.ToString();
 
-    var activeAlerts = await (
-        from alert in DbContext.Alerts
-        join vital in DbContext.VitalSignLogs
-            on alert.VitalLogId equals vital.VitalSignLogId
-        join clinicPatient in DbContext.ClinicPatients
-            on vital.ClinicPatientId equals clinicPatient.ClinicPatientId
-        join medical in DbContext.MedicalRecords
-            on vital.MedicalRecordId equals medical.MedicalRecordId
-        join student in DbContext.Students
-            on medical.StudentId equals student.StudentId into studentGroup
-        from student in studentGroup.DefaultIfEmpty()
-        where alert.Status == "Active"
-        orderby alert.CreatedAt descending
-        select new
-        {
-            AlertId = alert.AlertId,
-            PatientName = student != null
-                ? student.FullName
-                : clinicPatient.FullName ?? "Community Member",
-            Severity = vital.Status,
-            AlertType = alert.AlertType,
-            CreatedAt = alert.CreatedAt
-        }
-    ).Take(5).ToListAsync();
+    var activeAlerts = new List<dynamic>();
+    var activeAlertCount = 0;
+    var hasCriticalAlert = false;
 
-    var activeAlertCount = activeAlerts.Count;
-    var hasCriticalAlert = activeAlerts.Any(a => a.Severity == "Critical");
+    if (User.Identity?.IsAuthenticated == true)
+    {
+        activeAlerts = await (
+            from alert in DbContext.Alerts
+            join vital in DbContext.VitalSignLogs
+                on alert.VitalLogId equals vital.VitalSignLogId
+            join clinicPatient in DbContext.ClinicPatients
+                on vital.ClinicPatientId equals clinicPatient.ClinicPatientId
+            join medical in DbContext.MedicalRecords
+                on vital.MedicalRecordId equals medical.MedicalRecordId
+            join student in DbContext.Students
+                on medical.StudentId equals student.StudentId into studentGroup
+            from student in studentGroup.DefaultIfEmpty()
+            where alert.Status == "Active"
+            orderby alert.CreatedAt descending
+            select new
+            {
+                AlertId = alert.AlertId,
+                PatientName = student != null
+                    ? student.FullName
+                    : clinicPatient.FullName ?? "Community Member",
+                Severity = vital.Status,
+                AlertType = alert.AlertType,
+                CreatedAt = alert.CreatedAt
+            }
+        ).Take(5).ToListAsync<dynamic>();
+
+        activeAlertCount = activeAlerts.Count;
+        hasCriticalAlert = activeAlerts.Any(a => a.Severity == "Critical");
+    }
 }
+
+<!DOCTYPE html>
+<html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Capstone_Clinic</title>
+
+    <title>@ViewData["Title"] - Clinic Monitoring System</title>
+
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Capstone_Clinic.styles.css" asp-append-version="true" />
+
+    <style>
+            :root {
+                --cms-sidebar: #1f2933;
+                --cms-sidebar-hover: #2c3945;
+                --cms-sidebar-text: #cbd5df;
+                --cms-sidebar-muted: #8996a3;
+                --cms-accent: #2563eb;
+                --cms-bg: #f5f7fa;
+                --cms-border: #e2e6eb;
+                --cms-text: #1f2933;
+            }
+
+            html,
+            body {
+                min-height: 100%;
+            }
+
+            body {
+                margin: 0;
+                background: var(--cms-bg);
+                color: var(--cms-text);
+            }
+
+            /* ==============================
+               APP SHELL
+               ============================== */
+
+            .cms-app {
+                min-height: 100vh;
+            }
+
+            .cms-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                width: 245px;
+                background: var(--cms-sidebar);
+                color: white;
+                z-index: 1040;
+                display: flex;
+                flex-direction: column;
+                border-right: 1px solid rgba(255,255,255,.05);
+            }
+
+            .cms-brand {
+                padding: 24px 22px;
+                border-bottom: 1px solid rgba(255,255,255,.08);
+            }
+
+            .cms-brand-title {
+                font-size: 1.05rem;
+                font-weight: 600;
+                letter-spacing: .2px;
+            }
+
+            .cms-brand-subtitle {
+                margin-top: 3px;
+                font-size: .72rem;
+                color: var(--cms-sidebar-muted);
+            }
+
+            .cms-nav {
+                padding: 20px 12px;
+                flex: 1;
+            }
+
+            .cms-nav-label {
+                padding: 0 12px 8px;
+                font-size: .68rem;
+                font-weight: 600;
+                letter-spacing: .08em;
+                color: var(--cms-sidebar-muted);
+                text-transform: uppercase;
+            }
+
+            .cms-nav-link {
+                display: flex;
+                align-items: center;
+                width: 100%;
+                padding: 10px 12px;
+                margin-bottom: 3px;
+                border-radius: 6px;
+                color: var(--cms-sidebar-text);
+                text-decoration: none;
+                font-size: .9rem;
+                transition: background .15s ease, color .15s ease;
+            }
+
+            .cms-nav-link:hover {
+                background: var(--cms-sidebar-hover);
+                color: white;
+            }
+
+            .cms-nav-link.active {
+                background: #334155;
+                color: white;
+                font-weight: 600;
+            }
+
+            .cms-nav-link.active::before {
+                content: "";
+                width: 3px;
+                height: 18px;
+                margin-right: 9px;
+                margin-left: -12px;
+                background: #60a5fa;
+                border-radius: 0 3px 3px 0;
+            }
+
+            .cms-nav-divider {
+                height: 1px;
+                background: rgba(255,255,255,.08);
+                margin: 18px 12px;
+            }
+
+            .cms-quick-action {
+                display: block;
+                padding: 9px 12px;
+                margin-bottom: 4px;
+                border-radius: 6px;
+                color: #cbd5df;
+                text-decoration: none;
+                font-size: .82rem;
+            }
+
+            .cms-quick-action:hover {
+                background: var(--cms-sidebar-hover);
+                color: white;
+            }
+
+            .cms-sidebar-footer {
+                padding: 14px 12px;
+                border-top: 1px solid rgba(255,255,255,.08);
+            }
+
+            .cms-user-name {
+                padding: 8px 12px;
+                font-size: .78rem;
+                color: var(--cms-sidebar-muted);
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .cms-logout {
+                color: #d8a0a0 !important;
+            }
+
+            .cms-logout:hover {
+                color: #f1b4b4 !important;
+            }
+
+            /* ==============================
+               MAIN AREA
+               ============================== */
+
+            .cms-main {
+                margin-left: 245px;
+                min-height: 100vh;
+            }
+
+            .cms-header {
+                height: 68px;
+                background: white;
+                border-bottom: 1px solid var(--cms-border);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 30px;
+                position: sticky;
+                top: 0;
+                z-index: 1030;
+            }
+
+            .cms-header-title {
+                font-size: 1rem;
+                font-weight: 600;
+                color: #374151;
+            }
+
+            .cms-header-actions {
+                display: flex;
+                align-items: center;
+                gap: 18px;
+            }
+
+            .cms-user {
+                font-size: .85rem;
+                color: #64748b;
+            }
+
+            .cms-content {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 30px;
+            }
+
+            /* ==============================
+               NOTIFICATIONS
+               ============================== */
+
+            .cms-notification {
+                color: #64748b;
+                text-decoration: none;
+                font-size: .88rem;
+                cursor: pointer;
+            }
+
+            .cms-notification:hover {
+                color: #1f2937;
+            }
+
+            .cms-notification.critical {
+                color: #dc2626;
+                font-weight: 600;
+            }
+
+            .cms-notification-badge {
+                font-size: .65rem;
+                vertical-align: top;
+                margin-left: 3px;
+            }
+
+            .cms-notification-menu {
+                min-width: 350px;
+                border: 1px solid var(--cms-border);
+                border-radius: 8px;
+            }
+
+            /* ==============================
+               MOBILE
+               ============================== */
+
+            .cms-menu-button {
+                display: none;
+                border: 0;
+                background: transparent;
+                font-size: 1.25rem;
+                color: #475569;
+            }
+
+            .cms-sidebar-overlay {
+                display: none;
+            }
+
+            @@media (max-width: 991.98px) {
+
+                .cms-sidebar {
+                    transform: translateX(-100%);
+                    transition: transform .2s ease;
+                }
+
+                .cms-sidebar.open {
+                    transform: translateX(0);
+                }
+
+                .cms-sidebar-overlay {
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(15, 23, 42, .45);
+                    z-index: 1035;
+                }
+
+                .cms-sidebar-overlay.show {
+                    display: block;
+                }
+
+                .cms-main {
+                    margin-left: 0;
+                }
+
+                .cms-menu-button {
+                    display: inline-block;
+                }
+
+                .cms-header {
+                    padding: 0 18px;
+                }
+
+                .cms-content {
+                    padding: 20px;
+                }
+
+                .cms-user {
+                    display: none;
+                }
+            }
+
+            @@media (max-width: 575.98px) {
+
+                .cms-content {
+                    padding: 15px;
+                }
+
+                .cms-notification-menu {
+                    position: fixed !important;
+                    left: 15px !important;
+                    right: 15px !important;
+                    width: auto;
+                    min-width: 0;
+                }
+            }
+    </style>
 </head>
+
 <body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom shadow-sm sticky-top">
-            <div class="container">
-                <a class="navbar-brand fw-bold" asp-page="/Index">
-                    🏥 Clinic Monitoring System
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
 
-                        @if (User.Identity?.IsAuthenticated == true)
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link @(currentPage == "/Index" ? "active fw-bold text-primary" : "")"
-                                   asp-page="/Index">
-                                    🏠 Dashboard
-                                </a>
-                            </li>
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div class="cms-app">
 
-                            <li class="nav-item">
-                                <a class="nav-link @(currentPage == "/Student/Search" ? "active fw-bold text-primary" : "")"
-                                   asp-page="/Student/Search">
-                                    👤 Student Lookup
-                                </a>
-                            </li>
+            <!-- SIDEBAR -->
+            <aside class="cms-sidebar" id="cmsSidebar">
 
-                            <li class="nav-item">
-                                <a class="nav-link @(currentPage == "/MedicalRecordPages/Index" ? "active fw-bold text-primary" : "")"
-                                   asp-page="/MedicalRecordPages/Index">
-                                    📄 Medical Records
-                                </a>
-                            </li>
+                <div class="cms-brand">
+                    <div class="cms-brand-title">
+                        CdM Clinic
+                    </div>
 
-                            <li class="nav-item">
-                                <a class="nav-link @(currentPage!.StartsWith("/VitalSignLogPages") ? "active fw-bold text-primary" : "")"
-                                   asp-page="/VitalSignLogPages/Index">
-                                    ❤️ Vital Signs
-                                </a>
-                            </li>
+                    <div class="cms-brand-subtitle">
+                        Clinic Monitoring System
+                    </div>
+                </div>
 
-                            <li class="nav-item dropdown">
+                <nav class="cms-nav">
 
-                                <a class="nav-link dropdown-toggle position-relative @(currentPage!.StartsWith("/AlertPages") ? "active fw-bold text-primary" : "") @(hasCriticalAlert ? "text-danger fw-bold" : "")"
-                                   href="#"
-                                   id="notificationDropdown"
-                                   role="button"
-                                   data-bs-toggle="dropdown"
-                                   aria-expanded="false">
+                    <div class="cms-nav-label">
+                        Main
+                    </div>
 
-                                    🔔 Notifications
+                    <a class="cms-nav-link @(currentPage == "/Index" ? "active" : "")"
+                       asp-page="/Index">
+                        Dashboard
+                    </a>
 
-                                    @if (activeAlertCount > 0)
-                                    {
-                                        <span class="badge bg-danger rounded-pill ms-1">
-                                            @activeAlertCount
-                                        </span>
-                                    }
+                    <a class="cms-nav-link @(currentPage == "/Student/Search" ? "active" : "")"
+                       asp-page="/Student/Search">
+                        Patients
+                    </a>
 
-                                </a>
+                    <a class="cms-nav-link @(currentPage == "/MedicalRecordPages/Index" ? "active" : "")"
+                       asp-page="/MedicalRecordPages/Index">
+                        Medical Records
+                    </a>
 
-                                <ul class="dropdown-menu dropdown-menu-end shadow"
-                                    aria-labelledby="notificationDropdown"
-                                    style="min-width: 350px;">
+                    <a class="cms-nav-link @(currentPage?.StartsWith("/VitalSignLogPages") == true ? "active" : "")"
+                       asp-page="/VitalSignLogPages/Index">
+                        Vital Signs
+                    </a>
 
+                    <a class="cms-nav-link @(currentPage?.StartsWith("/AlertPages") == true ? "active" : "")"
+                       asp-page="/AlertPages/Index">
+                        Alerts
+                    </a>
+
+                    <a class="cms-nav-link @(currentPage?.StartsWith("/Reports") == true ? "active" : "")"
+                       asp-page="/Reports/Index">
+                        Reports
+                    </a>
+
+                    <div class="cms-nav-divider"></div>
+
+                    <div class="cms-nav-label">
+                        Quick Actions
+                    </div>
+
+                    <a class="cms-quick-action"
+                       asp-page="/MedicalRecordPages/Create">
+                        + New Consultation
+                    </a>
+
+                    <a class="cms-quick-action"
+                       asp-page="/VitalSignLogPages/Create">
+                        + Record Vital Signs
+                    </a>
+
+                    <a class="cms-quick-action"
+                       asp-page="/Student/Create">
+                        + Register Patient
+                    </a>
+
+                </nav>
+
+                <div class="cms-sidebar-footer">
+
+                    <div class="cms-user-name">
+                        @User.Identity?.Name
+                    </div>
+
+                    <a class="cms-nav-link cms-logout"
+                       asp-page="/Logout">
+                        Logout
+                    </a>
+
+                </div>
+
+            </aside>
+
+            <div class="cms-sidebar-overlay" id="cmsSidebarOverlay"></div>
+
+            <!-- MAIN -->
+            <div class="cms-main">
+
+                <header class="cms-header">
+
+                    <div class="d-flex align-items-center gap-2">
+
+                        <button class="cms-menu-button"
+                                type="button"
+                                id="cmsMenuButton"
+                                aria-label="Open navigation">
+                            ☰
+                        </button>
+
+                        <div class="cms-header-title">
+                            @(ViewData["Title"] ?? "Clinic Dashboard")
+                        </div>
+
+                    </div>
+
+                    <div class="cms-header-actions">
+
+                        <!-- Notifications -->
+                        <div class="dropdown">
+
+                            <a class="cms-notification dropdown-toggle @(hasCriticalAlert ? "critical" : "")"
+                               href="#"
+                               id="notificationDropdown"
+                               role="button"
+                               data-bs-toggle="dropdown"
+                               aria-expanded="false">
+
+                                Notifications
+
+                                @if (activeAlertCount > 0)
+                                {
+                                    <span class="badge bg-danger rounded-pill cms-notification-badge">
+                                        @activeAlertCount
+                                    </span>
+                                }
+
+                            </a>
+
+                            <ul class="dropdown-menu dropdown-menu-end shadow cms-notification-menu"
+                                aria-labelledby="notificationDropdown">
+
+                                <li>
+                                    <h6 class="dropdown-header">
+                                        Active Notifications
+                                    </h6>
+                                </li>
+
+                                @if (activeAlerts.Count == 0)
+                                {
                                     <li>
-                                        <h6 class="dropdown-header">
-                                            🔔 Active Notifications
-                                        </h6>
+                                        <span class="dropdown-item-text text-muted">
+                                            No active alerts.
+                                        </span>
                                     </li>
-
-                                    @if (activeAlerts.Count == 0)
+                                }
+                                else
+                                {
+                                    @foreach (var alert in activeAlerts)
                                     {
                                         <li>
-                                            <span class="dropdown-item-text text-muted">
-                                                No active alerts.
-                                            </span>
+                                            <a class="dropdown-item"
+                                               asp-page="/AlertPages/Index">
+
+                                                <div class="fw-semibold">
+                                                    @if (alert.Severity == "Critical")
+                                                    {
+                                                        <span class="text-danger">
+                                                            Critical
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-warning">
+                                                            Warning
+                                                        </span>
+                                                    }
+                                                </div>
+
+                                                <div>
+                                                    @alert.PatientName
+                                                </div>
+
+                                                <small class="text-muted">
+                                                    @alert.AlertType
+                                                    · @alert.CreatedAt.ToString("MMM d, h:mm tt")
+                                                </small>
+
+                                            </a>
                                         </li>
                                     }
-                                    else
-                                    {
-                                        @foreach (var alert in activeAlerts)
-                                        {
-                                            <li>
-                                                <a class="dropdown-item"
-                                                   asp-page="/AlertPages/Index">
+                                }
 
-                                                    <div class="fw-semibold">
-                                                        @if (alert.Severity == "Critical")
-                                                        {
-                                                            <span class="text-danger">🚨 Critical</span>
-                                                        }
-                                                        else
-                                                        {
-                                                            <span class="text-warning">⚠️ Warning</span>
-                                                        }
-                                                    </div>
+                                <li>
+                                    <hr class="dropdown-divider" />
+                                </li>
 
-                                                    <div>
-                                                        @alert.PatientName
-                                                    </div>
+                                <li>
+                                    <a class="dropdown-item text-center fw-semibold"
+                                       asp-page="/AlertPages/Index">
+                                        View All Alerts
+                                    </a>
+                                </li>
 
-                                                    <small class="text-muted">
-                                                        @alert.AlertType
-                                                        · @alert.CreatedAt.ToString("MMM d, h:mm tt")
-                                                    </small>
+                            </ul>
 
-                                                </a>
-                                            </li>
-                                        }
-                                    }
+                        </div>
 
-                                    <li>
-                                        <hr class="dropdown-divider" />
-                                    </li>
+                        <span class="cms-user">
+                            @User.Identity?.Name
+                        </span>
 
-                                    <li>
-                                        <a class="dropdown-item text-center fw-semibold text-primary"
-                                           asp-page="/AlertPages/Index">
-                                            View All Alerts →
-                                        </a>
-                                    </li>
+                    </div>
 
-                                </ul>
+                </header>
 
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link @(currentPage!.StartsWith("/Reports") ? "active fw-bold text-primary" : "")"
-                                   asp-page="/Reports/Index">
-                                    📊 Reports
-                                </a>
-                            </li>
+                <main role="main" class="cms-content">
+                    @RenderBody()
+                </main>
 
-                            <li class="nav-item ms-auto">
-                                <span class="nav-link text-secondary">
-                                    👤 @User.Identity?.Name
-                                </span>
-                            </li>
-
-                            <li class="nav-item">
-                                <a class="nav-link text-danger"
-                                   asp-page="/Logout">
-                                    🚪 Logout
-                                </a>
-                            </li>
-                        }
-                        else
-                        {
-                            <li class="nav-item ms-auto">
-                                <a class="nav-link text-primary"
-                                   asp-page="/Login">
-                                    🔐 Login
-                                </a>
-                            </li>
-                        }
-
-                    </ul>
-                </div>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+
+        </div>
+    }
+    else
+    {
+        <!-- LOGIN / PUBLIC PAGES -->
+        <main role="main">
             @RenderBody()
         </main>
-    </div>
+    }
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 Clinic Monitoring System
-        </div>
-    </footer>
-
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    
+    <!-- Critical Alert Popup -->
     @if (TempData["CriticalAlertMessage"] != null)
     {
         <div class="modal fade"
@@ -240,7 +607,7 @@
 
                         <h5 class="modal-title"
                             id="criticalAlertModalLabel">
-                            🚨 CRITICAL VITAL SIGN ALERT
+                            Critical Vital Sign Alert
                         </h5>
 
                         <button type="button"
@@ -302,6 +669,46 @@
         </script>
     }
 
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2026 Clinic Monitoring System
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+            document.addEventListener("DOMContentLoaded", function () {
+
+                const menuButton =
+                    document.getElementById("cmsMenuButton");
+
+                const sidebar =
+                    document.getElementById("cmsSidebar");
+
+                const overlay =
+                    document.getElementById("cmsSidebarOverlay");
+
+                if (menuButton && sidebar && overlay) {
+
+                    menuButton.addEventListener("click", function () {
+                        sidebar.classList.add("open");
+                        overlay.classList.add("show");
+                    });
+
+                    overlay.addEventListener("click", function () {
+                        sidebar.classList.remove("open");
+                        overlay.classList.remove("show");
+                    });
+
+                }
+
+            });
+    </script>
+
     @await RenderSectionAsync("Scripts", required: false)
+
 </body>
 </html>

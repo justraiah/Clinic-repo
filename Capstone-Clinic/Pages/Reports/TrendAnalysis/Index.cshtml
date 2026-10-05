@@ -5,209 +5,451 @@
     ViewData["Title"] = "Trend Analysis Reports";
 }
 
-<div class="container-fluid">
+<style>
+    .trend-header {
+        margin-bottom: 24px;
+    }
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    .trend-title {
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: #1e3a5f;
+        margin-bottom: 5px;
+        position: relative;
+        padding-left: 14px;
+    }
+
+        .trend-title::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 4px;
+            bottom: 4px;
+            width: 4px;
+            border-radius: 3px;
+            background: #2563eb;
+        }
+
+    .trend-subtitle {
+        color: #64748b;
+        font-size: .88rem;
+        margin: 0;
+    }
+
+    .trend-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+        .trend-actions .btn {
+            font-size: .75rem;
+        }
+
+    .summary-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 12px;
+        margin-bottom: 20px;
+    }
+
+    .summary-card {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 7px;
+        padding: 17px;
+        border-top: 3px solid #2563eb;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .03);
+    }
+
+        .summary-card.patients {
+            border-top-color: #64748b;
+        }
+
+        .summary-card.alerts {
+            border-top-color: #dc2626;
+        }
+
+        .summary-card.heart-rate {
+            border-top-color: #16a34a;
+        }
+
+    .summary-label {
+        color: #64748b;
+        font-size: .72rem;
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
+
+    .summary-value {
+        color: #1f2933;
+        font-size: 1.35rem;
+        font-weight: 600;
+        line-height: 1.2;
+    }
+
+        .summary-value.alert-value {
+            color: #dc2626;
+        }
+
+        .summary-value.heart-rate-value {
+            color: #15803d;
+        }
+
+    .summary-note {
+        margin-top: 5px;
+        color: #94a3b8;
+        font-size: .68rem;
+    }
+
+    .report-panel {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 18px;
+    }
+
+    .report-panel-header {
+        padding: 16px 20px;
+        background: #fbfcfe;
+        border-bottom: 1px solid #e2e6eb;
+        border-left: 3px solid #2563eb;
+    }
+
+    .report-panel-title {
+        margin: 0;
+        color: #1f2933;
+        font-size: .95rem;
+        font-weight: 600;
+    }
+
+    .report-panel-description {
+        margin: 3px 0 0;
+        color: #94a3b8;
+        font-size: .74rem;
+    }
+
+    .report-panel-body {
+        padding: 20px;
+    }
+
+    .chart-container {
+        position: relative;
+        width: 100%;
+        height: 330px;
+    }
+
+    .chart-container-small {
+        position: relative;
+        width: 100%;
+        height: 280px;
+    }
+
+    .insight-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    .insight-item {
+        padding: 13px 14px;
+        margin-bottom: 8px;
+        background: #f8fafc;
+        border: 1px solid #e2e6eb;
+        border-left: 3px solid #2563eb;
+        border-radius: 5px;
+        color: #475569;
+        font-size: .8rem;
+        line-height: 1.45;
+    }
+
+        .insight-item:last-child {
+            margin-bottom: 0;
+        }
+
+    @@media (max-width: 991.98px) {
+        .summary-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        .summary-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .trend-actions {
+            width: 100%;
+        }
+
+            .trend-actions .btn {
+                width: 100%;
+            }
+
+        .chart-container {
+            height: 280px;
+        }
+
+        .chart-container-small {
+            height: 250px;
+        }
+    }
+</style>
+
+
+<!-- Header -->
+
+<div class="trend-header">
+
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
 
         <div>
 
+            <h1 class="trend-title">
+                Trend Analysis Reports
+            </h1>
+
+            <p class="trend-subtitle">
+                Comprehensive overview of clinic consultations, alerts, and patient health trends.
+            </p>
+
+        </div>
+
+        <div class="trend-actions">
+
             <a asp-page="/Reports/Index"
-               class="btn btn-outline-secondary btn-sm mb-3">
-
-                <i class="bi bi-arrow-left me-2"></i>
+               class="btn btn-outline-secondary">
                 Back to Reports
-
             </a>
 
-            <h2 class="fw-bold mb-0">
-                Trend Analysis Reports
-            </h2>
-
-            <small class="text-muted">
-                Comprehensive overview of clinic consultations, alerts, and patient health trends.
-            </small>
-
-        </div>
-
-        <a asp-page-handler="ExportPdf"
-           class="btn btn-primary">
-
-            <i class="bi bi-file-earmark-arrow-down me-2"></i>
-            Export PDF
-
-        </a>
-
-    </div>
-
-    <div class="row g-3 mb-4">
-
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 border-start border-4 border-primary">
-                <div class="card-body">
-                    <small class="text-muted">
-                        <i class="bi bi-file-earmark-medical text-primary me-1"></i>
-                        Total Consultations
-                    </small>
-                    <h2 class="fw-bold display-6 text-primary mt-2">
-                        @Model.TotalConsultations
-                    </h2>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 border-start border-4 border-success h-100">
-                <div class="card-body">
-
-                    <small class="text-muted">
-                        <i class="bi bi-people-fill text-success me-1"></i>
-                        Patients Served
-                    </small>
-
-                    <h2 class="fw-bold display-6 text-success mt-2">
-                        @Model.PatientsServed
-                    </h2>
-
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 border-start border-4 border-danger h-100">
-                <div class="card-body">
-
-                    <small class="text-muted">
-                        <i class="bi bi-exclamation-triangle-fill text-danger me-1"></i>
-                        Health Alerts
-                    </small>
-
-                    <h2 class="fw-bold display-6 text-danger mt-2">
-                        @Model.HealthAlerts
-                    </h2>
-
-                </div>
-            </div>
-        </div>
-
-        <div class="col-md-3">
-            <div class="card shadow-sm border-0 border-start border-4 border-info h-100">
-                <div class="card-body">
-
-                    <small class="text-muted">
-                        <i class="bi bi-heart-pulse-fill text-info me-1"></i>
-                        Average Heart Rate
-                    </small>
-
-                    <h2 class="fw-bold display-6 text-info mt-2">
-                        @Model.AverageHeartRate.ToString("F1") BPM
-                    </h2>
-
-                </div>
-            </div>
-        </div>
-
-    </div>
-
-    <div class="row g-4">
-
-        <!-- Main Chart -->
-        <div class="col-12">
-
-            <div class="card shadow-sm border-0">
-
-                <div class="card-header fw-semibold">
-                    Monthly Consultation Trend
-                </div>
-
-                <div class="card-body">
-
-                    <canvas id="consultationChart" height="110"></canvas>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="col-lg-6">
-
-            <div class="card shadow-sm border-0 h-100">
-
-                <div class="card-header fw-semibold">
-                    Alert Distribution
-                </div>
-
-                <div class="card-body d-flex justify-content-center align-items-center">
-
-                    <div style="width:250px; height:250px;">
-                        <canvas id="alertChart"></canvas>
-                    </div>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="col-lg-6">
-
-            <div class="card shadow-sm border-0 h-100">
-
-                <div class="card-header fw-semibold">
-                    Top Visit Reasons
-                </div>
-
-                <div class="card-body">
-
-                    <canvas id="visitReasonChart" height="220"></canvas>
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <!-- Insights -->
-        <div class="col-12">
-
-            <div class="card shadow-sm border-0">
-
-                <div class="card-header fw-semibold">
-                    Insights
-                </div>
-
-                <div class="card-body">
-
-                    <ul class="mb-0">
-
-                        @foreach (var item in Model.Insights)
-                        {
-                            <li>@item</li>
-                        }
-
-                    </ul>
-
-                </div>
-
-            </div>
+            <a asp-page-handler="ExportPdf"
+               class="btn btn-primary">
+                Export PDF
+            </a>
 
         </div>
 
     </div>
-    
 
 </div>
+
+
+<!-- Summary -->
+
+<div class="summary-grid">
+
+    <div class="summary-card">
+
+        <div class="summary-label">
+            Total Consultations
+        </div>
+
+        <div class="summary-value">
+            @Model.TotalConsultations
+        </div>
+
+        <div class="summary-note">
+            Recorded clinic consultations
+        </div>
+
+    </div>
+
+
+    <div class="summary-card patients">
+
+        <div class="summary-label">
+            Patients Served
+        </div>
+
+        <div class="summary-value">
+            @Model.PatientsServed
+        </div>
+
+        <div class="summary-note">
+            Patients represented in records
+        </div>
+
+    </div>
+
+
+    <div class="summary-card alerts">
+
+        <div class="summary-label">
+            Health Alerts
+        </div>
+
+        <div class="summary-value alert-value">
+            @Model.HealthAlerts
+        </div>
+
+        <div class="summary-note">
+            Alerts generated by the system
+        </div>
+
+    </div>
+
+
+    <div class="summary-card heart-rate">
+
+        <div class="summary-label">
+            Average Heart Rate
+        </div>
+
+        <div class="summary-value heart-rate-value">
+            @Model.AverageHeartRate.ToString("F1") BPM
+        </div>
+
+        <div class="summary-note">
+            Average recorded heart rate
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Monthly Consultation Trend -->
+
+<div class="report-panel">
+
+    <div class="report-panel-header">
+
+        <h2 class="report-panel-title">
+            Monthly Consultation Trend
+        </h2>
+
+        <p class="report-panel-description">
+            Number of recorded consultations by month.
+        </p>
+
+    </div>
+
+    <div class="report-panel-body">
+
+        <div class="chart-container">
+            <canvas id="consultationChart"></canvas>
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Alert Distribution / Visit Reasons -->
+
+<div class="row g-3">
+
+    <div class="col-lg-6">
+
+        <div class="report-panel h-100">
+
+            <div class="report-panel-header">
+
+                <h2 class="report-panel-title">
+                    Alert Distribution
+                </h2>
+
+                <p class="report-panel-description">
+                    Current distribution of alert statuses.
+                </p>
+
+            </div>
+
+            <div class="report-panel-body">
+
+                <div class="chart-container-small">
+                    <canvas id="alertChart"></canvas>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div class="col-lg-6">
+
+        <div class="report-panel h-100">
+
+            <div class="report-panel-header">
+
+                <h2 class="report-panel-title">
+                    Top Visit Reasons
+                </h2>
+
+                <p class="report-panel-description">
+                    Most frequently recorded reasons for clinic visits.
+                </p>
+
+            </div>
+
+            <div class="report-panel-body">
+
+                <div class="chart-container-small">
+                    <canvas id="visitReasonChart"></canvas>
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Insights -->
+
+<div class="report-panel">
+
+    <div class="report-panel-header">
+
+        <h2 class="report-panel-title">
+            Insights
+        </h2>
+
+        <p class="report-panel-description">
+            Automatically generated observations from the available clinic data.
+        </p>
+
+    </div>
+
+    <div class="report-panel-body">
+
+        <ul class="insight-list">
+
+            @foreach (var item in Model.Insights)
+            {
+                <li class="insight-item">
+                    @item
+                </li>
+            }
+
+        </ul>
+
+    </div>
+
+</div>
+
+
 @section Scripts {
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthLabels));
-        const values = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthConsultationCounts));
-    </script>
+
     <script>
 
-        const ctx = document.getElementById('consultationChart');
+        const labels =
+            @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthLabels));
 
-        new Chart(ctx, {
+        const values =
+            @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MonthConsultationCounts));
+
+        const consultationCtx =
+            document.getElementById('consultationChart');
+
+        new Chart(consultationCtx, {
 
             type: 'line',
 
@@ -221,19 +463,25 @@
 
                     data: values,
 
-                    borderWidth: 3,
+                    borderWidth: 2,
 
                     tension: .35,
 
                     fill: true,
 
-                    backgroundColor: 'rgba(13,110,253,.12)',
+                    backgroundColor: 'rgba(37, 99, 235, .08)',
 
-                    borderColor: '#0d6efd',
+                    borderColor: '#2563eb',
 
-                    pointRadius: 5,
+                    pointBackgroundColor: '#2563eb',
 
-                    pointHoverRadius: 7
+                    pointBorderColor: '#ffffff',
+
+                    pointBorderWidth: 2,
+
+                    pointRadius: 4,
+
+                    pointHoverRadius: 6
 
                 }]
 
@@ -248,9 +496,7 @@
                 plugins: {
 
                     legend: {
-
                         display: false
-
                     }
 
                 },
@@ -262,9 +508,7 @@
                         beginAtZero: true,
 
                         ticks: {
-
                             precision: 0
-
                         }
 
                     }
@@ -275,10 +519,9 @@
 
         });
 
-    </script>
-    <script>
 
-        const alertCtx = document.getElementById('alertChart');
+        const alertCtx =
+            document.getElementById('alertChart');
 
         new Chart(alertCtx, {
 
@@ -287,11 +530,9 @@
             data: {
 
                 labels: [
-
                     'Active',
                     'Acknowledged',
                     'Resolved'
-
                 ],
 
                 datasets: [{
@@ -305,36 +546,42 @@
                     ],
 
                     backgroundColor: [
-
-                        '#dc3545',
-                        '#ffc107',
-                        '#198754'
-
+                        '#dc2626',
+                        '#d97706',
+                        '#16a34a'
                     ],
 
-                    borderWidth: 1
+                    borderWidth: 1,
+
+                    borderColor: '#ffffff'
 
                 }]
 
             },
 
             options: {
+
                 responsive: true,
+
                 maintainAspectRatio: false,
-                cutout: '50%',
+
+                cutout: '55%',
+
                 plugins: {
+
                     legend: {
                         position: 'bottom'
                     }
+
                 }
+
             }
 
         });
 
-    </script>
-    <script>
 
-        const visitReasonCtx = document.getElementById('visitReasonChart');
+        const visitReasonCtx =
+            document.getElementById('visitReasonChart');
 
         new Chart(visitReasonCtx, {
 
@@ -342,17 +589,19 @@
 
             data: {
 
-                labels: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.VisitReasonLabels)),
+                labels:
+                    @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.VisitReasonLabels)),
 
                 datasets: [{
 
                     label: 'Number of Visits',
 
-                    data: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.VisitReasonCounts)),
+                    data:
+                        @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.VisitReasonCounts)),
 
-                    backgroundColor: '#0d6efd',
+                    backgroundColor: '#2563eb',
 
-                    borderRadius: 8,
+                    borderRadius: 5,
 
                     borderSkipped: false
 
@@ -364,12 +613,12 @@
 
                 responsive: true,
 
+                maintainAspectRatio: false,
+
                 plugins: {
 
                     legend: {
-
                         display: false
-
                     }
 
                 },
@@ -381,9 +630,7 @@
                         beginAtZero: true,
 
                         ticks: {
-
                             precision: 0
-
                         }
 
                     }
@@ -395,4 +642,5 @@
         });
 
     </script>
+
 }

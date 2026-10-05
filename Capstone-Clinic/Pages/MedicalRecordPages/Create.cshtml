@@ -1,155 +1,434 @@
 @page
 @model Capstone_Clinic.Pages.MedicalRecordPages.CreateModel
+
 @{
     ViewData["Title"] = "New Consultation";
 }
 
-<div class="container-xl mt-4">
+<style>
+    .consultation-header {
+        margin-bottom: 24px;
+    }
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    .consultation-title {
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: #1e3a5f;
+        margin-bottom: 5px;
+        position: relative;
+        padding-left: 14px;
+    }
+
+    .consultation-title::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 4px;
+        bottom: 4px;
+        width: 4px;
+        border-radius: 3px;
+        background: #2563eb;
+    }
+
+    .consultation-subtitle {
+        color: #64748b;
+        font-size: .88rem;
+        margin: 0;
+    }
+
+    .consultation-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .consultation-actions .btn {
+        font-size: .75rem;
+    }
+
+    .record-panel {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 18px;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, .03);
+    }
+
+    .record-panel-header {
+        padding: 16px 20px;
+        background: #fbfcfe;
+        border-bottom: 1px solid #e2e6eb;
+        border-left: 3px solid #2563eb;
+    }
+
+    .record-panel-header.treatment {
+        border-left-color: #64748b;
+    }
+
+    .record-panel-header.notes {
+        border-left-color: #475569;
+    }
+
+    .record-panel-title {
+        margin: 0;
+        color: #1f2933;
+        font-size: .95rem;
+        font-weight: 600;
+    }
+
+    .record-panel-description {
+        margin: 3px 0 0;
+        color: #94a3b8;
+        font-size: .74rem;
+    }
+
+    .record-panel-body {
+        padding: 20px;
+    }
+
+    .patient-summary {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
+
+    .patient-summary-item {
+        padding: 13px 14px;
+        background: #f8fafc;
+        border: 1px solid #e2e6eb;
+        border-radius: 6px;
+    }
+
+    .patient-summary-label {
+        color: #64748b;
+        font-size: .68rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        margin-bottom: 5px;
+    }
+
+    .patient-summary-value {
+        color: #334155;
+        font-size: .8rem;
+        font-weight: 500;
+    }
+
+    .form-label {
+        color: #475569;
+        font-size: .75rem;
+        font-weight: 600;
+        margin-bottom: 6px;
+    }
+
+    .form-control,
+    .form-select {
+        font-size: .8rem;
+        border-color: #d9dee5;
+    }
+
+    .form-control:focus,
+    .form-select:focus {
+        border-color: #2563eb;
+        box-shadow: 0 0 0 .15rem rgba(37, 99, 235, .10);
+    }
+
+    textarea.form-control {
+        resize: vertical;
+    }
+
+    .field-note {
+        margin-top: 5px;
+        color: #94a3b8;
+        font-size: .68rem;
+    }
+
+    .validation-summary {
+        margin-bottom: 18px;
+    }
+
+    .consultation-footer {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 22px;
+        margin-bottom: 30px;
+    }
+
+    .consultation-footer .btn {
+        font-size: .78rem;
+    }
+
+    .patient-type-note {
+        margin-top: 5px;
+        color: #94a3b8;
+        font-size: .68rem;
+    }
+
+    @@media (max-width: 767.98px) {
+
+        .patient-summary {
+            grid-template-columns: 1fr;
+        }
+
+        .consultation-actions {
+            width: 100%;
+        }
+
+        .consultation-actions .btn {
+            width: 100%;
+        }
+
+        .consultation-footer {
+            flex-direction: column;
+        }
+
+        .consultation-footer .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+
+<!-- Header -->
+
+<div class="consultation-header">
+
+    <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+
         <div>
-            <h2 class="fw-bold mb-1">
-                🩺 New Consultation
-            </h2>
-            <p class="text-muted mb-0">
-                Create a new medical record.
+
+            <h1 class="consultation-title">
+                New Consultation
+            </h1>
+
+            <p class="consultation-subtitle">
+                Create a clinic consultation and record the patient's clinical information.
             </p>
+
         </div>
 
-        <a asp-page="/Student/Search"
-           class="btn btn-outline-secondary">
-            ← Back to Student Lookup
-        </a>
+        <div class="consultation-actions">
+
+            <a asp-page="/Student/Search"
+               class="btn btn-outline-secondary">
+                Back to Student Lookup
+            </a>
+
+        </div>
+
     </div>
 
-    <form method="post">
+</div>
 
-        <input type="hidden" asp-for="MedicalRecord.StudentId" />
-        <input type="hidden" asp-for="MedicalRecord.CreatedAt" />
-        <input type="hidden" asp-for="MedicalRecord.UpdatedAt" />
 
-        <div asp-validation-summary="ModelOnly"
-             class="text-danger mb-3">
+<form method="post">
+
+    <input type="hidden" asp-for="MedicalRecord.StudentId" />
+    <input type="hidden" asp-for="MedicalRecord.CreatedAt" />
+    <input type="hidden" asp-for="MedicalRecord.UpdatedAt" />
+
+
+    <div asp-validation-summary="ModelOnly"
+         class="text-danger validation-summary">
+    </div>
+
+
+    <!-- Patient Information -->
+
+    <div class="record-panel">
+
+        <div class="record-panel-header">
+
+            <h2 class="record-panel-title">
+                Patient Information
+            </h2>
+
+            <p class="record-panel-description">
+                Review or enter the patient information for this consultation.
+            </p>
+
         </div>
 
-        <div class="card border-primary mb-4">
 
-            <div class="card-header bg-primary text-white">
-                👤 Patient Information
-            </div>
+        <div class="record-panel-body">
 
-            <div class="card-body">
+            @if (Model.Student != null)
+            {
+                <div class="patient-summary">
 
-                @if (Model.Student != null)
-                {
-                    <div class="row">
+                    <div class="patient-summary-item">
 
-                        <div class="col-md-6 mb-3">
-                            <strong>Full Name</strong><br />
+                        <div class="patient-summary-label">
+                            Full Name
+                        </div>
+
+                        <div class="patient-summary-value">
                             @Model.Student.FullName
                         </div>
 
-                        <div class="col-md-6 mb-3">
-                            <strong>Student Number</strong><br />
+                    </div>
+
+
+                    <div class="patient-summary-item">
+
+                        <div class="patient-summary-label">
+                            Student Number
+                        </div>
+
+                        <div class="patient-summary-value">
                             @Model.Student.StudentNumber
                         </div>
 
-                        <div class="col-md-6">
-                            <strong>Age</strong><br />
+                    </div>
+
+
+                    <div class="patient-summary-item">
+
+                        <div class="patient-summary-label">
+                            Age
+                        </div>
+
+                        <div class="patient-summary-value">
                             @Model.StudentAge years old
                         </div>
 
-                        <div class="col-md-6">
-                            <strong>Course / Year Level</strong><br />
+                    </div>
+
+
+                    <div class="patient-summary-item">
+
+                        <div class="patient-summary-label">
+                            Course / Year Level
+                        </div>
+
+                        <div class="patient-summary-value">
                             @Model.Student.Course • Year @Model.Student.YearLevel
                         </div>
 
                     </div>
-                }
-                else
-                {
-                    <input type="hidden"
-                           asp-for="MedicalRecord.ClinicPatientId" />
 
-                    <div class="row">
+                </div>
+            }
+            else
+            {
+                <input type="hidden"
+                       asp-for="MedicalRecord.ClinicPatientId" />
 
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold">
-                                Patient Type
-                            </label>
+                <div class="row g-3">
 
-                            <select name="CommunityPatientType"
-                                    class="form-select"
-                                @(Model.IsExistingPatient ? "disabled" : "")>
-                                <option value="Faculty"
-                                        selected="@(Model.CommunityPatientType == "Faculty")">
-                                    Faculty
-                                </option>
-                                <option value="Staff"
-                                        selected="@(Model.CommunityPatientType == "Staff")">
-                                    Staff
-                                </option>
-                                <option value="Other Community Member"
-                                        selected="@(Model.CommunityPatientType == "Other Community Member")">
-                                    Other Community Member
-                                </option>
-                            </select>
-                        </div>
+                    <div class="col-md-6">
 
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold">
-                                Full Name
-                            </label>
+                        <label class="form-label">
+                            Patient Type
+                        </label>
 
-                            <input name="CommunityFullName"
-                                   value="@Model.CommunityFullName"
-                                   class="form-control"
-                                   placeholder="Enter full name"
-                            @(Model.IsExistingPatient ? "readonly" : "") />
-                        </div>
+                        <select name="CommunityPatientType"
+                                class="form-select"
+                            @(Model.IsExistingPatient ? "disabled" : "")>
 
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold">
-                                Identifier
-                            </label>
+                            <option value="Faculty"
+                                    selected="@(Model.CommunityPatientType == "Faculty")">
+                                Faculty
+                            </option>
 
-                            <input name="CommunityIdentifier"
-                                   value="@Model.CommunityIdentifier"
-                                   class="form-control"
-                                   placeholder="Employee ID / other identifier"
-                            @(Model.IsExistingPatient ? "readonly" : "") />
-                        </div>
+                            <option value="Staff"
+                                    selected="@(Model.CommunityPatientType == "Staff")">
+                                Staff
+                            </option>
 
-                        <div class="col-md-6 mb-3">
-                            <label class="form-label fw-semibold">
-                                Date of Birth
-                            </label>
+                            <option value="Other Community Member"
+                                    selected="@(Model.CommunityPatientType == "Other Community Member")">
+                                Other Community Member
+                            </option>
 
-                            <input name="CommunityDateOfBirth"
-                                   value="@(Model.CommunityDateOfBirth?.ToString("yyyy-MM-dd"))"
-                                   type="date"
-                                   class="form-control"
-                            @(Model.IsExistingPatient ? "readonly" : "") />
+                        </select>
+
+                        <div class="patient-type-note">
+                            Select the patient's category within the clinic.
                         </div>
 
                     </div>
-                }
 
-            </div>
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Full Name
+                        </label>
+
+                        <input name="CommunityFullName"
+                               value="@Model.CommunityFullName"
+                               class="form-control"
+                               placeholder="Enter full name"
+                            @(Model.IsExistingPatient ? "readonly" : "") />
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Identifier
+                        </label>
+
+                        <input name="CommunityIdentifier"
+                               value="@Model.CommunityIdentifier"
+                               class="form-control"
+                               placeholder="Employee ID / other identifier"
+                            @(Model.IsExistingPatient ? "readonly" : "") />
+
+                    </div>
+
+
+                    <div class="col-md-6">
+
+                        <label class="form-label">
+                            Date of Birth
+                        </label>
+
+                        <input name="CommunityDateOfBirth"
+                               value="@(Model.CommunityDateOfBirth?.ToString("yyyy-MM-dd"))"
+                               type="date"
+                               class="form-control"
+                            @(Model.IsExistingPatient ? "readonly" : "") />
+
+                    </div>
+
+                </div>
+            }
+
         </div>
 
-        <div class="card border-success mb-4">
+    </div>
 
-            <div class="card-header bg-success text-white">
-                🏥 Consultation
-            </div>
 
-            <div class="card-body">
+    <!-- Consultation -->
 
-                <div class="mb-3">
+    <div class="record-panel">
+
+        <div class="record-panel-header">
+
+            <h2 class="record-panel-title">
+                Consultation
+            </h2>
+
+            <p class="record-panel-description">
+                Record the reason for the visit and clinical assessment.
+            </p>
+
+        </div>
+
+
+        <div class="record-panel-body">
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
 
                     <label asp-for="MedicalRecord.VisitDate"
-                           class="form-label fw-semibold">
+                           class="form-label">
                     </label>
 
                     <input asp-for="MedicalRecord.VisitDate"
@@ -162,26 +441,11 @@
 
                 </div>
 
-                <div class="mb-3">
 
-                    <label asp-for="MedicalRecord.ChiefComplaint"
-                           class="form-label fw-semibold">
-                    </label>
-
-                    <textarea asp-for="MedicalRecord.ChiefComplaint"
-                              rows="3"
-                              class="form-control"></textarea>
-
-                    <span asp-validation-for="MedicalRecord.ChiefComplaint"
-                          class="text-danger small">
-                    </span>
-
-                </div>
-
-                <div class="mb-3">
+                <div class="col-md-6">
 
                     <label asp-for="MedicalRecord.PainScale"
-                           class="form-label fw-semibold">
+                           class="form-label">
                         Pain Scale (0–10)
                     </label>
 
@@ -197,15 +461,35 @@
 
                 </div>
 
-                <div class="mb-0">
+
+                <div class="col-12">
+
+                    <label asp-for="MedicalRecord.ChiefComplaint"
+                           class="form-label">
+                    </label>
+
+                    <textarea asp-for="MedicalRecord.ChiefComplaint"
+                              rows="3"
+                              class="form-control"
+                              placeholder="Describe the patient's main complaint or reason for consultation."></textarea>
+
+                    <span asp-validation-for="MedicalRecord.ChiefComplaint"
+                          class="text-danger small">
+                    </span>
+
+                </div>
+
+
+                <div class="col-12">
 
                     <label asp-for="MedicalRecord.Diagnosis"
-                           class="form-label fw-semibold">
+                           class="form-label">
                     </label>
 
                     <textarea asp-for="MedicalRecord.Diagnosis"
                               rows="3"
-                              class="form-control"></textarea>
+                              class="form-control"
+                              placeholder="Enter the clinical diagnosis or assessment."></textarea>
 
                     <span asp-validation-for="MedicalRecord.Diagnosis"
                           class="text-danger small">
@@ -214,75 +498,119 @@
                 </div>
 
             </div>
+
         </div>
 
-        <div class="card border-warning mb-4">
+    </div>
 
-            <div class="card-header bg-warning">
-                💊 Treatment
-            </div>
 
-            <div class="card-body">
+    <!-- Treatment -->
 
-                <div class="mb-3">
+    <div class="record-panel">
+
+        <div class="record-panel-header treatment">
+
+            <h2 class="record-panel-title">
+                Treatment
+            </h2>
+
+            <p class="record-panel-description">
+                Record medications and known allergies relevant to the consultation.
+            </p>
+
+        </div>
+
+
+        <div class="record-panel-body">
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
 
                     <label asp-for="MedicalRecord.Medications"
-                           class="form-label fw-semibold">
+                           class="form-label">
                     </label>
 
                     <textarea asp-for="MedicalRecord.Medications"
-                              rows="3"
-                              class="form-control"></textarea>
+                              rows="4"
+                              class="form-control"
+                              placeholder="Enter prescribed or administered medications."></textarea>
 
                 </div>
 
-                <div class="mb-0">
+
+                <div class="col-md-6">
 
                     <label asp-for="MedicalRecord.Allergies"
-                           class="form-label fw-semibold">
+                           class="form-label">
                     </label>
 
                     <textarea asp-for="MedicalRecord.Allergies"
-                              rows="2"
-                              class="form-control"></textarea>
+                              rows="4"
+                              class="form-control"
+                              placeholder="Enter known allergies or indicate none if applicable."></textarea>
 
                 </div>
 
             </div>
-        </div>
-
-        <div class="card border-secondary mb-4">
-
-            <div class="card-header bg-secondary text-white">
-                📝 Clinical Notes
-            </div>
-
-            <div class="card-body">
-
-                <textarea asp-for="MedicalRecord.ClinicalNotes"
-                          rows="5"
-                          class="form-control"></textarea>
-
-            </div>
 
         </div>
+
+    </div>
+
+
+    <!-- Clinical Notes -->
+
+    <div class="record-panel">
+
+        <div class="record-panel-header notes">
+
+            <h2 class="record-panel-title">
+                Clinical Notes
+            </h2>
+
+            <p class="record-panel-description">
+                Add additional observations or notes from the consultation.
+            </p>
+
+        </div>
+
+
+        <div class="record-panel-body">
+
+            <textarea asp-for="MedicalRecord.ClinicalNotes"
+                      rows="5"
+                      class="form-control"
+                      placeholder="Enter additional clinical observations or notes."></textarea>
+
+        </div>
+
+    </div>
+
+
+    <!-- Actions -->
+
+    <div class="consultation-footer">
 
         <button type="submit"
                 class="btn btn-primary">
-            💾 Save Consultation
+            Save Consultation
         </button>
 
         <a asp-page="/Student/Search"
-           class="btn btn-outline-secondary ms-2">
+           class="btn btn-outline-secondary">
             Cancel
         </a>
 
-    </form>
+    </div>
 
-</div>
+</form>
+
 
 @section Scripts {
+
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
 }

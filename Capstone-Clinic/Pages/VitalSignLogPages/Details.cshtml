@@ -2,142 +2,523 @@
 @model Capstone_Clinic.Pages.VitalSignLogPages.DetailsModel
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Vital Sign Details";
+
+    var statusClass = Model.VitalSignLog.Status switch
+    {
+        "Critical" => "status-critical",
+        "Warning" => "status-warning",
+        _ => "status-normal"
+    };
+
+    var statusPanelClass = Model.VitalSignLog.Status switch
+    {
+        "Critical" => "status-panel-critical",
+        "Warning" => "status-panel-warning",
+        _ => "status-panel-normal"
+    };
 }
 
-<div class="container-xl mt-4">
+<style>
+    .vital-details-header {
+        margin-bottom: 24px;
+    }
 
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    .vital-details-title {
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: #1e3a5f;
+        margin-bottom: 5px;
+        position: relative;
+        padding-left: 14px;
+    }
 
-        <div>
+    .vital-details-title::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 4px;
+        bottom: 4px;
+        width: 4px;
+        border-radius: 3px;
+        background: #2563eb;
+    }
 
-            <h2 class="fw-bold mb-1">
-                ❤️ Vital Sign Details
-            </h2>
+    .vital-details-subtitle {
+        color: #64748b;
+        font-size: .88rem;
+        margin: 0;
+    }
 
-            <p class="text-muted mb-0">
-                View the recorded vital signs for this clinic visit.
-            </p>
+    .details-panel {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 18px;
+    }
 
-        </div>
+    .details-panel-header {
+        padding: 16px 20px;
+        background: #fbfcfe;
+        border-bottom: 1px solid #e2e6eb;
+        border-left: 3px solid #2563eb;
+    }
 
-        <a asp-page="./Index"
-           asp-route-medicalRecordId="@Model.MedicalRecordId"
-           class="btn btn-outline-secondary">
-            ← Back to History
-        </a>
+    .details-panel-title {
+        margin: 0;
+        color: #1f2933;
+        font-size: .95rem;
+        font-weight: 600;
+    }
 
-    </div>
+    .details-panel-description {
+        margin: 3px 0 0;
+        color: #94a3b8;
+        font-size: .74rem;
+    }
 
-    <div class="card border-danger">
+    .details-panel-body {
+        padding: 20px;
+    }
 
-        <div class="card-header bg-danger text-white">
-            ❤️ Vital Sign Record
-        </div>
+    .patient-name {
+        color: #1e3a5f;
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin: 0;
+    }
 
-        <div class="card-body">
+    .patient-label {
+        color: #94a3b8;
+        font-size: .7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        margin-bottom: 4px;
+    }
 
-<div class="card-body">
+    .status-panel {
+        border-radius: 7px;
+        padding: 15px 17px;
+        border: 1px solid #e2e6eb;
+        background: #ffffff;
+    }
 
-    <div class="mb-4">
-        <h5 class="text-primary">👤 Student</h5>
-        <p class="fs-5 mb-0">@Model.StudentName</p>
-    </div>
+    .status-panel-normal {
+        border-left: 4px solid #16a34a;
+    }
 
-    <hr />
+    .status-panel-warning {
+        border-left: 4px solid #d97706;
+    }
 
-    <div class="row">
+    .status-panel-critical {
+        border-left: 4px solid #dc2626;
+    }
 
-        <div class="col-md-6 mb-3">
-            <strong>🩺 Visit Reason</strong><br />
-            @(string.IsNullOrWhiteSpace(Model.VitalSignLog.VisitReason)
-                ? "—"
-                : Model.VitalSignLog.VisitReason)
-        </div>
+    .status-label {
+        color: #64748b;
+        font-size: .7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .03em;
+        margin-bottom: 6px;
+    }
 
-        <div class="col-md-6 mb-3">
-            <strong>📊 Status</strong><br />
+    .status-value {
+        font-size: 1.05rem;
+        font-weight: 600;
+    }
 
-            @if (Model.VitalSignLog.Status == "Critical")
-            {
-                <span class="badge bg-danger">🔴 Critical</span>
-            }
-            else if (Model.VitalSignLog.Status == "Warning")
-            {
-                <span class="badge bg-warning text-dark">🟡 Warning</span>
-            }
-            else
-            {
-                <span class="badge bg-success">🟢 Normal</span>
-            }
+    .status-normal {
+        color: #15803d;
+    }
 
-        </div>
+    .status-warning {
+        color: #b45309;
+    }
 
-        <div class="col-md-6 mb-3">
-            <strong>🌡 Temperature</strong><br />
-            @($"{Model.VitalSignLog.Temperature:F1} °C")
-        </div>
+    .status-critical {
+        color: #dc2626;
+    }
 
-        <div class="col-md-6 mb-3">
-            <strong>❤️ Heart Rate</strong><br />
-            @($"{Model.VitalSignLog.HeartRate} BPM")
-        </div>
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 12px;
+    }
 
-        <div class="col-md-6 mb-3">
-        <strong>🫁 Respiratory Rate</strong><br />
-        @($"{Model.VitalSignLog.RespiratoryRate} breaths/min")
-        </div>
+    .info-item {
+        padding: 14px 15px;
+        background: #f8fafc;
+        border: 1px solid #e2e6eb;
+        border-radius: 6px;
+    }
 
-        <div class="col-md-6 mb-3">
-            <strong>🫁 SpO₂</strong><br />
-            @($"{Model.VitalSignLog.OxygenSaturation}%")
-        </div>
+    .info-label {
+        color: #64748b;
+        font-size: .7rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: .025em;
+        margin-bottom: 5px;
+    }
 
-        <div class="col-md-6 mb-3">
-            <strong>🩸 Blood Pressure</strong><br />
-            @($"{Model.VitalSignLog.SystolicBP}/{Model.VitalSignLog.DiastolicBP} mmHg")
-        </div>
+    .info-value {
+        color: #334155;
+        font-size: .82rem;
+        font-weight: 500;
+        line-height: 1.4;
+        word-break: break-word;
+    }
 
-        <div class="col-md-6 mb-3">
-            <strong>📝 Remarks</strong><br />
-            @(string.IsNullOrWhiteSpace(Model.VitalSignLog.Remarks)
-                ? "—"
-                : Model.VitalSignLog.Remarks)
-        </div>
+    .measurement-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
 
-        <div class="col-md-6 mb-3">
-            <strong>📅 Recorded At</strong><br />
-            @Model.VitalSignLog.RecordedAt.ToString("MMMM dd, yyyy hh:mm tt")
-        </div>
+    .measurement-card {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 7px;
+        padding: 15px;
+        border-top: 3px solid #2563eb;
+    }
 
-        <div class="col-md-6 mb-3">
-            <strong>👨‍⚕️ Recorded By</strong><br />
-            Staff #@Model.VitalSignLog.StaffId
-        </div>
+    .measurement-label {
+        color: #64748b;
+        font-size: .7rem;
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
 
-    </div>
+    .measurement-value {
+        color: #1f2933;
+        font-size: 1.05rem;
+        font-weight: 600;
+    }
+
+    .remarks-box {
+        padding: 14px 15px;
+        background: #f8fafc;
+        border: 1px solid #e2e6eb;
+        border-radius: 6px;
+        color: #475569;
+        font-size: .8rem;
+        line-height: 1.5;
+        min-height: 48px;
+    }
+
+    .details-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .details-actions .btn {
+        font-size: .75rem;
+    }
+
+    @@media (max-width: 767.98px) {
+        .info-grid,
+        .measurement-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .details-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+
+<!-- Header -->
+
+<div class="vital-details-header">
+
+    <h1 class="vital-details-title">
+        Vital Sign Details
+    </h1>
+
+    <p class="vital-details-subtitle">
+        View the recorded vital signs for this clinic visit.
+    </p>
 
 </div>
 
-            <div class="mt-4">
 
-                <a asp-page="./Edit"
-                   asp-route-id="@Model.VitalSignLog.VitalSignLogId"
-                   asp-route-medicalRecordId="@Model.MedicalRecordId"
-                   class="btn btn-warning">
-                    ✏ Edit Record
-                </a>
+<!-- Patient & Status -->
 
-                <a asp-page="./Index"
-                   asp-route-medicalRecordId="@Model.MedicalRecordId"
-                   class="btn btn-outline-secondary ms-2">
-                    Back
-                </a>
+<div class="details-panel">
+
+    <div class="details-panel-header">
+
+        <h2 class="details-panel-title">
+            Patient Information
+        </h2>
+
+        <p class="details-panel-description">
+            Patient associated with this vital-sign record.
+        </p>
+
+    </div>
+
+    <div class="details-panel-body">
+
+        <div class="row g-3">
+
+            <div class="col-md-8">
+
+                <div class="patient-label">
+                    Patient
+                </div>
+
+                <p class="patient-name">
+                    @Model.StudentName
+                </p>
+
+            </div>
+
+            <div class="col-md-4">
+
+                <div class="status-panel @statusPanelClass">
+
+                    <div class="status-label">
+                        Current Status
+                    </div>
+
+                    <div class="status-value @statusClass">
+                        @Model.VitalSignLog.Status
+                    </div>
+
+                </div>
 
             </div>
 
         </div>
 
     </div>
+
+</div>
+
+
+<!-- Visit Information -->
+
+<div class="details-panel">
+
+    <div class="details-panel-header">
+
+        <h2 class="details-panel-title">
+            Visit Information
+        </h2>
+
+        <p class="details-panel-description">
+            Details associated with this recorded measurement.
+        </p>
+
+    </div>
+
+    <div class="details-panel-body">
+
+        <div class="info-grid">
+
+            <div class="info-item">
+
+                <div class="info-label">
+                    Visit Reason
+                </div>
+
+                <div class="info-value">
+                    @(string.IsNullOrWhiteSpace(Model.VitalSignLog.VisitReason)
+                        ? "—"
+                        : Model.VitalSignLog.VisitReason)
+                </div>
+
+            </div>
+
+            <div class="info-item">
+
+                <div class="info-label">
+                    Recorded At
+                </div>
+
+                <div class="info-value">
+                    @Model.VitalSignLog.RecordedAt.ToString("MMMM dd, yyyy hh:mm tt")
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Vital Measurements -->
+
+<div class="details-panel">
+
+    <div class="details-panel-header">
+
+        <h2 class="details-panel-title">
+            Vital Measurements
+        </h2>
+
+        <p class="details-panel-description">
+            Recorded physiological measurements for this visit.
+        </p>
+
+    </div>
+
+    <div class="details-panel-body">
+
+        <div class="measurement-grid">
+
+            <div class="measurement-card">
+
+                <div class="measurement-label">
+                    Temperature
+                </div>
+
+                <div class="measurement-value">
+                    @($"{Model.VitalSignLog.Temperature:F1} °C")
+                </div>
+
+            </div>
+
+            <div class="measurement-card">
+
+                <div class="measurement-label">
+                    Heart Rate
+                </div>
+
+                <div class="measurement-value">
+                    @($"{Model.VitalSignLog.HeartRate} BPM")
+                </div>
+
+            </div>
+
+            <div class="measurement-card">
+
+                <div class="measurement-label">
+                    Respiratory Rate
+                </div>
+
+                <div class="measurement-value">
+                    @($"{Model.VitalSignLog.RespiratoryRate} breaths/min")
+                </div>
+
+            </div>
+
+            <div class="measurement-card">
+
+                <div class="measurement-label">
+                    SpO₂
+                </div>
+
+                <div class="measurement-value">
+                    @($"{Model.VitalSignLog.OxygenSaturation}%")
+                </div>
+
+            </div>
+
+            <div class="measurement-card">
+
+                <div class="measurement-label">
+                    Blood Pressure
+                </div>
+
+                <div class="measurement-value">
+                    @($"{Model.VitalSignLog.SystolicBP}/{Model.VitalSignLog.DiastolicBP} mmHg")
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Record Information -->
+
+<div class="details-panel">
+
+    <div class="details-panel-header">
+
+        <h2 class="details-panel-title">
+            Record Information
+        </h2>
+
+        <p class="details-panel-description">
+            Additional information stored with this vital-sign record.
+        </p>
+
+    </div>
+
+    <div class="details-panel-body">
+
+        <div class="info-grid">
+
+            <div class="info-item">
+
+                <div class="info-label">
+                    Remarks
+                </div>
+
+                <div class="info-value">
+                    @(string.IsNullOrWhiteSpace(Model.VitalSignLog.Remarks)
+                        ? "—"
+                        : Model.VitalSignLog.Remarks)
+                </div>
+
+            </div>
+
+            <div class="info-item">
+
+                <div class="info-label">
+                    Recorded By
+                </div>
+
+                <div class="info-value">
+                    Staff #@Model.VitalSignLog.StaffId
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+
+
+<!-- Actions -->
+
+<div class="details-actions mb-4">
+
+    <a asp-page="./Edit"
+       asp-route-id="@Model.VitalSignLog.VitalSignLogId"
+       asp-route-medicalRecordId="@Model.MedicalRecordId"
+       class="btn btn-primary">
+        Edit Record
+    </a>
+
+    <a asp-page="./Delete"
+       asp-route-id="@Model.VitalSignLog.VitalSignLogId"
+       asp-route-medicalRecordId="@Model.MedicalRecordId"
+       class="btn btn-outline-danger">
+        Delete Record
+    </a>
+
+    <a asp-page="./Index"
+       asp-route-medicalRecordId="@Model.MedicalRecordId"
+       class="btn btn-outline-secondary">
+        Back to History
+    </a>
 
 </div>
