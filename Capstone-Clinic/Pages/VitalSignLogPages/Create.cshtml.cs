@@ -221,6 +221,29 @@ public class CreateModel : PageModel
 
             _context.Alerts.Add(alert);
             await _context.SaveChangesAsync();
+            // Show an immediate popup after a Critical vital-sign record is completed.
+            if (VitalSignLog.Status == "Critical")
+            {
+                var patientName = "patient";
+
+                if (medicalRecord.StudentId.HasValue)
+                {
+                    patientName = await _context.Students
+                        .Where(s => s.StudentId == medicalRecord.StudentId.Value)
+                        .Select(s => s.FullName)
+                        .FirstOrDefaultAsync() ?? "patient";
+                }
+                else
+                {
+                    patientName = await _context.ClinicPatients
+                        .Where(cp => cp.ClinicPatientId == medicalRecord.ClinicPatientId)
+                        .Select(cp => cp.FullName)
+                        .FirstOrDefaultAsync() ?? "patient";
+                }
+
+                TempData["CriticalAlertMessage"] =
+                    $"Critical vital signs detected for {patientName}. {VitalSignLog.Remarks}";
+            }
         }
         Console.WriteLine("===== SAVE HANDLER END =====");
         return RedirectToPage("/MedicalRecordPages/Details",

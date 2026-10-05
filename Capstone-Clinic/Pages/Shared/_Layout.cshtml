@@ -2,8 +2,39 @@
 
 <!DOCTYPE html>
 <html lang="en">
+@using Microsoft.EntityFrameworkCore
+@inject Capstone_Clinic.Data.AppDbContext DbContext
+
 @{
     var currentPage = ViewContext.RouteData.Values["page"]?.ToString();
+
+    var activeAlerts = await (
+        from alert in DbContext.Alerts
+        join vital in DbContext.VitalSignLogs
+            on alert.VitalLogId equals vital.VitalSignLogId
+        join clinicPatient in DbContext.ClinicPatients
+            on vital.ClinicPatientId equals clinicPatient.ClinicPatientId
+        join medical in DbContext.MedicalRecords
+            on vital.MedicalRecordId equals medical.MedicalRecordId
+        join student in DbContext.Students
+            on medical.StudentId equals student.StudentId into studentGroup
+        from student in studentGroup.DefaultIfEmpty()
+        where alert.Status == "Active"
+        orderby alert.CreatedAt descending
+        select new
+        {
+            AlertId = alert.AlertId,
+            PatientName = student != null
+                ? student.FullName
+                : clinicPatient.FullName ?? "Community Member",
+            Severity = vital.Status,
+            AlertType = alert.AlertType,
+            CreatedAt = alert.CreatedAt
+        }
+    ).Take(5).ToListAsync();
+
+    var activeAlertCount = activeAlerts.Count;
+    var hasCriticalAlert = activeAlerts.Any(a => a.Severity == "Critical");
 }
 <head>
     <meta charset="utf-8" />
@@ -57,11 +88,90 @@
                                 </a>
                             </li>
 
-                            <li class="nav-item">
-                                <a class="nav-link @(currentPage!.StartsWith("/AlertPages") ? "active fw-bold text-primary" : "")"
-                                   asp-page="/AlertPages/Index">
-                                    🚨 Alerts
+                            <li class="nav-item dropdown">
+
+                                <a class="nav-link dropdown-toggle position-relative @(currentPage!.StartsWith("/AlertPages") ? "active fw-bold text-primary" : "") @(hasCriticalAlert ? "text-danger fw-bold" : "")"
+                                   href="#"
+                                   id="notificationDropdown"
+                                   role="button"
+                                   data-bs-toggle="dropdown"
+                                   aria-expanded="false">
+
+                                    🔔 Notifications
+
+                                    @if (activeAlertCount > 0)
+                                    {
+                                        <span class="badge bg-danger rounded-pill ms-1">
+                                            @activeAlertCount
+                                        </span>
+                                    }
+
                                 </a>
+
+                                <ul class="dropdown-menu dropdown-menu-end shadow"
+                                    aria-labelledby="notificationDropdown"
+                                    style="min-width: 350px;">
+
+                                    <li>
+                                        <h6 class="dropdown-header">
+                                            🔔 Active Notifications
+                                        </h6>
+                                    </li>
+
+                                    @if (activeAlerts.Count == 0)
+                                    {
+                                        <li>
+                                            <span class="dropdown-item-text text-muted">
+                                                No active alerts.
+                                            </span>
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        @foreach (var alert in activeAlerts)
+                                        {
+                                            <li>
+                                                <a class="dropdown-item"
+                                                   asp-page="/AlertPages/Index">
+
+                                                    <div class="fw-semibold">
+                                                        @if (alert.Severity == "Critical")
+                                                        {
+                                                            <span class="text-danger">🚨 Critical</span>
+                                                        }
+                                                        else
+                                                        {
+                                                            <span class="text-warning">⚠️ Warning</span>
+                                                        }
+                                                    </div>
+
+                                                    <div>
+                                                        @alert.PatientName
+                                                    </div>
+
+                                                    <small class="text-muted">
+                                                        @alert.AlertType
+                                                        · @alert.CreatedAt.ToString("MMM d, h:mm tt")
+                                                    </small>
+
+                                                </a>
+                                            </li>
+                                        }
+                                    }
+
+                                    <li>
+                                        <hr class="dropdown-divider" />
+                                    </li>
+
+                                    <li>
+                                        <a class="dropdown-item text-center fw-semibold text-primary"
+                                           asp-page="/AlertPages/Index">
+                                            View All Alerts →
+                                        </a>
+                                    </li>
+
+                                </ul>
+
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link @(currentPage!.StartsWith("/Reports") ? "active fw-bold text-primary" : "")"
@@ -113,6 +223,84 @@
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
+    
+    @if (TempData["CriticalAlertMessage"] != null)
+    {
+        <div class="modal fade"
+             id="criticalAlertModal"
+             tabindex="-1"
+             aria-labelledby="criticalAlertModalLabel"
+             aria-hidden="true">
+
+            <div class="modal-dialog modal-dialog-centered">
+
+                <div class="modal-content border-danger">
+
+                    <div class="modal-header bg-danger text-white">
+
+                        <h5 class="modal-title"
+                            id="criticalAlertModalLabel">
+                            🚨 CRITICAL VITAL SIGN ALERT
+                        </h5>
+
+                        <button type="button"
+                                class="btn-close btn-close-white"
+                                data-bs-dismiss="modal"
+                                aria-label="Close">
+                        </button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <p class="fw-semibold mb-2">
+                            Immediate attention is required.
+                        </p>
+
+                        <p class="mb-0">
+                            @TempData["CriticalAlertMessage"]
+                        </p>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <a asp-page="/AlertPages/Index"
+                           class="btn btn-danger">
+                            View Alerts
+                        </a>
+
+                        <button type="button"
+                                class="btn btn-secondary"
+                                data-bs-dismiss="modal">
+                            Close
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <script>
+                document.addEventListener("DOMContentLoaded", function () {
+
+                    const modalElement =
+                        document.getElementById("criticalAlertModal");
+
+                    if (modalElement) {
+
+                        const criticalAlertModal =
+                            new bootstrap.Modal(modalElement);
+
+                        criticalAlertModal.show();
+                    }
+
+                });
+        </script>
+    }
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
