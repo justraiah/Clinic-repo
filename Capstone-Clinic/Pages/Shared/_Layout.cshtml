@@ -10,6 +10,18 @@
 
     if (User.Identity?.IsAuthenticated == true)
     {
+        activeAlertCount = await DbContext.Alerts
+    .CountAsync(a => a.Status == "Active");
+
+        hasCriticalAlert = await (
+            from alert in DbContext.Alerts
+            join vital in DbContext.VitalSignLogs
+                on alert.VitalLogId equals vital.VitalSignLogId
+            where alert.Status == "Active"
+                && vital.Status == "Critical"
+            select alert.AlertId
+        ).AnyAsync();
+
         activeAlerts = await (
             from alert in DbContext.Alerts
             join vital in DbContext.VitalSignLogs
@@ -33,9 +45,11 @@
                 AlertType = alert.AlertType,
                 CreatedAt = alert.CreatedAt
             }
-        ).Take(5).ToListAsync<dynamic>();
+                ).Take(5).ToListAsync<dynamic>();
 
-        activeAlertCount = activeAlerts.Count;
+        activeAlertCount = await DbContext.Alerts
+            .CountAsync(a => a.Status == "Active");
+
         hasCriticalAlert = activeAlerts.Any(a => a.Severity == "Critical");
     }
 }
@@ -449,7 +463,7 @@
                     </a>
 
                     <a class="cms-quick-action"
-                       asp-page="/VitalSignLogPages/Create">
+                       asp-page="/Student/Search">
                         + Record Vital Signs
                     </a>
 
@@ -521,7 +535,8 @@
                             </a>
 
                             <ul class="dropdown-menu dropdown-menu-end shadow cms-notification-menu"
-                                aria-labelledby="notificationDropdown">
+                                aria-labelledby="notificationDropdown"
+                                style="max-height: 380px; overflow-y: auto;">
 
                                 <li>
                                     <h6 class="dropdown-header">

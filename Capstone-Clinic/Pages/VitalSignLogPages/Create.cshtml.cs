@@ -141,19 +141,27 @@ public class CreateModel : PageModel
     public async Task<IActionResult> OnPostAsync()
     {
         Console.WriteLine("===== SAVE HANDLER =====");
+
         if (!ModelState.IsValid)
         {
-            StudentList = new SelectList(
-                _context.Students
-                    .Select(s => new
-                    {
-                        s.StudentId,
-                        Display = s.StudentNumber + " - " + s.FullName
-                    })
-                    .ToList(),
-                "StudentId",
-                "Display"
-            );
+            if (VitalSignLog.MedicalRecordId > 0)
+            {
+                LoadMedicalRecordStudent(VitalSignLog.MedicalRecordId);
+            }
+            else
+            {
+                StudentList = new SelectList(
+                    _context.Students
+                        .Select(s => new
+                        {
+                            s.StudentId,
+                            Display = s.StudentNumber + " - " + s.FullName
+                        })
+                        .ToList(),
+                    "StudentId",
+                    "Display"
+                );
+            }
 
             return Page();
         }
@@ -176,14 +184,15 @@ public class CreateModel : PageModel
 
             return Page();
         }
+
         var medicalRecord = await _context.MedicalRecords
-    .FirstOrDefaultAsync(m =>
-        m.MedicalRecordId == VitalSignLog.MedicalRecordId);
+            .FirstOrDefaultAsync(m =>
+                m.MedicalRecordId == VitalSignLog.MedicalRecordId);
 
         if (medicalRecord == null)
         {
             ModelState.AddModelError("", "Medical Record not found.");
-
+            LoadMedicalRecordStudent(VitalSignLog.MedicalRecordId);
             return Page();
         }
 
@@ -194,59 +203,60 @@ public class CreateModel : PageModel
         // Evaluate the vital-sign readings
         VitalSignEvaluator.Evaluate(VitalSignLog);
 
-        // Save the vital-sign record first
+        // Add the vital-sign record
         _context.VitalSignLogs.Add(VitalSignLog);
-        await _context.SaveChangesAsync();
 
-        // Create an alert only for Warning or Critical readings
+        // Create the alert in the same EF save operation
         if (VitalSignLog.Status == "Warning" ||
             VitalSignLog.Status == "Critical")
         {
             var firstRemark = VitalSignLog.Remarks
-    .Split(',', StringSplitOptions.RemoveEmptyEntries)
-    .FirstOrDefault()?.Trim() ?? "Abnormal Vital Signs";
+                .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .FirstOrDefault()?.Trim() ?? "Abnormal Vital Signs";
 
             var alert = new Alert
             {
-                VitalLogId = VitalSignLog.VitalSignLogId,
-
+                VitalSignLog = VitalSignLog,
                 AlertType = firstRemark,
-
                 AlertMessage = VitalSignLog.Remarks,
-
                 Status = "Active",
-
                 CreatedAt = DateTime.Now
             };
 
             _context.Alerts.Add(alert);
-            await _context.SaveChangesAsync();
-            // Show an immediate popup after a Critical vital-sign record is completed.
-            if (VitalSignLog.Status == "Critical")
-            {
-                var patientName = "patient";
-
-                if (medicalRecord.StudentId.HasValue)
-                {
-                    patientName = await _context.Students
-                        .Where(s => s.StudentId == medicalRecord.StudentId.Value)
-                        .Select(s => s.FullName)
-                        .FirstOrDefaultAsync() ?? "patient";
-                }
-                else
-                {
-                    patientName = await _context.ClinicPatients
-                        .Where(cp => cp.ClinicPatientId == medicalRecord.ClinicPatientId)
-                        .Select(cp => cp.FullName)
-                        .FirstOrDefaultAsync() ?? "patient";
-                }
-
-                TempData["CriticalAlertMessage"] =
-                    $"Critical vital signs detected for {patientName}. {VitalSignLog.Remarks}";
-            }
         }
+
+        // VitalSignLog and Alert are committed together.
+        await _context.SaveChangesAsync();
+
+        // Show an immediate popup after a Critical vital-sign record is completed.
+        if (VitalSignLog.Status == "Critical")
+        {
+            var patientName = "patient";
+
+            if (medicalRecord.StudentId.HasValue)
+            {
+                patientName = await _context.Students
+                    .Where(s => s.StudentId == medicalRecord.StudentId.Value)
+                    .Select(s => s.FullName)
+                    .FirstOrDefaultAsync() ?? "patient";
+            }
+            else
+            {
+                patientName = await _context.ClinicPatients
+                    .Where(cp => cp.ClinicPatientId == medicalRecord.ClinicPatientId)
+                    .Select(cp => cp.FullName)
+                    .FirstOrDefaultAsync() ?? "patient";
+            }
+
+            TempData["CriticalAlertMessage"] =
+                $"Critical vital signs detected for {patientName}. {VitalSignLog.Remarks}";
+        }
+
         Console.WriteLine("===== SAVE HANDLER END =====");
-        return RedirectToPage("/MedicalRecordPages/Details",
-    new { id = VitalSignLog.MedicalRecordId });
+
+        return RedirectToPage(
+            "/MedicalRecordPages/Details",
+            new { id = VitalSignLog.MedicalRecordId });
     }
 }

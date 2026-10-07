@@ -63,6 +63,31 @@ namespace Capstone_Clinic.Helpers
 
                 remarks.Add("Bradycardia");
             }
+            // Respiratory Rate
+            if (vital.RespiratoryRate < 8)
+            {
+                vital.Status = "Critical";
+                remarks.Add("Severe Bradypnea");
+            }
+            else if (vital.RespiratoryRate < 12)
+            {
+                if (vital.Status != "Critical")
+                    vital.Status = "Warning";
+
+                remarks.Add("Bradypnea");
+            }
+            else if (vital.RespiratoryRate > 30)
+            {
+                vital.Status = "Critical";
+                remarks.Add("Severe Tachypnea");
+            }
+            else if (vital.RespiratoryRate > 20)
+            {
+                if (vital.Status != "Critical")
+                    vital.Status = "Warning";
+
+                remarks.Add("Tachypnea");
+            }
 
             // SpO₂
             if (vital.OxygenSaturation > 0 && vital.OxygenSaturation < 90)
