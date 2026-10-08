@@ -79,6 +79,9 @@ public class EditModel : PageModel
         // Re-evaluate the updated vital signs.
         VitalSignEvaluator.Evaluate(existingVital);
 
+        // Capture the previous status before evaluating the updated readings.
+        var previousStatus = existingVital.Status;
+
         // Reconcile existing active alerts for this vital record.
         var activeAlerts = await _context.Alerts
             .Where(a =>
@@ -86,30 +89,56 @@ public class EditModel : PageModel
                 a.Status == "Active")
             .ToListAsync();
 
-        foreach (var alert in activeAlerts)
+        // If the vital remains at the same abnormal severity,
+        // keep the existing active alert instead of creating a duplicate.
+        if ((previousStatus == "Warning" || previousStatus == "Critical") &&
+            previousStatus == existingVital.Status &&
+            activeAlerts.Count > 0)
         {
-            alert.Status = "Resolved";
-        }
+            var existingAlert = activeAlerts.First();
 
-        // Create a new alert if the updated reading is abnormal.
-        if (existingVital.Status == "Warning" ||
-            existingVital.Status == "Critical")
-        {
             var firstRemark = existingVital.Remarks
                 .Split(',', StringSplitOptions.RemoveEmptyEntries)
                 .FirstOrDefault()?.Trim()
                 ?? "Abnormal Vital Signs";
 
-            var alert = new Alert
-            {
-                VitalLogId = existingVital.VitalSignLogId,
-                AlertType = firstRemark,
-                AlertMessage = existingVital.Remarks,
-                Status = "Active",
-                CreatedAt = DateTime.Now
-            };
+            existingAlert.AlertType = firstRemark;
+            existingAlert.AlertMessage = existingVital.Remarks;
 
-            _context.Alerts.Add(alert);
+            foreach (var duplicateAlert in activeAlerts.Skip(1))
+            {
+                duplicateAlert.Status = "Resolved";
+            }
+        }
+        else
+        {
+            // Resolve previous active alerts when the severity changes
+            // or when the updated vital is now normal.
+            foreach (var alert in activeAlerts)
+            {
+                alert.Status = "Resolved";
+            }
+
+            // Create a new alert if the updated reading is abnormal.
+            if (existingVital.Status == "Warning" ||
+                existingVital.Status == "Critical")
+            {
+                var firstRemark = existingVital.Remarks
+                    .Split(',', StringSplitOptions.RemoveEmptyEntries)
+                    .FirstOrDefault()?.Trim()
+                    ?? "Abnormal Vital Signs";
+
+                var alert = new Alert
+                {
+                    VitalLogId = existingVital.VitalSignLogId,
+                    AlertType = firstRemark,
+                    AlertMessage = existingVital.Remarks,
+                    Status = "Active",
+                    CreatedAt = DateTime.Now
+                };
+
+                _context.Alerts.Add(alert);
+            }
         }
 
         try

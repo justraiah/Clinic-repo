@@ -173,7 +173,7 @@
 
     .vital-grid {
         display: grid;
-        grid-template-columns: repeat(4, 1fr);
+        grid-template-columns: repeat(5, 1fr);
         gap: 12px;
     }
 
@@ -435,6 +435,19 @@
                 </div>
 
             </div>
+
+            <div class="vital-card">
+
+                <div class="vital-label">
+                    Respiratory Rate
+                </div>
+
+                <div class="vital-value">
+                    @($"{Model.VitalSign.RespiratoryRate} BPM")
+                </div>
+
+            </div>
+            
 
             <div class="vital-card">
 

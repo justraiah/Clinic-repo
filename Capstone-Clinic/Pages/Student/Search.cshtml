@@ -2,7 +2,7 @@
 @model Capstone_Clinic.Pages.Student.SearchModel
 
 @{
-    ViewData["Title"] = "Student Lookup";
+    ViewData["Title"] = "Patient Lookup";
 }
 
 <style>
@@ -214,10 +214,20 @@
     }
 
     .clinic-action-title {
-        font-size: .78rem;
-        font-weight: 600;
-        color: #334155;
-    }
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 5px;
+    background: #1e3a5f;
+    color: #ffffff;
+    font-size: .78rem;
+    font-weight: 600;
+    line-height: 1.2;
+    transition: background .15s ease;
+}
+
+.clinic-action:hover .clinic-action-title {
+    background: #2563eb;
+}
 
     .clinic-action-description {
         margin-top: 3px;
@@ -277,11 +287,11 @@
 <div class="lookup-header">
 
     <h1 class="lookup-title">
-        Student Lookup
+    Patient Lookup
     </h1>
 
     <p class="lookup-subtitle">
-        Find a student and access their clinic records.
+        Find a patient and access their clinic records.
     </p>
 
 </div>
@@ -310,11 +320,11 @@
     <div class="lookup-panel-header">
 
         <h2 class="lookup-panel-title">
-            Find Student
+            Find Patient
         </h2>
 
         <p class="lookup-panel-description">
-            Search using the student's Student Number or full name.
+            Search using a name, Student Number, or patient identifier.
         </p>
 
     </div>
@@ -329,7 +339,7 @@
                 <div class="col-md-9">
 
                     <label class="search-label">
-                        Student Number or Name
+                        Name, Student Number, or Identifier
                     </label>
 
                     <input asp-for="SearchStudentNumber"
@@ -347,7 +357,7 @@
 
                     <button type="submit"
                             class="btn btn-primary search-button w-100">
-                        Search Student
+                        Search Patient
                     </button>
 
                 </div>
@@ -356,6 +366,59 @@
 
         </form>
 
+        @if (Model.PatientResults.Any(p => p.PatientType != "Student"))
+{
+    <div class="cms-card mt-4">
+        <div class="cms-card-header">
+            <div>
+                <h3>Search Results</h3>
+                <p>Patients matching your search.</p>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead>
+                    <tr>
+                        <th>Patient Type</th>
+                        <th>Name</th>
+                        <th>Identifier</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach (var patient in Model.PatientResults.Where(p => p.PatientType != "Student"))
+                    {
+                        <tr>
+                            <td>@patient.PatientType</td>
+                            <td>@patient.FullName</td>
+                            <td>
+                                @(string.IsNullOrWhiteSpace(patient.Identifier)
+                                    ? "—"
+                                    : patient.Identifier)
+                            </td>
+                            <td>
+                                @if (patient.MedicalRecordId.HasValue)
+                                {
+                                    <a asp-page="/MedicalRecordPages/Details"
+                                       asp-route-id="@patient.MedicalRecordId.Value"
+                                       class="btn btn-sm btn-primary">
+                                        View Record
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No Record</span>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
 
         @if (Model.Student != null)
         {
@@ -449,38 +512,66 @@
                                     Medical Requirements
                                 </th>
 
-                                <td>
+                               <td>
+    @if (Model.MedicalRequirements.Any())
+    {
+        <table class="table table-sm align-middle mb-0">
+            <thead>
+                <tr>
+                    <th>Requirement</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var requirement in Model.MedicalRequirements)
+                {
+                    <tr>
+                        <td>@requirement.RequirementName</td>
+                        <td>
+    <form method="post"
+          asp-page-handler="UpdateRequirement"
+          class="d-inline">
 
-                                    @if (Model.Student.MedicalRequirementStatus == "Complete")
-                                    {
-                                        <span class="requirement-status requirement-complete">
-                                            Complete
-                                        </span>
-                                    }
-                                    else if (Model.Student.MedicalRequirementStatus == "Pending Review")
-                                    {
-                                        <span class="requirement-status requirement-pending">
-                                            Pending Review
-                                        </span>
-                                    }
-                                    else if (Model.Student.MedicalRequirementStatus == "Incomplete")
-                                    {
-                                        <span class="requirement-status requirement-incomplete">
-                                            Incomplete
-                                        </span>
-                                    }
-                                    else
-                                    {
-                                        <span class="requirement-status requirement-none">
-                                            Not Submitted
-                                        </span>
-                                    }
+        <input type="hidden"
+               name="medicalRequirementId"
+               value="@requirement.MedicalRequirementId" />
 
-                                    <div class="requirement-note">
-                                        This status does not restrict clinic services.
-                                    </div>
+        @if (requirement.Status == "Complete")
+        {
+            <input type="hidden"
+                   name="status"
+                   value="Not Submitted" />
 
-                                </td>
+            <button type="submit"
+                    class="requirement-status requirement-complete border-0">
+                Complete
+            </button>
+        }
+        else
+        {
+            <input type="hidden"
+                   name="status"
+                   value="Complete" />
+
+            <button type="submit"
+                    class="requirement-status requirement-none border-0">
+                Not Submitted
+            </button>
+        }
+    </form>
+</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <div class="requirement-note">
+            No medical requirements have been recorded.
+        </div>
+    }
+</td>
 
                             </tr>
 
@@ -578,17 +669,17 @@
             <div class="not-found">
 
                 <div class="not-found-title">
-                    Student Not Found
+                    Patient Not Found
                 </div>
 
                 <div class="not-found-text">
-                    No student was found using that Student Number or name.
-                    You can register the student and continue with clinic care.
+                    No patient was found using that Patient ID or name.
+                    You can register the patient and continue with clinic care.
                 </div>
 
                 <a asp-page="/StudentPages/Create"
                    class="btn btn-sm btn-outline-warning">
-                    Add New Student
+                    Add New Patient
                 </a>
 
             </div>

@@ -26,6 +26,7 @@ public class DetailsModel : PageModel
     public string LatestStatus { get; set; } = "";
 
     public Capstone_Clinic.Models.Student? Student { get; set; }
+    public List<MedicalRequirement> MedicalRequirements { get; set; } = new();
 
     public int StudentAge { get; set; }
 
@@ -63,6 +64,13 @@ public class DetailsModel : PageModel
                 {
                     StudentAge--;
                 }
+            }
+            if (Student != null)
+            {
+                MedicalRequirements = await _context.MedicalRequirements
+                    .Where(r => r.StudentId == Student.StudentId)
+                    .OrderBy(r => r.RequirementName)
+                    .ToListAsync();
             }
 
             // Get every consultation for this student
@@ -109,5 +117,33 @@ public class DetailsModel : PageModel
             .FirstOrDefaultAsync() ?? "No Records";
 
         return Page();
+    }
+    public async Task<IActionResult> OnPostUpdateRequirementAsync(
+    int medicalRequirementId,
+    string status,
+    int medicalRecordId)
+    {
+        if (status != "Not Submitted" && status != "Complete")
+        {
+            return BadRequest();
+        }
+
+        var requirement = await _context.MedicalRequirements
+            .FirstOrDefaultAsync(r =>
+                r.MedicalRequirementId == medicalRequirementId);
+
+        if (requirement == null)
+        {
+            return NotFound();
+        }
+
+        requirement.Status = status;
+
+        await _context.SaveChangesAsync();
+
+        return RedirectToPage(new
+        {
+            id = medicalRecordId
+        });
     }
 }

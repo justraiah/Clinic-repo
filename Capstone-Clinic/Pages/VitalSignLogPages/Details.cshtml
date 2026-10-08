@@ -175,7 +175,7 @@
 
     .measurement-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(5, 1fr);
         gap: 12px;
     }
 
@@ -500,7 +500,6 @@
 <!-- Actions -->
 
 <div class="details-actions mb-4">
-
     <a asp-page="./Edit"
        asp-route-id="@Model.VitalSignLog.VitalSignLogId"
        asp-route-medicalRecordId="@Model.MedicalRecordId"

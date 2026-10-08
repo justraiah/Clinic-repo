@@ -615,12 +615,122 @@
             </div>
         }
 
-    </div>
+        </div>
 
 </div>
 
 
+<!-- Medical Requirements -->
+
+@if (Model.Student != null)
+{
+    <div class="record-panel">
+
+        <div class="record-panel-header">
+
+            <h2 class="record-panel-title">
+                Medical Requirements
+            </h2>
+
+            <p class="record-panel-description">
+                Student medical requirements verified by clinic staff.
+            </p>
+
+        </div>
+
+        <div class="record-panel-body p-0">
+
+            @if (Model.MedicalRequirements.Any())
+            {
+                <div class="table-responsive">
+
+                    <table class="table history-table align-middle mb-0">
+
+                        <thead>
+
+                            <tr>
+                                <th>Requirement</th>
+                                <th>Status</th>
+                            </tr>
+
+                        </thead>
+
+                        <tbody>
+
+                            @foreach (var requirement in Model.MedicalRequirements)
+                            {
+                                <tr>
+
+                                    <td>
+                                        @requirement.RequirementName
+                                    </td>
+
+                                    <td>
+
+                                        <form method="post"
+                                              asp-page-handler="UpdateRequirement"
+                                              class="d-inline">
+
+                                            <input type="hidden"
+                                                   name="medicalRequirementId"
+                                                   value="@requirement.MedicalRequirementId" />
+
+                                            <input type="hidden"
+                                                   name="medicalRecordId"
+                                                   value="@Model.MedicalRecord.MedicalRecordId" />
+
+                                            @if (requirement.Status == "Complete")
+                                            {
+                                                <input type="hidden"
+                                                       name="status"
+                                                       value="Not Submitted" />
+
+                                                <button type="submit"
+                                                        class="status-badge status-normal border-0">
+                                                    Complete
+                                                </button>
+                                            }
+                                            else
+                                            {
+                                                <input type="hidden"
+                                                       name="status"
+                                                       value="Complete" />
+
+                                                <button type="submit"
+                                                        class="status-badge border-0"
+                                                        style="background:#f1f5f9;color:#475569;">
+                                                    Not Submitted
+                                                </button>
+                                            }
+
+                                        </form>
+
+                                    </td>
+
+                                </tr>
+                            }
+
+                        </tbody>
+
+                    </table>
+
+                </div>
+            }
+            else
+            {
+                <div class="empty-history">
+                    No medical requirements have been recorded.
+                </div>
+            }
+
+        </div>
+
+    </div>
+}
+
+
 <!-- Recent Vital Signs -->
+
 
 <div class="record-panel">
 
