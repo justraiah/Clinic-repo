@@ -36,6 +36,8 @@ public class SearchModel : PageModel
         public int? MedicalRecordId { get; set; }
     }
     public List<PatientSearchResult> PatientResults { get; set; } = new();
+    public Dictionary<int, List<Models.DentalRecord>> DentalHistory { get; set; } = new();
+    public Dictionary<int, int> StudentClinicPatientIds { get; set; } = new();
 
     public async Task OnGetAsync(string? studentNumber)
     {
@@ -175,6 +177,51 @@ public class SearchModel : PageModel
 
         PatientResults.AddRange(students);
         PatientResults.AddRange(communityPatients);
+        var studentIds = students
+            .Where(s => s.StudentId.HasValue)
+            .Select(s => s.StudentId!.Value)
+            .ToList();
+
+        StudentClinicPatientIds = await _context.ClinicPatients
+            .Where(cp => cp.StudentId.HasValue &&
+                         studentIds.Contains(cp.StudentId.Value))
+            .ToDictionaryAsync(
+                cp => cp.StudentId!.Value,
+                cp => cp.ClinicPatientId);
+
+        var studentClinicPatientIds = StudentClinicPatientIds
+            .Values
+            .ToList();
+
+        var studentDentalRecords = await _context.DentalRecords
+            .Where(d => studentClinicPatientIds.Contains(d.ClinicPatientId))
+            .OrderByDescending(d => d.VisitDate)
+            .ToListAsync();
+
+        foreach (var group in studentDentalRecords.GroupBy(d => d.ClinicPatientId))
+        {
+            DentalHistory[group.Key] = group.ToList();
+        }
+        var communityPatientIds = communityPatients
+            .Where(p => p.ClinicPatientId.HasValue)
+            .Select(p => p.ClinicPatientId!.Value)
+            .ToList();
+
+
+        var communityDentalHistory = await _context.DentalRecords
+            .Include(d => d.ClinicPatient)
+            .Where(d => communityPatientIds.Contains(d.ClinicPatientId))
+            .OrderByDescending(d => d.VisitDate)
+            .GroupBy(d => d.ClinicPatientId)
+            .ToDictionaryAsync(
+                g => g.Key,
+                g => g.ToList());
+
+        foreach (var group in communityDentalHistory)
+        {
+            DentalHistory[group.Key] = group.Value;
+        }
+
 
         if (PatientResults.Count == 0)
         {
@@ -213,30 +260,82 @@ public class SearchModel : PageModel
         new Models.MedicalRequirement
         {
             StudentId = Student.StudentId,
-            RequirementName = "X-Ray",
+            RequirementName = "CBC (Complete Blood Count)",
             Status = "Not Submitted"
         },
         new Models.MedicalRequirement
         {
             StudentId = Student.StudentId,
-            RequirementName = "Laboratory Result",
+            RequirementName = "Urinalysis",
             Status = "Not Submitted"
         },
         new Models.MedicalRequirement
         {
             StudentId = Student.StudentId,
-            RequirementName = "Medical Certificate",
+            RequirementName = "Chest X-ray",
             Status = "Not Submitted"
         },
         new Models.MedicalRequirement
         {
             StudentId = Student.StudentId,
-            RequirementName = "Physical Examination",
+            RequirementName = "Drug Testing",
             Status = "Not Submitted"
         }
     };
 
                     _context.MedicalRequirements.AddRange(MedicalRequirements);
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    var oldRequirements = MedicalRequirements.ToList();
+
+                    foreach (var requirement in oldRequirements)
+                    {
+                        switch (requirement.RequirementName)
+                        {
+                            case "Laboratory Result":
+                                requirement.RequirementName = "CBC (Complete Blood Count)";
+                                break;
+
+                            case "X-Ray":
+                                requirement.RequirementName = "Chest X-ray";
+                                break;
+
+                            case "Medical Certificate":
+                            case "Physical Examination":
+                                _context.MedicalRequirements.Remove(requirement);
+                                break;
+                        }
+                    }
+
+                    var existingNames = oldRequirements
+                        .Where(r => _context.Entry(r).State != EntityState.Deleted)
+                        .Select(r => r.RequirementName)
+                        .ToHashSet();
+
+                    var newRequirementNames = new[]
+                    {
+        "CBC (Complete Blood Count)",
+        "Urinalysis",
+        "Chest X-ray",
+        "Drug Testing"
+    };
+
+                    foreach (var name in newRequirementNames)
+                    {
+                        if (!existingNames.Contains(name))
+                        {
+                            _context.MedicalRequirements.Add(
+                                new Models.MedicalRequirement
+                                {
+                                    StudentId = Student.StudentId,
+                                    RequirementName = name,
+                                    Status = "Not Submitted"
+                                });
+                        }
+                    }
+
                     await _context.SaveChangesAsync();
                 }
 

@@ -1,0 +1,86 @@
+﻿@page "{id:int}"
+@model Capstone_Clinic.Pages.DentalRecordPages.EditModel
+
+@{
+    ViewData["Title"] = "Edit Dental Record";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Edit Dental Record</h1>
+            <p class="text-muted">Update an existing dental consultation.</p>
+        </div>
+        <a asp-page="./Index" class="btn btn-outline-secondary">Back to Records</a>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <form method="post">
+                <input type="hidden" asp-for="DentalRecord.DentalRecordId" />
+                <input type="hidden" asp-for="DentalRecord.CreatedAt" />
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <div class="mb-3">
+                    <label class="form-label">Patient</label>
+
+                    <input type="text"
+                           class="form-control"
+                           value="@(Model.DentalRecord.ClinicPatient?.Student?.FullName
+                                   is string studentName
+                                   ? $"{studentName} ({Model.DentalRecord.ClinicPatient.Student.StudentNumber})"
+                                   : Model.DentalRecord.ClinicPatient?.FullName ?? "Unknown Patient")"
+                           readonly />
+
+                    <input type="hidden"
+                           asp-for="DentalRecord.ClinicPatientId" />
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DentalRecord.VisitDate" class="form-label">Visit Date</label>
+                    <input asp-for="DentalRecord.VisitDate" type="date" class="form-control" />
+                    <span asp-validation-for="DentalRecord.VisitDate" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DentalRecord.ChiefComplaint" class="form-label">Chief Complaint</label>
+                    <textarea asp-for="DentalRecord.ChiefComplaint" class="form-control" rows="3"></textarea>
+                    <span asp-validation-for="DentalRecord.ChiefComplaint" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DentalRecord.DentalFindings" class="form-label">Dental Findings</label>
+                    <textarea asp-for="DentalRecord.DentalFindings" class="form-control" rows="3"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DentalRecord.Diagnosis" class="form-label">Diagnosis</label>
+                    <textarea asp-for="DentalRecord.Diagnosis" class="form-control" rows="2"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DentalRecord.TreatmentProvided" class="form-label">Treatment Provided</label>
+                    <textarea asp-for="DentalRecord.TreatmentProvided" class="form-control" rows="3"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DentalRecord.Medications" class="form-label">Medications</label>
+                    <textarea asp-for="DentalRecord.Medications" class="form-control" rows="2"></textarea>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="DentalRecord.ClinicalNotes" class="form-label">Clinical Notes</label>
+                    <textarea asp-for="DentalRecord.ClinicalNotes" class="form-control" rows="3"></textarea>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <a asp-page="./Index" class="btn btn-secondary ms-2">Cancel</a>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

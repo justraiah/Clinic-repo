@@ -1,0 +1,83 @@
+﻿@page "{id:int}"
+@model Capstone_Clinic.Pages.DentalRecordPages.DetailsModel
+
+@{
+    ViewData["Title"] = "Dental Record Details";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1>Dental Record Details</h1>
+            <p class="text-muted">Complete dental consultation information.</p>
+        </div>
+        <a asp-page="./Index" class="btn btn-outline-secondary">Back to Records</a>
+    </div>
+
+    @if (Model.DentalRecord is not null)
+    {
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h4 class="mb-3">Patient Information</h4>
+
+                <dl class="row">
+                    <dt class="col-sm-3">Patient Name</dt>
+                    <dd class="col-sm-9">
+                        @(Model.DentalRecord.ClinicPatient?.Student?.FullName
+    ?? Model.DentalRecord.ClinicPatient?.FullName
+    ?? "Unknown Patient")
+                    </dd>
+
+                    <dt class="col-sm-3">Visit Date</dt>
+                    <dd class="col-sm-9">
+                        @Model.DentalRecord.VisitDate.ToString("MMMM dd, yyyy")
+                    </dd>
+                </dl>
+
+                <hr />
+
+                <h4 class="mb-3">Consultation Details</h4>
+
+                <dl class="row">
+                    <dt class="col-sm-3">Chief Complaint</dt>
+                    <dd class="col-sm-9">@Model.DentalRecord.ChiefComplaint</dd>
+
+                    <dt class="col-sm-3">Dental Findings</dt>
+                    <dd class="col-sm-9">
+                        @(string.IsNullOrWhiteSpace(Model.DentalRecord.DentalFindings)
+                            ? "—"
+                            : Model.DentalRecord.DentalFindings)
+                    </dd>
+
+                    <dt class="col-sm-3">Diagnosis</dt>
+                    <dd class="col-sm-9">
+                        @(string.IsNullOrWhiteSpace(Model.DentalRecord.Diagnosis)
+                            ? "—"
+                            : Model.DentalRecord.Diagnosis)
+                    </dd>
+
+                    <dt class="col-sm-3">Treatment Provided</dt>
+                    <dd class="col-sm-9">
+                        @(string.IsNullOrWhiteSpace(Model.DentalRecord.TreatmentProvided)
+                            ? "—"
+                            : Model.DentalRecord.TreatmentProvided)
+                    </dd>
+
+                    <dt class="col-sm-3">Medications</dt>
+                    <dd class="col-sm-9">
+                        @(string.IsNullOrWhiteSpace(Model.DentalRecord.Medications)
+                            ? "—"
+                            : Model.DentalRecord.Medications)
+                    </dd>
+
+                    <dt class="col-sm-3">Clinical Notes</dt>
+                    <dd class="col-sm-9">
+                        @(string.IsNullOrWhiteSpace(Model.DentalRecord.ClinicalNotes)
+                            ? "—"
+                            : Model.DentalRecord.ClinicalNotes)
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    }
+</div>

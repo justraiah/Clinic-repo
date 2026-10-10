@@ -471,7 +471,7 @@
 
     <a asp-page="/Student/Search"
        class="btn btn-outline-secondary">
-        Back to Student Lookup
+        Back to Patient Lookup
     </a>
 
 </div>
@@ -524,6 +524,20 @@
                     </div>
 
                 </div>
+
+                
+                <div class="info-item">
+
+                    <div class="info-label">
+                        Date of Birth
+                    </div>
+
+                    <div class="info-value">
+                        @Model.Student.DateOfBirth.ToString("MMMM dd, yyyy")
+                    </div>
+
+                </div>
+
 
 
                 <div class="info-item">

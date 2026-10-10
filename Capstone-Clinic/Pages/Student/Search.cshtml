@@ -367,58 +367,138 @@
         </form>
 
         @if (Model.PatientResults.Any(p => p.PatientType != "Student"))
-{
-    <div class="cms-card mt-4">
-        <div class="cms-card-header">
-            <div>
-                <h3>Search Results</h3>
-                <p>Patients matching your search.</p>
-            </div>
-        </div>
+        {
+            <div class="student-result">
 
-        <div class="table-responsive">
-            <table class="table align-middle mb-0">
-                <thead>
-                    <tr>
-                        <th>Patient Type</th>
-                        <th>Name</th>
-                        <th>Identifier</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
+                <div class="student-result-header">
+                    <div>
+                        <h2 class="student-result-title">
+                            Patient Information
+                        </h2>
 
-                <tbody>
-                    @foreach (var patient in Model.PatientResults.Where(p => p.PatientType != "Student"))
-                    {
-                        <tr>
-                            <td>@patient.PatientType</td>
-                            <td>@patient.FullName</td>
-                            <td>
-                                @(string.IsNullOrWhiteSpace(patient.Identifier)
-                                    ? "—"
-                                    : patient.Identifier)
-                            </td>
-                            <td>
-                                @if (patient.MedicalRecordId.HasValue)
+                        <p class="student-result-subtitle">
+                            Patient information registered in the system.
+                        </p>
+                    </div>
+                </div>
+
+                @foreach (var patient in Model.PatientResults.Where(p => p.PatientType != "Student"))
+                {
+                    <div class="table-responsive mb-4">
+
+                        <table class="table student-info-table">
+                            <tbody>
+                                <tr>
+                                    <th>Patient Type</th>
+                                    <td>@patient.PatientType</td>
+                                </tr>
+
+                                <tr>
+                                    <th>Full Name</th>
+                                    <td>
+                                        @(string.IsNullOrWhiteSpace(patient.FullName)
+                                            ? "—"
+                                            : patient.FullName)
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Identifier</th>
+                                    <td>
+                                        @(string.IsNullOrWhiteSpace(patient.Identifier)
+                                            ? "—"
+                                            : patient.Identifier)
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="clinic-actions">
+                            <div class="clinic-actions-title">
+                                Clinic Actions
+                            </div>
+                            <div class="clinic-actions">
+                                <div class="clinic-actions-title">
+                                    Dental History
+                                </div>
+
+                                @if (patient.ClinicPatientId.HasValue &&
+                                     Model.DentalHistory.TryGetValue(
+                                         patient.ClinicPatientId.Value,
+                                         out var dentalRecords) &&
+                                     dentalRecords.Any())
                                 {
-                                    <a asp-page="/MedicalRecordPages/Details"
-                                       asp-route-id="@patient.MedicalRecordId.Value"
-                                       class="btn btn-sm btn-primary">
-                                        View Record
-                                    </a>
+                                    <div class="table-responsive">
+                                        <table class="table student-info-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Visit Date</th>
+                                                    <th>Chief Complaint</th>
+                                                    <th>Diagnosis</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var dentalRecord in dentalRecords)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            @dentalRecord.VisitDate.ToString("MMM dd, yyyy")
+                                                        </td>
+                                                        <td>@dentalRecord.ChiefComplaint</td>
+                                                        <td>
+                                                            @(string.IsNullOrWhiteSpace(dentalRecord.Diagnosis)
+                                                                ? "—"
+                                                                : dentalRecord.Diagnosis)
+                                                        </td>
+                                                        <td>
+                                                            <a asp-page="/DentalRecordPages/Details"
+                                                               asp-route-id="@dentalRecord.DentalRecordId"
+                                                               class="btn btn-sm btn-outline-primary">
+                                                                View
+                                                            </a>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    </div>
                                 }
                                 else
                                 {
-                                    <span class="text-muted">No Record</span>
+                                    <div class="requirement-note">
+                                        No dental records have been recorded for this patient.
+                                    </div>
                                 }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        </div>
-    </div>
-}
+                            </div>
+
+                            @if (patient.MedicalRecordId.HasValue)
+                            {
+                                <a class="clinic-action"
+                                   asp-page="/MedicalRecordPages/Details"
+                                   asp-route-id="@patient.MedicalRecordId.Value">
+
+                                    <span class="clinic-action-title">
+                                        Open Medical Record
+                                    </span>
+
+                                    <span class="clinic-action-description">
+                                        View consultation history
+                                    </span>
+                                </a>
+                            }
+                            else
+                            {
+                                <div class="requirement-note">
+                                    No medical record is linked to this patient yet.
+                                </div>
+                            }
+                        </div>
+
+                    </div>
+                }
+            </div>
+        }
 
         @if (Model.Student != null)
         {
@@ -581,6 +661,65 @@
 
                 </div>
 
+                <!-- Dental History -->
+
+                <div class="clinic-actions">
+                    <div class="clinic-actions-title">
+                        Dental History
+                    </div>
+
+                    @if (Model.Student != null &&
+                         Model.StudentClinicPatientIds.TryGetValue(
+                             Model.Student.StudentId,
+                             out var studentClinicPatientId) &&
+                         Model.DentalHistory.TryGetValue(
+                             studentClinicPatientId,
+                             out var studentDentalRecords) &&
+                         studentDentalRecords.Any())
+                    {
+                        <div class="table-responsive">
+                            <table class="table student-info-table">
+                                <thead>
+                                    <tr>
+                                        <th>Visit Date</th>
+                                        <th>Chief Complaint</th>
+                                        <th>Diagnosis</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var dentalRecord in studentDentalRecords)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @dentalRecord.VisitDate.ToString("MMM dd, yyyy")
+                                            </td>
+                                            <td>@dentalRecord.ChiefComplaint</td>
+                                            <td>
+                                                @(string.IsNullOrWhiteSpace(dentalRecord.Diagnosis)
+                                                    ? "—"
+                                                    : dentalRecord.Diagnosis)
+                                            </td>
+                                            <td>
+                                                <a asp-page="/DentalRecordPages/Details"
+                                                   asp-route-id="@dentalRecord.DentalRecordId"
+                                                   class="btn btn-sm btn-outline-primary">
+                                                    View
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="requirement-note">
+                            No dental records have been recorded for this student.
+                        </div>
+                    }
+                </div>
 
                 <!-- Clinic Actions -->
 

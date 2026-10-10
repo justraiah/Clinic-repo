@@ -436,6 +436,11 @@
                         Medical Records
                     </a>
 
+                    <a class="cms-nav-link @(currentPage?.StartsWith("/DentalRecordPages") == true ? "active" : "")"
+                       asp-page="/DentalRecordPages/Index">
+                        Dental Records
+                    </a>
+
                     <a class="cms-nav-link @(currentPage?.StartsWith("/VitalSignLogPages") == true ? "active" : "")"
                        asp-page="/VitalSignLogPages/Index">
                         Vital Signs

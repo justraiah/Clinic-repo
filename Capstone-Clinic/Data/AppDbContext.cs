@@ -15,6 +15,9 @@ namespace Capstone_Clinic.Data
         public DbSet<StudentAccount> StudentAccounts { get; set; }
         public DbSet<ClinicPatient> ClinicPatients { get; set; }
         public DbSet<MedicalRecord> MedicalRecords { get; set; }
+
+        public DbSet<DentalRecord> DentalRecords { get; set; }
+
         public DbSet<VitalSignLog> VitalSignLogs { get; set; }
         public DbSet<Alert> Alerts { get; set; }
         public DbSet<Staff> Staffs { get; set; }
@@ -22,6 +25,12 @@ namespace Capstone_Clinic.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<DentalRecord>()
+                .HasOne(d => d.ClinicPatient)
+                .WithMany()
+                .HasForeignKey(d => d.ClinicPatientId)
+                .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<VitalSignLog>()
                 .HasOne(v => v.MedicalRecord)
