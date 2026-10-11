@@ -18,6 +18,8 @@ namespace Capstone_Clinic.Data
 
         public DbSet<DentalRecord> DentalRecords { get; set; }
 
+        public DbSet<Referral> Referrals { get; set; }
+
         public DbSet<VitalSignLog> VitalSignLogs { get; set; }
         public DbSet<Alert> Alerts { get; set; }
         public DbSet<Staff> Staffs { get; set; }

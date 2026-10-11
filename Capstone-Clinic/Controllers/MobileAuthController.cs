@@ -96,6 +96,8 @@ public class MobileAuthController : ControllerBase
                 "StudentNumber",
                 student.StudentNumber)
         };
+        Console.WriteLine(
+    $"JWT key length: {Encoding.UTF8.GetByteCount(_configuration["Jwt:Key"] ?? "")} bytes");
 
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(
@@ -126,6 +128,39 @@ public class MobileAuthController : ControllerBase
             fullName = student.FullName
         });
     }
+
+    [HttpPost("dev-reset-test-password")]
+    public async Task<IActionResult> ResetTestPassword()
+    {
+        if (!_configuration.GetValue<bool>("EnableDevelopmentPasswordReset") ||
+            !HttpContext.RequestServices
+                .GetRequiredService<IWebHostEnvironment>()
+                .IsDevelopment())
+        {
+            return NotFound();
+        }
+
+        var student = await _context.Students
+            .FirstOrDefaultAsync(s => s.StudentNumber == "23-00148");
+
+        if (student == null)
+            return NotFound(new { message = "Test student not found." });
+
+        var account = await _context.StudentAccounts
+            .FirstOrDefaultAsync(a => a.StudentId == student.StudentId);
+
+        if (account == null)
+            return NotFound(new { message = "Test account not found." });
+
+        var hasher = new PasswordHasher<Models.StudentAccount>();
+        account.PasswordHash = hasher.HashPassword(account, "Test123!");
+        account.UpdatedAt = DateTime.Now;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Test account password reset successfully." });
+    }
+
 }
 
 public class MobileLoginRequest

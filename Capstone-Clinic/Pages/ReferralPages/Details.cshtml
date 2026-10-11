@@ -1,0 +1,317 @@
+﻿
+@page "{id:int}"
+@model Capstone_Clinic.Pages.ReferralPages.DetailsModel
+
+@{
+    ViewData["Title"] = "Referral Details";
+
+    var patient = Model.Referral.ClinicPatient;
+
+    var patientName = patient?.Student?.FullName
+        ?? patient?.FullName
+        ?? "Unknown Patient";
+
+    var patientIdentifier = patient?.Student?.StudentNumber
+        ?? patient?.Identifier
+        ?? "Not provided";
+
+    var patientType = patient?.Student != null
+        ? "Student"
+        : patient?.PatientType ?? "Patient";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4 no-print">
+        <div>
+            <h1 class="h3 mb-1">Referral Details</h1>
+            <p class="text-muted mb-0">
+                Review and print the patient's referral document.
+            </p>
+        </div>
+
+        <div class="d-flex gap-2">
+            <a asp-page="./Index"
+               class="btn btn-outline-secondary">
+                Back to Referrals
+            </a>
+
+            <button type="button"
+                    class="btn btn-primary"
+                    onclick="window.print()">
+                Print Referral
+            </button>
+        </div>
+    </div>
+
+    <div id="printableReferral" class="card shadow-sm">
+        <div class="card-body p-4 p-md-5">
+            <div class="text-center mb-4">
+                <h2 class="h4 fw-bold mb-1">CLINIC MONITORING SYSTEM</h2>
+                <p class="mb-1">Clinic Referral Form</p>
+                <hr class="my-4" />
+                <h3 class="h5 fw-bold">PATIENT REFERRAL</h3>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-sm-6 mb-3">
+                    <strong>Referral No.:</strong>
+                    @Model.Referral.ReferralId
+                </div>
+
+                <div class="col-sm-6 mb-3">
+                    <strong>Referral Date:</strong>
+                    @Model.Referral.ReferralDate.ToString("MMMM dd, yyyy")
+                </div>
+
+                <div class="col-12 mb-3">
+                    <strong>Destination Facility:</strong>
+                    <div class="border rounded p-2 mt-1">
+                        @Model.Referral.FacilityName
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="h6 fw-bold border-bottom pb-2">
+                Patient Information
+            </h4>
+
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3">
+                    <strong>Full Name:</strong>
+                    <div>@patientName</div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <strong>Patient Type:</strong>
+                    <div>@patientType</div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <strong>Student No. / Identifier:</strong>
+                    <div>@patientIdentifier</div>
+                </div>
+
+                <div class="col-md-6 mb-3">
+                    <strong>Date of Birth:</strong>
+                    <div>
+                        @(patient?.DateOfBirth?.ToString("MMMM dd, yyyy")
+                            ?? "Not provided")
+                    </div>
+                </div>
+            </div>
+
+            <h4 class="h6 fw-bold border-bottom pb-2">
+                Reason for Referral
+            </h4>
+
+            <div class="mb-4 referral-text">
+                @Model.Referral.ReasonForReferral
+            </div>
+
+            <h4 class="h6 fw-bold border-bottom pb-2">
+                Clinical Notes
+            </h4>
+
+            <div class="mb-5 referral-text">
+                @(string.IsNullOrWhiteSpace(Model.Referral.ClinicalNotes)
+                    ? "No additional clinical notes provided."
+                    : Model.Referral.ClinicalNotes)
+            </div>
+
+            <div class="row mt-5">
+                <div class="col-md-6 mb-4">
+                    <div class="signature-line"></div>
+                    <p class="text-center mb-0">
+                        Referring Clinician / Authorized Staff
+                    </p>
+                </div>
+
+                <div class="col-md-6 mb-4">
+                    <div class="signature-line"></div>
+                    <p class="text-center mb-0">
+                        Receiving Facility / Attending Personnel
+                    </p>
+                </div>
+            </div>
+
+            
+<div class="text-muted small mt-3">
+    <strong>Current Referral Status:</strong>
+    @Model.Referral.Status
+</div>
+
+<hr class="my-4 no-print" />
+
+<div class="no-print">
+    <h4 class="h6 fw-bold mb-3">Update Referral Status</h4>
+
+    <form method="post"
+          asp-page-handler="UpdateStatus"
+          asp-route-id="@Model.Referral.ReferralId">
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3"></div>
+
+        <div class="row g-2 align-items-end">
+            <div class="col-md-6">
+                <label asp-for="SelectedStatus" class="form-label">
+                    New Status
+                </label>
+
+                <select asp-for="SelectedStatus" class="form-select">
+                    @foreach (var status in DetailsModel.AvailableStatuses)
+                    {
+                        <option value="@status">@status</option>
+                    }
+                </select>
+
+                <span asp-validation-for="SelectedStatus"
+                      class="text-danger"></span>
+            </div>
+
+            <div class="col-md-auto">
+                <button type="submit" class="btn btn-primary">
+                    Save Status
+                </button>
+            </div>
+        </div>
+    </form>
+</div>
+
+
+            <p class="text-muted small text-center mt-4 mb-0">
+                Please evaluate the patient and provide appropriate care.
+            </p>
+        </div>
+    </div>
+</div>
+
+
+<style>
+    .referral-text {
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        min-height: 20px;
+    }
+
+    .signature-line {
+        border-bottom: 1px solid #333;
+        height: 25px;
+        margin: 0 12px 6px;
+    }
+
+    @@media screen {
+        /* Keep the normal screen layout unchanged. */
+    }
+
+    @@media print {
+        @@page {
+            size: A4 portrait;
+            margin: 8mm;
+        }
+
+        html,
+        body {
+            margin: 0 !important;
+            padding: 0 !important;
+            height: auto !important;
+            overflow: visible !important;
+        }
+
+        body * {
+            visibility: hidden !important;
+        }
+
+        #printableReferral,
+        #printableReferral * {
+            visibility: visible !important;
+        }
+
+        #printableReferral {
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            border: 0 !important;
+            box-shadow: none !important;
+            overflow: visible !important;
+            font-size: 10px !important;
+            line-height: 1.25 !important;
+        }
+
+        #printableReferral .card-body {
+            padding: 0 !important;
+        }
+
+        #printableReferral h2 {
+            font-size: 14px !important;
+            margin-bottom: 3px !important;
+        }
+
+        #printableReferral h3 {
+            font-size: 12px !important;
+            margin-bottom: 3px !important;
+        }
+
+        #printableReferral h4 {
+            font-size: 11px !important;
+            margin-bottom: 4px !important;
+            padding-bottom: 3px !important;
+        }
+
+        #printableReferral hr {
+            margin: 8px 0 !important;
+        }
+
+        #printableReferral .row {
+            margin-bottom: 5px !important;
+        }
+
+        #printableReferral .mb-3 {
+            margin-bottom: 5px !important;
+        }
+
+        #printableReferral .mb-4 {
+            margin-bottom: 7px !important;
+        }
+
+        #printableReferral .mb-5 {
+            margin-bottom: 8px !important;
+        }
+
+        #printableReferral .mt-4 {
+            margin-top: 8px !important;
+        }
+
+        #printableReferral .mt-5 {
+            margin-top: 10px !important;
+        }
+
+        #printableReferral .signature-line {
+            height: 22px !important;
+        }
+
+        #printableReferral .text-center {
+            break-inside: avoid;
+        }
+
+        #printableReferral h2,
+        #printableReferral h3,
+        #printableReferral h4,
+        #printableReferral .signature-line,
+        #printableReferral .referral-text {
+            break-inside: avoid;
+            page-break-inside: avoid;
+        }
+
+        .no-print {
+            display: none !important;
+        }
+
+        a[href]::after {
+            content: none !important;
+        }
+    }
+</style>

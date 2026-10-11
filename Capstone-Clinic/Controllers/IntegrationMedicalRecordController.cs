@@ -25,6 +25,8 @@ public class IntegrationMedicalRecordController : ControllerBase
     string studentNumber,
     [FromHeader(Name = "X-Integration-Key")] string? integrationKey)
     {
+
+
         if (!IsAuthorizedIntegrationRequest(integrationKey))
         {
             return Unauthorized(new
@@ -115,6 +117,95 @@ public class IntegrationMedicalRecordController : ControllerBase
             .ToListAsync();
 
         return Ok(vitalSigns);
+    }
+
+
+    [HttpGet("{studentNumber}/dental-records")]
+    public async Task<IActionResult> GetStudentDentalRecords(
+        string studentNumber,
+        [FromHeader(Name = "X-Integration-Key")] string? integrationKey)
+    {
+        if (!IsAuthorizedIntegrationRequest(integrationKey))
+        {
+            return Unauthorized(new
+            {
+                message = "Invalid integration credentials."
+            });
+        }
+
+        var student = await _context.Students
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.StudentNumber == studentNumber);
+
+        if (student == null)
+        {
+            return NotFound(new { message = "Student not found." });
+        }
+
+        var records = await _context.DentalRecords
+            .AsNoTracking()
+            .Where(r => r.ClinicPatient != null &&
+                        r.ClinicPatient.StudentId == student.StudentId)
+            .OrderByDescending(r => r.VisitDate)
+            .Select(r => new
+            {
+                dentalRecordId = r.DentalRecordId,
+                clinicPatientId = r.ClinicPatientId,
+                visitDate = r.VisitDate,
+                chiefComplaint = r.ChiefComplaint,
+                dentalFindings = r.DentalFindings,
+                diagnosis = r.Diagnosis,
+                treatmentProvided = r.TreatmentProvided,
+                medications = r.Medications,
+                clinicalNotes = r.ClinicalNotes,
+                createdAt = r.CreatedAt
+            })
+            .ToListAsync();
+
+        return Ok(records);
+    }
+
+    [HttpGet("{studentNumber}/referrals")]
+    public async Task<IActionResult> GetStudentReferrals(
+        string studentNumber,
+        [FromHeader(Name = "X-Integration-Key")] string? integrationKey)
+    {
+        if (!IsAuthorizedIntegrationRequest(integrationKey))
+        {
+            return Unauthorized(new
+            {
+                message = "Invalid integration credentials."
+            });
+        }
+
+        var student = await _context.Students
+            .AsNoTracking()
+            .FirstOrDefaultAsync(s => s.StudentNumber == studentNumber);
+
+        if (student == null)
+        {
+            return NotFound(new { message = "Student not found." });
+        }
+
+        var referrals = await _context.Referrals
+            .AsNoTracking()
+            .Where(r => r.ClinicPatient != null &&
+                        r.ClinicPatient.StudentId == student.StudentId)
+            .OrderByDescending(r => r.ReferralDate)
+            .Select(r => new
+            {
+                referralId = r.ReferralId,
+                clinicPatientId = r.ClinicPatientId,
+                referralDate = r.ReferralDate,
+                facilityName = r.FacilityName,
+                reasonForReferral = r.ReasonForReferral,
+                clinicalNotes = r.ClinicalNotes,
+                status = r.Status,
+                createdAt = r.CreatedAt
+            })
+            .ToListAsync();
+
+        return Ok(referrals);
     }
 
     private bool IsAuthorizedIntegrationRequest(string? integrationKey)

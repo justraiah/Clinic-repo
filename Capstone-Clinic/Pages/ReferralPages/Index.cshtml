@@ -1,0 +1,92 @@
+﻿
+@page
+@model Capstone_Clinic.Pages.ReferralPages.IndexModel
+
+@{
+    ViewData["Title"] = "Referral Forms";
+}
+
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-1">Referral Forms</h1>
+            <p class="text-muted mb-0">
+                Manage referrals to hospitals and outside healthcare facilities.
+            </p>
+        </div>
+
+        <a asp-page="./Create" class="btn btn-primary">
+            + New Referral
+        </a>
+    </div>
+
+    @if (Model.Referrals.Count == 0)
+    {
+        <div class="card shadow-sm">
+            <div class="card-body text-center py-5">
+                <h5>No referrals recorded yet</h5>
+                <p class="text-muted mb-3">
+                    Create a referral when a patient needs care at another facility.
+                </p>
+                <a asp-page="./Create" class="btn btn-primary">
+                    Create First Referral
+                </a>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Referral Date</th>
+                            <th>Patient</th>
+                            <th>Destination Facility</th>
+                            <th>Reason</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var referral in Model.Referrals)
+                        {
+                            <tr>
+                                <td>
+                                    @referral.ReferralDate.ToString("MMM dd, yyyy")
+                                </td>
+
+                                <td>
+                                    @(referral.ClinicPatient?.Student?.FullName
+                                        ?? referral.ClinicPatient?.FullName
+                                        ?? "Unknown Patient")
+                                </td>
+
+                                <td>@referral.FacilityName</td>
+
+                                <td>
+                                    @(string.IsNullOrWhiteSpace(referral.ReasonForReferral)
+                                        ? "—"
+                                        : referral.ReasonForReferral)
+                                </td>
+
+                                <td>
+                                    @referral.Status
+                                </td>
+
+                                <td>
+                                    <a asp-page="./Details"
+                                       asp-route-id="@referral.ReferralId"
+                                       class="btn btn-sm btn-outline-primary">
+                                        View / Print
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>

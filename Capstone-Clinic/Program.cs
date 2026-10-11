@@ -12,6 +12,7 @@ using Capstone_Clinic.Models;
 QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
+Console.WriteLine($"JWT key length loaded by Program.cs: {System.Text.Encoding.UTF8.GetByteCount(builder.Configuration["Jwt:Key"] ?? "")} bytes");
 
 // Add services to the container.
 builder.Services.AddAuthentication(options =>

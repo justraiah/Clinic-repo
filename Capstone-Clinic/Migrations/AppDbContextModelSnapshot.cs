@@ -212,6 +212,46 @@ namespace Capstone_Clinic.Migrations
                     b.ToTable("MedicalRequirements");
                 });
 
+            modelBuilder.Entity("Capstone_Clinic.Models.Referral", b =>
+                {
+                    b.Property<int>("ReferralId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ReferralId"));
+
+                    b.Property<int>("ClinicPatientId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ClinicalNotes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("FacilityName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("ReasonForReferral")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ReferralDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("ReferralId");
+
+                    b.HasIndex("ClinicPatientId");
+
+                    b.ToTable("Referrals");
+                });
+
             modelBuilder.Entity("Capstone_Clinic.Models.Staff", b =>
                 {
                     b.Property<int>("StaffId")
@@ -434,6 +474,17 @@ namespace Capstone_Clinic.Migrations
                         .IsRequired();
 
                     b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("Capstone_Clinic.Models.Referral", b =>
+                {
+                    b.HasOne("Capstone_Clinic.Models.ClinicPatient", "ClinicPatient")
+                        .WithMany()
+                        .HasForeignKey("ClinicPatientId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("ClinicPatient");
                 });
 
             modelBuilder.Entity("Capstone_Clinic.Models.StudentAccount", b =>
