@@ -418,13 +418,14 @@
 
             <div class="sensor-action">
 
+                
                 <button type="submit"
-                        asp-page-handler="ReadSensor"
+                        formaction="/VitalSignLogPages/Create?handler=ReadSensor"
+                        formmethod="post"
+                        formnovalidate
                         class="btn btn-primary"
                         id="readSensorBtn">
-
                     Read Heart Rate &amp; SpO₂
-
                 </button>
 
             </div>
@@ -606,36 +607,26 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-
-    
-    
     <script>
-        const sensorForm = document.querySelector("form");
-        const sensorButton = document.getElementById("readSensorBtn");
-        const sensorLoading = document.getElementById("sensorLoading");
+        document.addEventListener("DOMContentLoaded", function () {
+            const sensorButton = document.getElementById("readSensorBtn");
+            const sensorLoading = document.getElementById("sensorLoading");
+            const form = sensorButton?.closest("form");
 
-        if (sensorForm && sensorButton && sensorLoading) {
-            sensorForm.addEventListener("submit", function (event) {
-                const submitter = event.submitter;
+            if (!sensorButton || !form) return;
 
-                // Only show the spinner for the Read Sensor button.
-                if (!submitter || submitter.id !== "readSensorBtn") {
+            form.addEventListener("submit", function (event) {
+                if (event.submitter?.id !== "readSensorBtn") {
                     return;
                 }
 
                 sensorButton.disabled = true;
-                sensorButton.innerHTML = `
-                    <span class="spinner-border spinner-border-sm me-2"
-                          role="status"
-                          aria-hidden="true"></span>
-                    Waiting for Sensor...
-                `;
+                sensorButton.textContent = "Reading Sensor...";
 
-                sensorLoading.classList.remove("d-none");
+                if (sensorLoading) {
+                    sensorLoading.classList.remove("d-none");
+                }
             });
-        }
+        });
     </script>
-
-
-
 }

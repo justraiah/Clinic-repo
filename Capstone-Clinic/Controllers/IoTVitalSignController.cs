@@ -1,4 +1,4 @@
-﻿
+
 using Capstone_Clinic.Data;
 using Capstone_Clinic.Models.IoT;
 using Microsoft.AspNetCore.Mvc;
@@ -27,6 +27,8 @@ public class IoTVitalSignController : ControllerBase
         [FromHeader(Name = "X-IoT-Key")] string? iotKey)
     {
         var configuredKey = _configuration["IoT:ApiKey"];
+        if (string.IsNullOrWhiteSpace(configuredKey))
+            configuredKey = _configuration["Integration:ApiKey"];
 
         if (string.IsNullOrWhiteSpace(configuredKey) ||
             string.IsNullOrWhiteSpace(iotKey) ||
@@ -108,6 +110,10 @@ public class IoTVitalSignController : ControllerBase
                 message = "No pending sensor reading found. Open the ESP32 page first."
             });
         }
+
+        // Consume the reading so repeated button presses cannot reuse stale data.
+        reading.IsUsed = true;
+        await _context.SaveChangesAsync();
 
         return Ok(new
         {

@@ -102,25 +102,27 @@ public class CreateModel : PageModel
     public SelectList StudentList { get; set; } = default!;
 
     // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD.
-
-
     public async Task<IActionResult> OnPostReadSensorAsync()
     {
-        Console.WriteLine("===== READ SENSOR HANDLER REACHED =====");
-        var reading = await _esp32Service.GetVitalsAsync();
+        var medicalRecordId = VitalSignLog.MedicalRecordId;
 
-        // Always reload the student information before returning the page
-        if (VitalSignLog.MedicalRecordId > 0)
+        if (medicalRecordId > 0)
         {
-            LoadMedicalRecordStudent(VitalSignLog.MedicalRecordId);
+            LoadMedicalRecordStudent(medicalRecordId);
         }
 
-        if (reading != null && reading.FingerDetected)
+        var reading = await _esp32Service.GetVitalsAsync();
+
+        if (reading == null || !reading.FingerDetected)
         {
-            VitalSignLog.HeartRate =
-                reading.AverageHeartRate > 0
-                    ? reading.AverageHeartRate
-                    : (int)Math.Round(reading.HeartRate);
+            TempData["ErrorMessage"] =
+                "No pending sensor reading was available. Please try again.";
+        }
+        else
+        {
+            VitalSignLog.HeartRate = reading.AverageHeartRate > 0
+                ? reading.AverageHeartRate
+                : (int)Math.Round(reading.HeartRate);
 
             VitalSignLog.OxygenSaturation = reading.Spo2;
 
@@ -128,16 +130,13 @@ public class CreateModel : PageModel
             ModelState.Remove("VitalSignLog.OxygenSaturation");
 
             TempData["SuccessMessage"] =
-                "Heart Rate and SpO₂ successfully read from ESP32.";
-        }
-        else
-        {
-            TempData["ErrorMessage"] =
-                "Unable to obtain enough stable readings. Please keep your finger steady and try again.";
+                $"Sensor reading received: {VitalSignLog.HeartRate} BPM, " +
+                $"SpO₂ {VitalSignLog.OxygenSaturation}%.";
         }
 
         return Page();
     }
+
     public async Task<IActionResult> OnPostAsync()
     {
         Console.WriteLine("===== SAVE HANDLER =====");

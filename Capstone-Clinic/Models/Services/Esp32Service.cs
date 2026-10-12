@@ -1,41 +1,79 @@
-﻿using System.Text.Json;
+
+using System.Text.Json;
 using Capstone_Clinic.Models.IoT;
+
 namespace Capstone_Clinic.Services;
 
-// Webserver mode: the CMS asks the ESP32 directly (GET http://<esp32-ip>/)
-// and the ESP32 measures and answers with {"heartRate":..,"spo2":..,"fingerDetected":..}
 public class Esp32Service
 {
     private readonly HttpClient _httpClient;
-    private readonly string _baseUrl;
+    private readonly string _sensorUrl;
 
     public Esp32Service(HttpClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
-        _baseUrl = configuration["Esp32:BaseUrl"] ?? "http://192.168.1.16/";
+
+        _sensorUrl = (
+            configuration["Integration:Esp32BaseUrl"]
+            ?? "http://10.67.173.55"
+        ).TrimEnd('/');
     }
 
     public async Task<VitalReading?> GetVitalsAsync()
     {
         try
         {
-            Console.WriteLine($"Requesting vitals from ESP32: {_baseUrl}");
+            Console.WriteLine($"Requesting a new reading from ESP32: {_sensorUrl}");
 
-            var response = await _httpClient.GetAsync(_baseUrl);
+            using var response = await _httpClient.GetAsync(_sensorUrl);
+
             var json = await response.Content.ReadAsStringAsync();
 
-            Console.WriteLine($"ESP32 replied {(int)response.StatusCode}: {json}");
+            Console.WriteLine(
+                $"ESP32 replied {(int)response.StatusCode}: {json}"
+            );
 
             if (!response.IsSuccessStatusCode)
                 return null;
 
-            return JsonSerializer.Deserialize<VitalReading>(
-                json,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            using var document = JsonDocument.Parse(json);
+            var root = document.RootElement;
+
+            bool fingerDetected =
+                root.TryGetProperty("fingerDetected", out var finger)
+                && finger.GetBoolean();
+
+            if (root.TryGetProperty("success", out var success)
+                && !success.GetBoolean())
+            {
+                return null;
+            }
+
+            if (!fingerDetected)
+                return null;
+
+            int heartRate = root.TryGetProperty("heartRate", out var hr)
+                ? (int)Math.Round(hr.GetDouble())
+                : 0;
+
+            int spo2 = root.TryGetProperty("spo2", out var oxygen)
+                ? oxygen.GetInt32()
+                : 0;
+
+            if (heartRate <= 0 || spo2 <= 0)
+                return null;
+
+            return new VitalReading
+            {
+                HeartRate = heartRate,
+                AverageHeartRate = heartRate,
+                Spo2 = spo2,
+                FingerDetected = true
+            };
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ESP32 request ERROR: {ex.Message}");
+            Console.WriteLine($"ESP32 sensor request ERROR: {ex.Message}");
             return null;
         }
     }
