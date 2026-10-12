@@ -106,7 +106,7 @@ public class CreateModel : PageModel
 
     public async Task<IActionResult> OnPostReadSensorAsync()
     {
-        Console.WriteLine("===== READ SENSOR HANDLER START =====");
+        Console.WriteLine("===== READ SENSOR HANDLER REACHED =====");
         var reading = await _esp32Service.GetVitalsAsync();
 
         // Always reload the student information before returning the page

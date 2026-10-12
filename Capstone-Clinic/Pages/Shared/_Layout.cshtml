@@ -67,16 +67,21 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/Capstone_Clinic.styles.css" asp-append-version="true" />
 
+    
     <style>
             :root {
-                --cms-sidebar: #1f2933;
-                --cms-sidebar-hover: #2c3945;
-                --cms-sidebar-text: #cbd5df;
-                --cms-sidebar-muted: #8996a3;
-                --cms-accent: #2563eb;
-                --cms-bg: #f5f7fa;
-                --cms-border: #e2e6eb;
-                --cms-text: #1f2933;
+                --cms-sidebar: #174C3C;
+                --cms-sidebar-hover: #24634F;
+                --cms-sidebar-text: #E0F2E8;
+                --cms-sidebar-muted: #A7C8B8;
+                --cms-accent: #A7E8C5;
+                --cms-bg: #F3F7F4;
+                --cms-border: #DCE7DF;
+                --cms-text: #20352B;
+                --cms-surface: #FFFFFF;
+                --cms-text-muted: #64786D;
+                --cms-danger: #DC4545;
+                --cms-danger-soft: #FDECEC;
             }
 
             html,
@@ -91,8 +96,8 @@
             }
 
             /* ==============================
-               APP SHELL
-               ============================== */
+                   APP SHELL
+                   ============================== */
 
             .cms-app {
                 min-height: 100vh;
@@ -109,12 +114,12 @@
                 z-index: 1040;
                 display: flex;
                 flex-direction: column;
-                border-right: 1px solid rgba(255,255,255,.05);
+                border-right: 1px solid rgba(255,255,255,.12);
             }
 
             .cms-brand {
                 padding: 24px 22px;
-                border-bottom: 1px solid rgba(255,255,255,.08);
+                border-bottom: 1px solid rgba(255,255,255,.12);
             }
 
             .cms-brand-header {
@@ -130,12 +135,14 @@
                 border-radius: 50%;
                 flex-shrink: 0;
                 background: white;
+                border: 2px solid rgba(167,232,197,.55);
             }
 
             .cms-brand-title {
                 font-size: 1.05rem;
-                font-weight: 600;
+                font-weight: 700;
                 letter-spacing: .2px;
+                color: #FFFFFF;
             }
 
             .cms-brand-subtitle {
@@ -152,7 +159,7 @@
             .cms-nav-label {
                 padding: 0 12px 8px;
                 font-size: .68rem;
-                font-weight: 600;
+                font-weight: 700;
                 letter-spacing: .08em;
                 color: var(--cms-sidebar-muted);
                 text-transform: uppercase;
@@ -164,37 +171,39 @@
                 width: 100%;
                 padding: 10px 12px;
                 margin-bottom: 3px;
-                border-radius: 6px;
+                border-radius: 8px;
                 color: var(--cms-sidebar-text);
                 text-decoration: none;
                 font-size: .9rem;
                 transition: background .15s ease, color .15s ease;
             }
 
-            .cms-nav-link:hover {
-                background: var(--cms-sidebar-hover);
-                color: white;
-            }
+                .cms-nav-link:hover {
+                    background: var(--cms-sidebar-hover);
+                    color: #FFFFFF;
+                }
 
-            .cms-nav-link.active {
-                background: #334155;
-                color: white;
-                font-weight: 600;
-            }
+                .cms-nav-link.active {
+                    background: var(--cms-sidebar-hover);
+                    color: #FFFFFF;
+                    font-weight: 600;
+                    box-shadow: inset 0 0 0 1px rgba(167,232,197,.12);
+                }
 
-            .cms-nav-link.active::before {
-                content: "";
-                width: 3px;
-                height: 18px;
-                margin-right: 9px;
-                margin-left: -12px;
-                background: #60a5fa;
-                border-radius: 0 3px 3px 0;
-            }
+                    .cms-nav-link.active::before {
+                        content: "";
+                        width: 3px;
+                        height: 18px;
+                        margin-right: 9px;
+                        margin-left: -12px;
+                        background: var(--cms-accent);
+                        border-radius: 0 3px 3px 0;
+                        flex-shrink: 0;
+                    }
 
             .cms-nav-divider {
                 height: 1px;
-                background: rgba(255,255,255,.08);
+                background: rgba(255,255,255,.12);
                 margin: 18px 12px;
             }
 
@@ -202,20 +211,21 @@
                 display: block;
                 padding: 9px 12px;
                 margin-bottom: 4px;
-                border-radius: 6px;
-                color: #cbd5df;
+                border-radius: 8px;
+                color: var(--cms-sidebar-text);
                 text-decoration: none;
                 font-size: .82rem;
+                transition: background .15s ease, color .15s ease;
             }
 
-            .cms-quick-action:hover {
-                background: var(--cms-sidebar-hover);
-                color: white;
-            }
+                .cms-quick-action:hover {
+                    background: var(--cms-sidebar-hover);
+                    color: #FFFFFF;
+                }
 
             .cms-sidebar-footer {
                 padding: 14px 12px;
-                border-top: 1px solid rgba(255,255,255,.08);
+                border-top: 1px solid rgba(255,255,255,.12);
             }
 
             .cms-user-name {
@@ -228,16 +238,17 @@
             }
 
             .cms-logout {
-                color: #d8a0a0 !important;
+                color: #F4B5B5 !important;
             }
 
-            .cms-logout:hover {
-                color: #f1b4b4 !important;
-            }
+                .cms-logout:hover {
+                    color: #FFD4D4 !important;
+                    background: rgba(220,69,69,.14);
+                }
 
             /* ==============================
-               MAIN AREA
-               ============================== */
+                   MAIN AREA
+                   ============================== */
 
             .cms-main {
                 margin-left: 245px;
@@ -246,7 +257,7 @@
 
             .cms-header {
                 height: 68px;
-                background: white;
+                background: var(--cms-surface);
                 border-bottom: 1px solid var(--cms-border);
                 display: flex;
                 align-items: center;
@@ -255,12 +266,13 @@
                 position: sticky;
                 top: 0;
                 z-index: 1030;
+                box-shadow: 0 2px 8px rgba(32,53,43,.035);
             }
 
             .cms-header-title {
                 font-size: 1rem;
-                font-weight: 600;
-                color: #374151;
+                font-weight: 700;
+                color: var(--cms-text);
             }
 
             .cms-header-actions {
@@ -271,7 +283,7 @@
 
             .cms-user {
                 font-size: .85rem;
-                color: #64748b;
+                color: var(--cms-text-muted);
             }
 
             .cms-content {
@@ -281,24 +293,25 @@
             }
 
             /* ==============================
-               NOTIFICATIONS
-               ============================== */
+                   NOTIFICATIONS
+                   ============================== */
 
             .cms-notification {
-                color: #64748b;
+                color: var(--cms-text-muted);
                 text-decoration: none;
                 font-size: .88rem;
                 cursor: pointer;
+                transition: color .15s ease;
             }
 
-            .cms-notification:hover {
-                color: #1f2937;
-            }
+                .cms-notification:hover {
+                    color: var(--cms-sidebar);
+                }
 
-            .cms-notification.critical {
-                color: #dc2626;
-                font-weight: 600;
-            }
+                .cms-notification.critical {
+                    color: var(--cms-danger);
+                    font-weight: 700;
+                }
 
             .cms-notification-badge {
                 font-size: .65rem;
@@ -308,20 +321,23 @@
 
             .cms-notification-menu {
                 min-width: 350px;
+                background: var(--cms-surface);
                 border: 1px solid var(--cms-border);
-                border-radius: 8px;
+                border-radius: 10px;
+                box-shadow: 0 12px 32px rgba(32,53,43,.12);
             }
 
             /* ==============================
-               MOBILE
-               ============================== */
+                   MOBILE
+                   ============================== */
 
             .cms-menu-button {
                 display: none;
                 border: 0;
                 background: transparent;
                 font-size: 1.25rem;
-                color: #475569;
+                color: var(--cms-sidebar);
+                cursor: pointer;
             }
 
             .cms-sidebar-overlay {
@@ -335,20 +351,20 @@
                     transition: transform .2s ease;
                 }
 
-                .cms-sidebar.open {
-                    transform: translateX(0);
-                }
+                    .cms-sidebar.open {
+                        transform: translateX(0);
+                    }
 
                 .cms-sidebar-overlay {
                     position: fixed;
                     inset: 0;
-                    background: rgba(15, 23, 42, .45);
+                    background: rgba(15,23,42,.45);
                     z-index: 1035;
                 }
 
-                .cms-sidebar-overlay.show {
-                    display: block;
-                }
+                    .cms-sidebar-overlay.show {
+                        display: block;
+                    }
 
                 .cms-main {
                     margin-left: 0;
@@ -386,6 +402,7 @@
                 }
             }
     </style>
+
 </head>
 
 <body>
@@ -439,6 +456,11 @@
                     <a class="cms-nav-link @(currentPage?.StartsWith("/DentalRecordPages") == true ? "active" : "")"
                        asp-page="/DentalRecordPages/Index">
                         Dental Records
+                    </a>
+
+                    <a class="cms-nav-link @(currentPage?.StartsWith("/ReferralPages") == true ? "active" : "")"
+                       asp-page="/ReferralPages/Index">
+                        Referrals
                     </a>
 
                     <a class="cms-nav-link @(currentPage?.StartsWith("/VitalSignLogPages") == true ? "active" : "")"

@@ -1,52 +1,41 @@
 ﻿using System.Text.Json;
 using Capstone_Clinic.Models.IoT;
-using Microsoft.Extensions.Configuration;
-
 namespace Capstone_Clinic.Services;
 
+// Webserver mode: the CMS asks the ESP32 directly (GET http://<esp32-ip>/)
+// and the ESP32 measures and answers with {"heartRate":..,"spo2":..,"fingerDetected":..}
 public class Esp32Service
 {
     private readonly HttpClient _httpClient;
-    private readonly IConfiguration _configuration;
+    private readonly string _baseUrl;
 
     public Esp32Service(HttpClient httpClient, IConfiguration configuration)
     {
         _httpClient = httpClient;
-        _configuration = configuration;
+        _baseUrl = configuration["Esp32:BaseUrl"] ?? "http://192.168.1.16/";
     }
 
-    public bool IsEsp32Online { get; private set; }
     public async Task<VitalReading?> GetVitalsAsync()
     {
         try
         {
-            Console.WriteLine("Sending request to ESP32...");
+            Console.WriteLine($"Requesting vitals from ESP32: {_baseUrl}");
 
-            var response = await _httpClient.GetAsync(_configuration["Esp32:BaseUrl"]);
-
-            Console.WriteLine($"ESP32 responded: {response.StatusCode}");
-
-            IsEsp32Online = response.IsSuccessStatusCode;
-
+            var response = await _httpClient.GetAsync(_baseUrl);
             var json = await response.Content.ReadAsStringAsync();
 
-            Console.WriteLine($"Response JSON: {json}");
+            Console.WriteLine($"ESP32 replied {(int)response.StatusCode}: {json}");
 
-            var result = JsonSerializer.Deserialize<VitalReading>(
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            return JsonSerializer.Deserialize<VitalReading>(
                 json,
-                new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
-
-            return result;
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"ESP32 ERROR: {ex}");
-
-            IsEsp32Online = false;
-
+            Console.WriteLine($"ESP32 request ERROR: {ex.Message}");
             return null;
         }
     }

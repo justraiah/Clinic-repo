@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Capstone_Clinic.Models;
+using Capstone_Clinic.Models.IoT;
 
 namespace Capstone_Clinic.Data
 {
@@ -9,7 +10,7 @@ namespace Capstone_Clinic.Data
             : base(options)
         {
         }
-
+        public DbSet<PendingVitalReading> PendingVitalReadings { get; set; }
         public DbSet<Student> Students { get; set; }
         public DbSet<MedicalRequirement> MedicalRequirements { get; set; }
         public DbSet<StudentAccount> StudentAccounts { get; set; }

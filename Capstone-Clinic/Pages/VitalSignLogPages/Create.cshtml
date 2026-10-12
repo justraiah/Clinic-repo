@@ -607,35 +607,35 @@
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
 
+    
+    
     <script>
+        const sensorForm = document.querySelector("form");
+        const sensorButton = document.getElementById("readSensorBtn");
+        const sensorLoading = document.getElementById("sensorLoading");
 
-        document.querySelector("form").addEventListener("submit", function (event) {
+        if (sensorForm && sensorButton && sensorLoading) {
+            sensorForm.addEventListener("submit", function (event) {
+                const submitter = event.submitter;
 
-            const submitter = event.submitter;
-
-            if (!submitter || submitter.id !== "readSensorBtn") {
-                return;
-            }
-
-            const button = document.getElementById("readSensorBtn");
-
-            if (button) {
-
-                button.disabled = true;
-
-                button.innerHTML =
-                    "Reading Sensor...";
-
-                const loading = document.getElementById("sensorLoading");
-
-                if (loading) {
-                    loading.classList.remove("d-none");
+                // Only show the spinner for the Read Sensor button.
+                if (!submitter || submitter.id !== "readSensorBtn") {
+                    return;
                 }
 
-            }
+                sensorButton.disabled = true;
+                sensorButton.innerHTML = `
+                    <span class="spinner-border spinner-border-sm me-2"
+                          role="status"
+                          aria-hidden="true"></span>
+                    Waiting for Sensor...
+                `;
 
-        });
-
+                sensorLoading.classList.remove("d-none");
+            });
+        }
     </script>
+
+
 
 }

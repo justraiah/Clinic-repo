@@ -1,23 +1,30 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
+﻿
+using Capstone_Clinic.Data;
+using Capstone_Clinic.Models.IoT;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Capstone_Clinic.Controllers;
 
 [ApiController]
 [Route("api/iot/vital-signs")]
-
 public class IoTVitalSignController : ControllerBase
 {
+    private readonly AppDbContext _context;
     private readonly IConfiguration _configuration;
 
-    public IoTVitalSignController(IConfiguration configuration)
+    public IoTVitalSignController(
+        AppDbContext context,
+        IConfiguration configuration)
     {
+        _context = context;
         _configuration = configuration;
     }
+
     [HttpPost]
-    public IActionResult ReceiveVitalSigns(
-    [FromBody] IoTVitalSignRequest request,
-    [FromHeader(Name = "X-IoT-Key")] string? iotKey)
+    public async Task<IActionResult> ReceiveVitalSigns(
+        [FromBody] IoTVitalSignRequest request,
+        [FromHeader(Name = "X-IoT-Key")] string? iotKey)
     {
         var configuredKey = _configuration["IoT:ApiKey"];
 
@@ -34,6 +41,7 @@ public class IoTVitalSignController : ControllerBase
                 message = "Invalid IoT credentials."
             });
         }
+
         if (!request.FingerDetected)
         {
             return BadRequest(new
@@ -44,7 +52,8 @@ public class IoTVitalSignController : ControllerBase
         }
 
         if (request.HeartRate <= 0 ||
-            request.Spo2 <= 0)
+            request.Spo2 <= 0 ||
+            request.Spo2 > 100)
         {
             return BadRequest(new
             {
@@ -53,20 +62,64 @@ public class IoTVitalSignController : ControllerBase
             });
         }
 
-        Console.WriteLine("===== ESP32 VITAL READING RECEIVED =====");
-        Console.WriteLine($"Heart Rate: {request.HeartRate}");
-        Console.WriteLine($"SpO2: {request.Spo2}");
-        Console.WriteLine($"Finger Detected: {request.FingerDetected}");
-        Console.WriteLine("=========================================");
+        var pendingReading = new PendingVitalReading
+        {
+            HeartRate = request.HeartRate,
+            Spo2 = request.Spo2,
+            FingerDetected = request.FingerDetected,
+            ReceivedAt = DateTime.Now,
+            IsUsed = false
+        };
+
+        _context.PendingVitalReadings.Add(pendingReading);
+        await _context.SaveChangesAsync();
+
+        Console.WriteLine("===== ESP32 VITAL READING SAVED =====");
+        Console.WriteLine($"Reading ID: {pendingReading.PendingVitalReadingId}");
+        Console.WriteLine($"Heart Rate: {pendingReading.HeartRate}");
+        Console.WriteLine($"SpO2: {pendingReading.Spo2}");
+        Console.WriteLine($"Received At: {pendingReading.ReceivedAt}");
+        Console.WriteLine("=====================================");
 
         return Ok(new
         {
             success = true,
-            message = "Vital-sign reading received successfully.",
-            heartRate = request.HeartRate,
-            spo2 = request.Spo2
+            message = "Vital-sign reading saved successfully.",
+            readingId = pendingReading.PendingVitalReadingId,
+            heartRate = pendingReading.HeartRate,
+            spo2 = pendingReading.Spo2,
+            receivedAt = pendingReading.ReceivedAt
         });
     }
+
+    [HttpGet("pending")]
+    public async Task<IActionResult> GetPendingVitalReading()
+    {
+        var reading = await _context.PendingVitalReadings
+            .Where(r => !r.IsUsed)
+            .OrderByDescending(r => r.ReceivedAt)
+            .FirstOrDefaultAsync();
+
+        if (reading == null)
+        {
+            return NotFound(new
+            {
+                success = false,
+                message = "No pending sensor reading found. Open the ESP32 page first."
+            });
+        }
+
+        return Ok(new
+        {
+            success = true,
+            readingId = reading.PendingVitalReadingId,
+            heartRate = reading.HeartRate,
+            spo2 = reading.Spo2,
+            fingerDetected = reading.FingerDetected,
+            receivedAt = reading.ReceivedAt
+        });
+    }
+
 }
 
 public class IoTVitalSignRequest

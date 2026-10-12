@@ -134,6 +134,34 @@ namespace Capstone_Clinic.Migrations
                     b.ToTable("DentalRecords");
                 });
 
+            modelBuilder.Entity("Capstone_Clinic.Models.IoT.PendingVitalReading", b =>
+                {
+                    b.Property<int>("PendingVitalReadingId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("PendingVitalReadingId"));
+
+                    b.Property<bool>("FingerDetected")
+                        .HasColumnType("bit");
+
+                    b.Property<int>("HeartRate")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("ReceivedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Spo2")
+                        .HasColumnType("int");
+
+                    b.HasKey("PendingVitalReadingId");
+
+                    b.ToTable("PendingVitalReadings");
+                });
+
             modelBuilder.Entity("Capstone_Clinic.Models.MedicalRecord", b =>
                 {
                     b.Property<int>("MedicalRecordId")
