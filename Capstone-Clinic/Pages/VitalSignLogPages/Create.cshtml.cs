@@ -27,6 +27,8 @@ public class CreateModel : PageModel
 
     public string StudentName { get; set; } = "";
 
+    public string IoTDeviceStatus { get; set; } = "Checking...";
+
     private void LoadMedicalRecordStudent(int medicalRecordId)
     {
         var medicalRecord = _context.MedicalRecords
@@ -60,8 +62,9 @@ public class CreateModel : PageModel
         StudentName = clinicPatient.FullName ?? "";
     }
 
-    public IActionResult OnGet(int? medicalRecordId)
+    public async Task<IActionResult> OnGetAsync(int? medicalRecordId)
     {
+        await CheckIoTDeviceStatusAsync();
         if (medicalRecordId.HasValue)
         {
             VitalSignLog = new VitalSignLog
@@ -104,6 +107,8 @@ public class CreateModel : PageModel
     // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD.
     public async Task<IActionResult> OnPostReadSensorAsync()
     {
+        Console.WriteLine("READ SENSOR HANDLER REACHED");
+
         var medicalRecordId = VitalSignLog.MedicalRecordId;
 
         if (medicalRecordId > 0)
@@ -257,5 +262,11 @@ public class CreateModel : PageModel
         return RedirectToPage(
             "/MedicalRecordPages/Details",
             new { id = VitalSignLog.MedicalRecordId });
+    }
+    private async Task CheckIoTDeviceStatusAsync()
+    {
+        IoTDeviceStatus = await _esp32Service.IsReachableAsync()
+            ? "Connected"
+            : "Disconnected";
     }
 }

@@ -62,7 +62,7 @@ builder.Services.AddAuthentication(options =>
             };
     });
 builder.Services.AddAuthorization();
-builder.Services.AddHttpClient<Esp32Service>(c => c.Timeout = TimeSpan.FromSeconds(45));
+builder.Services.AddHttpClient<Esp32Service>(c => c.Timeout = TimeSpan.FromSeconds(90));
 
 builder.Services.AddRazorPages(options =>
 {

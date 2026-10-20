@@ -205,6 +205,22 @@
         .form-actions .btn {
             width: 100%;
         }
+        .status-dot {
+            display: inline-block;
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+            .status-dot.online {
+                background: #16a34a;
+            }
+
+            .status-dot.offline {
+                background: #dc2626;
+            }
+
     }
 </style>
 
@@ -370,6 +386,13 @@
             <div class="sensor-note">
                 Use the sensor reading function when the device is available.
                 Values may also be entered manually if necessary.
+            </div>
+            <div class="mb-3 d-flex align-items-center gap-2">
+                <span class="status-dot @(Model.IoTDeviceStatus == "Connected" ? "online" : "offline")"></span>
+                <strong class="small">ESP32 Sensor:</strong>
+                <span class="small @(Model.IoTDeviceStatus == "Connected" ? "text-success" : "text-danger")">
+                    @Model.IoTDeviceStatus
+                </span>
             </div>
 
             <div class="measurement-grid">

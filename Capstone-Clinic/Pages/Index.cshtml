@@ -272,6 +272,14 @@
         color: #94a3b8;
         font-size: .72rem;
     }
+
+    .status-dot.offline {
+        background: #dc2626;
+    }
+
+    .dashboard-status-value.offline {
+        color: #dc2626;
+    }
 </style>
 
 <!-- Dashboard Header -->
@@ -559,6 +567,17 @@
 
                 </div>
 
+                <div class="dashboard-status">
+                    <span class="status-dot @(Model.IoTDeviceStatus == "Connected" ? "" : "offline")"></span>
+
+                    <span class="dashboard-status-name">
+                        ESP32 Sensor
+                    </span>
+
+                    <span class="dashboard-status-value @(Model.IoTDeviceStatus == "Connected" ? "" : "offline")">
+                        @Model.IoTDeviceStatus
+                    </span>
+                </div>
 
                 <div class="dashboard-status">
 
