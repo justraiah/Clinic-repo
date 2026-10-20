@@ -1,294 +1,148 @@
+// ESP32 + MAX30102 -> CMS
+// Request-driven mode: measure ONLY when the CMS requests GET /
+//
+// Required secrets.h:
+// WIFI_SSID, WIFI_PASSWORD
+
 #include <Wire.h>
 #include <MAX30105.h>
-#include <heartRate.h>
 #include "spo2_algorithm.h"
 #include <WiFi.h>
-#include <HTTPClient.h>
 #include <WebServer.h>
-
-const char* ssid = "DSP 2.4Ghz";
-const char* password = "";
-
-const char* apiUrl = "http://192.168.1.7:5018/api/iot/vital-signs";
+#include "secrets.h"
 
 const byte TOTAL_MEASUREMENTS = 8;
-const byte MIN_VALID_READINGS = 4;
+const int MIN_VALID_READINGS = 3;
+const long FINGER_THRESHOLD = 50000;
+const unsigned long FINGER_WAIT_MS = 10000;
+const unsigned long SAMPLE_TIMEOUT_MS = 2000;
+
+const byte SAMPLES = 100;
+uint32_t irBuffer[SAMPLES];
+uint32_t redBuffer[SAMPLES];
 
 WebServer server(80);
 MAX30105 particleSensor;
 
-const byte RATE_SIZE = 4;
-
-byte rates[RATE_SIZE];
-byte rateSpot = 0;
-long lastBeat = 0;
-
-// -------- Current Measurements --------
-float beatsPerMinute = 0;
 int beatAvg = 0;
-
 int32_t spo2 = 0;
-
 bool fingerDetected = false;
 
-// -------- Measurement Buffers --------
-const byte SPO2_SAMPLE_SIZE = 100;
-
-uint32_t irBuffer[SPO2_SAMPLE_SIZE];
-uint32_t redBuffer[SPO2_SAMPLE_SIZE];
-
-// -------- Maxim Algorithm Results --------
 int32_t heartRateFromSpo2 = 0;
 int8_t validHeartRate = 0;
-
 int32_t spo2FromAlgorithm = 0;
 int8_t validSpO2 = 0;
 
-bool measurementInProgress = false;
-bool measurementComplete = false;
+bool readNextSample(uint32_t &red, uint32_t &ir) {
+  unsigned long start = millis();
 
-bool measureVitals();
+  while (!particleSensor.available()) {
+    particleSensor.check();
 
+    if (millis() - start >= SAMPLE_TIMEOUT_MS) {
+      return false;
+    }
+
+    delay(1);
+  }
+
+  red = particleSensor.getRed();
+  ir = particleSensor.getIR();
+  particleSensor.nextSample();
+  return true;
+}
 
 String createJsonResponse() {
   String json = "{";
-
+  json += "\"success\":true,";
   json += "\"heartRate\":" + String(beatAvg) + ",";
   json += "\"spo2\":" + String(spo2) + ",";
-  json += "\"fingerDetected\":" + String(fingerDetected ? "true" : "false");
-
+  json += "\"fingerDetected\":true";
   json += "}";
 
   return json;
 }
 
-void handleRoot() {
-  Serial.println("Request received");
-
-  if (!measureVitals()) {
-    server.send(
-      400,
-      "application/json",
-      "{\"status\":\"error\",\"message\":\"No finger detected\"}");
-
-    return;
-  }
-
-  Serial.println("Measurement finished.");
-  Serial.println(createJsonResponse());
-
-  server.send(
-    200,
-    "application/json",
-    createJsonResponse());
-
-  Serial.println("Response sent");
-}
-
-void sendVitalsToBackend() {
-
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("Cannot send vitals: WiFi disconnected.");
-    return;
-  }
-
-  WiFiClient client;
-  HTTPClient http;
-
-  Serial.println();
-  Serial.println("Sending vital signs to backend...");
-
-  String json = "{";
-  json += "\"heartRate\":" + String(beatAvg) + ",";
-  json += "\"spo2\":" + String(spo2) + ",";
-  json += "\"fingerDetected\":" + String(fingerDetected ? "true" : "false");
-  json += "}";
-
-  Serial.print("Payload: ");
-  Serial.println(json);
-
-  http.begin(client, apiUrl);
-  http.addHeader("Content-Type", "application/json");
-
-  int httpResponseCode = http.POST(json);
-
-  Serial.print("HTTP Response Code: ");
-  Serial.println(httpResponseCode);
-
-  if (httpResponseCode > 0) {
-
-    String response = http.getString();
-
-    Serial.print("Backend Response: ");
-    Serial.println(response);
-
-  } else {
-
-    Serial.print("POST failed: ");
-    Serial.println(http.errorToString(httpResponseCode));
-
-  }
-
-  http.end();
-
-  Serial.println("Finished sending vital signs.");
-}
-
-void setup() {
-  Serial.begin(115200);
-  delay(1000);
-
-  Serial.println();
-  Serial.println("===== ESP32 Clinic IoT =====");
-  Serial.print("Connecting to WiFi: ");
-  Serial.println(ssid);
-
-  WiFi.mode(WIFI_OFF);
-  delay(1000);
-
-  WiFi.mode(WIFI_STA);
-  delay(1000);
-
-  WiFi.begin(ssid, password);
-
-  int retries = 0;
-
-  while (WiFi.status() != WL_CONNECTED && retries < 40) {
-    delay(500);
-    Serial.print(".");
-    retries++;
-  }
-
-  Serial.println();
-
-  if (WiFi.status() == WL_CONNECTED) {
-    Serial.println("WiFi Connected!");
-    Serial.print("ESP32 IP Address: ");
-    Serial.println(WiFi.localIP());
-
-    server.on("/", handleRoot);
-    server.begin();
-
-    Serial.println("Web server started!");
-  } else {
-    Serial.println("WiFi FAILED!");
-    Serial.print("Status Code: ");
-    Serial.println(WiFi.status());
-
-    Serial.println();
-    Serial.println("WiFi connection failed.");
-
-    int n = WiFi.scanNetworks();
-
-    Serial.println("WiFi FAILED!");
-    Serial.print("Status Code: ");
-    Serial.println(WiFi.status());
-
-    Serial.println("WiFi connection failed.");
-
-    delay(3000);
-
-    ESP.restart();
-  }
-
-  Wire.begin(21, 22);
-
-  Serial.println("Initializing sensor...");
-
-  if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) {
-    Serial.println("MAX30102 NOT FOUND!");
-    while (1)
-      ;
-  }
-
-  Serial.println("MAX30102 FOUND!");
-
-  particleSensor.setup();
-  particleSensor.setPulseAmplitudeRed(0x0A);
-  particleSensor.setPulseAmplitudeGreen(0);
-}
-
 bool measureVitals() {
-  measurementInProgress = true;
-  measurementComplete = false;
+  fingerDetected = false;
+  beatAvg = 0;
+  spo2 = 0;
 
-  unsigned long startTime = millis();
+  Serial.println("Request received. Waiting for finger...");
 
-  while (particleSensor.getIR() < 50000) {
-    particleSensor.check();
+  // Wait for a fresh sensor sample showing a finger.
+  unsigned long start = millis();
+  bool foundFinger = false;
 
-    if (millis() - startTime > 10000) {
-      measurementInProgress = false;
-      fingerDetected = false;
-      return false;
+  while (millis() - start < FINGER_WAIT_MS) {
+    uint32_t red, ir;
+
+    if (readNextSample(red, ir)) {
+      if (ir >= FINGER_THRESHOLD) {
+        foundFinger = true;
+        break;
+      }
     }
 
-    delay(10);
+    delay(1);
+  }
+
+  if (!foundFinger) {
+    Serial.println("Timed out: no finger detected.");
+    return false;
   }
 
   fingerDetected = true;
+  Serial.println("Finger detected. Measuring...");
+
+  particleSensor.clearFIFO();
 
   long hrSum = 0;
   long spo2Sum = 0;
   int validCount = 0;
 
-  for (int measurement = 0; measurement < TOTAL_MEASUREMENTS; measurement++) {
-    for (int i = 0; i < 100; i++) {
-      while (!particleSensor.available()) {
-        particleSensor.check();
-        yield();
+  for (int m = 0; m < TOTAL_MEASUREMENTS; m++) {
+    bool ok = true;
+
+    for (int i = 0; i < SAMPLES; i++) {
+      if (!readNextSample(redBuffer[i], irBuffer[i])) {
+        ok = false;
+        break;
       }
+    }
 
-      redBuffer[i] = particleSensor.getRed();
-      irBuffer[i] = particleSensor.getIR();
-
-      particleSensor.nextSample();
+    if (!ok) {
+      Serial.println("Sensor stopped delivering samples.");
+      break;
     }
 
     maxim_heart_rate_and_oxygen_saturation(
-      irBuffer,
-      100,
-      redBuffer,
-      &spo2FromAlgorithm,
-      &validSpO2,
-      &heartRateFromSpo2,
-      &validHeartRate);
+      irBuffer, SAMPLES, redBuffer,
+      &spo2FromAlgorithm, &validSpO2,
+      &heartRateFromSpo2, &validHeartRate
+    );
 
-    if (validHeartRate && validSpO2 && heartRateFromSpo2 >= 55 && heartRateFromSpo2 <= 120 && spo2FromAlgorithm >= 90 && spo2FromAlgorithm <= 100) {
+    bool good = validHeartRate && validSpO2 &&
+                heartRateFromSpo2 >= 55 &&
+                heartRateFromSpo2 <= 120 &&
+                spo2FromAlgorithm >= 90 &&
+                spo2FromAlgorithm <= 100;
+
+    Serial.print(good ? "Accepted" : "Rejected");
+    Serial.print(" HR=");
+    Serial.print(heartRateFromSpo2);
+    Serial.print(" SpO2=");
+    Serial.println(spo2FromAlgorithm);
+
+    if (good) {
       hrSum += heartRateFromSpo2;
       spo2Sum += spo2FromAlgorithm;
       validCount++;
-
-      Serial.print("Accepted HR=");
-      Serial.print(heartRateFromSpo2);
-
-      Serial.print("  SpO2=");
-      Serial.println(spo2FromAlgorithm);
-    } else {
-      Serial.print("Rejected HR=");
-      Serial.print(heartRateFromSpo2);
-
-      Serial.print("  SpO2=");
-      Serial.println(spo2FromAlgorithm);
     }
-
-    // Give the sensor a moment before the next measurement
-    delay(250);
   }
 
-  measurementInProgress = false;
-  measurementComplete = true;
-
-  const int MIN_VALID_READINGS = 3;
-
   if (validCount < MIN_VALID_READINGS) {
-    Serial.println("---------------------");
-    Serial.println("Measurement failed.");
-    Serial.print("Only ");
-    Serial.print(validCount);
-    Serial.println(" valid reading(s).");
-    Serial.println("---------------------");
-
+    Serial.println("Not enough stable readings.");
     fingerDetected = false;
     return false;
   }
@@ -296,75 +150,90 @@ bool measureVitals() {
   beatAvg = hrSum / validCount;
   spo2 = spo2Sum / validCount;
 
-  Serial.println("---------------------");
   Serial.print("Average HR: ");
   Serial.println(beatAvg);
-
   Serial.print("Average SpO2: ");
   Serial.println(spo2);
-  Serial.println("---------------------");
-
-  sendVitalsToBackend();
 
   return true;
 }
-void loop() {
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("WiFi disconnected. Reconnecting...");
 
-    WiFi.disconnect();
-    WiFi.begin(ssid, password);
+void handleRoot() {
+  // Prevent browser or proxy caching of an old measurement.
+  server.sendHeader("Cache-Control", "no-store");
 
-    delay(1000);
+  if (!measureVitals()) {
+    server.send(408, "application/json",
+      "{\"success\":false,\"message\":\"No finger detected or insufficient stable readings\",\"fingerDetected\":false}");
     return;
   }
-  server.handleClient();
 
-  particleSensor.check();
+  server.send(200, "application/json", createJsonResponse());
+  Serial.println("Measurement returned to requester.");
+}
 
-  redBuffer[0] = particleSensor.getRed();
-  irBuffer[0] = particleSensor.getIR();
+void connectWiFi() {
+  WiFi.mode(WIFI_STA);
+  WiFi.setSleep(false);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-  long irValue = particleSensor.getIR();
-  fingerDetected = (irValue > 50000);
-
-  if (checkForBeat(irValue)) {
-    long delta = millis() - lastBeat;
-    lastBeat = millis();
-
-    beatsPerMinute = 60 / (delta / 1000.0);
-
-    if (beatsPerMinute < 255 && beatsPerMinute > 20) {
-      rates[rateSpot++] = (byte)beatsPerMinute;
-      rateSpot %= RATE_SIZE;
-
-      beatAvg = 0;
-      for (byte x = 0; x < RATE_SIZE; x++)
-        beatAvg += rates[x];
-      beatAvg /= RATE_SIZE;
-    }
+  int retries = 0;
+  while (WiFi.status() != WL_CONNECTED && retries < 40) {
+    delay(500);
+    Serial.print(".");
+    retries++;
   }
 
-  // Serial.print("IR=");
-  // Serial.print(irValue);
-
-  // Serial.print(" BPM=");
-  // Serial.print(beatsPerMinute);
-
-  // Serial.print(" Avg BPM=");
-  // Serial.print(beatAvg);
-
-  // if (irValue < 50000)
-  //   Serial.print(" No finger?");
-
-  // Serial.println();
-
-  yield();
-
-static bool testMeasurementStarted = false;
-
-if (!testMeasurementStarted && fingerDetected) {
-    testMeasurementStarted = true;
-    measureVitals();
+  Serial.println();
 }
+
+void setup() {
+  Serial.begin(115200);
+  delay(1000);
+
+  Serial.println("\n===== ESP32 Clinic Sensor: Request-Driven Mode =====");
+
+  Wire.begin(21, 22);
+
+  if (!particleSensor.begin(Wire, I2C_SPEED_FAST)) {
+    Serial.println("MAX30102 NOT FOUND!");
+    while (true) delay(1000);
+  }
+
+  particleSensor.setup();
+  particleSensor.setPulseAmplitudeRed(0x0A);
+  particleSensor.setPulseAmplitudeGreen(0);
+
+  Serial.println("MAX30102 ready.");
+
+  Serial.print("Connecting to Wi-Fi: ");
+  Serial.println(WIFI_SSID);
+  connectWiFi();
+
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("Wi-Fi connection failed. Restarting...");
+    delay(3000);
+    ESP.restart();
+  }
+
+  Serial.print("ESP32 IP: ");
+  Serial.println(WiFi.localIP());
+
+  server.on("/", HTTP_GET, handleRoot);
+  server.begin();
+
+  Serial.println("Web server ready. Waiting for a CMS request.");
+}
+
+void loop() {
+  if (WiFi.status() != WL_CONNECTED) {
+    WiFi.disconnect();
+    connectWiFi();
+    delay(10);
+    return;
+  }
+
+  // No background measurements and no automatic backend uploads.
+  server.handleClient();
+  delay(2);
 }
