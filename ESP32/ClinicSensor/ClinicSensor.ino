@@ -172,20 +172,28 @@ void handleRoot() {
   Serial.println("Measurement returned to requester.");
 }
 
-void connectWiFi() {
-  WiFi.mode(WIFI_STA);
-  WiFi.setSleep(false);
-  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-  int retries = 0;
-  while (WiFi.status() != WL_CONNECTED && retries < 40) {
-    delay(500);
-    Serial.print(".");
-    retries++;
+const char* AP_SSID = "CMS-Clinic-Sensor";
+const char* AP_PASSWORD = "ClinicDemo26";
+
+void connectWiFi() {
+  WiFi.mode(WIFI_AP);
+  WiFi.setSleep(false);
+
+  bool started = WiFi.softAP(AP_SSID, AP_PASSWORD);
+
+  if (!started) {
+    Serial.println("ESP32 access point failed to start.");
+    return;
   }
 
-  Serial.println();
+  Serial.println("ESP32 access point started.");
+  Serial.print("Network name: ");
+  Serial.println(AP_SSID);
+  Serial.print("ESP32 IP: ");
+  Serial.println(WiFi.softAPIP());
 }
+
 
 void setup() {
   Serial.begin(115200);
@@ -206,34 +214,30 @@ void setup() {
 
   Serial.println("MAX30102 ready.");
 
-  Serial.print("Connecting to Wi-Fi: ");
-  Serial.println(WIFI_SSID);
-  connectWiFi();
+connectWiFi();
 
-  if (WiFi.status() != WL_CONNECTED) {
-    Serial.println("Wi-Fi connection failed. Restarting...");
-    delay(3000);
-    ESP.restart();
-  }
+if (WiFi.getMode() != WIFI_AP) {
+  Serial.println("Access point failed. Restarting...");
+  delay(3000);
+  ESP.restart();
+}
 
-  Serial.print("ESP32 IP: ");
-  Serial.println(WiFi.localIP());
+Serial.print("ESP32 IP: ");
+Serial.println(WiFi.softAPIP());  
 
-  server.on("/", HTTP_GET, handleRoot);
-  server.begin();
+  server.on("/health", HTTP_GET, []() {
+  server.sendHeader("Cache-Control", "no-store");
+  server.send(200, "application/json",
+              "{\"status\":\"online\",\"sensor\":\"MAX30102\"}");
+});
+
+server.on("/", HTTP_GET, handleRoot);
+server.begin();
 
   Serial.println("Web server ready. Waiting for a CMS request.");
 }
 
 void loop() {
-  if (WiFi.status() != WL_CONNECTED) {
-    WiFi.disconnect();
-    connectWiFi();
-    delay(10);
-    return;
-  }
-
-  // No background measurements and no automatic backend uploads.
   server.handleClient();
   delay(2);
 }
