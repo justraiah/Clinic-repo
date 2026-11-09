@@ -1,0 +1,257 @@
+@page
+@model Capstone_Clinic.Pages.LoginModel
+
+@{
+    ViewData["Title"] = "Clinic Login";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Clinic Monitoring System</title>
+    <link rel="icon" type="image/svg+xml" href="~/favicon.svg" asp-append-version="true" />
+    <link rel="alternate icon" type="image/x-icon" href="~/favicon.ico" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        :root {
+            --login-forest: #174c3c;
+            --login-deep: #10392f;
+            --login-green: #238363;
+            --login-mint: #dff4e9;
+            --login-ink: #20352d;
+            --login-muted: #718178;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+
+        html, body { min-height: 100%; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 32px 20px;
+            font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+            color: var(--login-ink);
+            background:
+                radial-gradient(ellipse at 12% 14%, rgba(255,255,255,.8) 0, rgba(255,255,255,0) 35%),
+                radial-gradient(ellipse at 88% 82%, rgba(20,105,77,.22) 0, rgba(20,105,77,0) 38%),
+                linear-gradient(135deg, #c8eddd 0%, #f2faf5 46%, #9bd5bd 100%);
+            overflow-x: hidden;
+            position: relative;
+        }
+
+        body::before, body::after {
+            content: "";
+            position: fixed;
+            z-index: 0;
+            pointer-events: none;
+            border-radius: 50%;
+        }
+
+        body::before {
+            width: 560px; height: 560px;
+            top: -340px; left: -130px;
+            background: linear-gradient(145deg, rgba(16,57,47,.9), rgba(35,131,99,.35));
+            filter: blur(1px);
+        }
+
+        body::after {
+            width: 680px; height: 680px;
+            right: -330px; bottom: -440px;
+            border: 1px solid rgba(23,76,60,.15);
+            box-shadow: 0 0 0 55px rgba(23,76,60,.035), 0 0 0 110px rgba(23,76,60,.025);
+        }
+
+        .login-shell {
+            position: relative;
+            z-index: 1;
+            width: min(100%, 960px);
+            display: grid;
+            grid-template-columns: minmax(280px, .88fr) minmax(360px, 1.12fr);
+            background: rgba(255,255,255,.94);
+            border: 1px solid rgba(255,255,255,.78);
+            border-radius: 26px;
+            overflow: hidden;
+            box-shadow: 0 24px 70px rgba(20,65,48,.18), 0 4px 16px rgba(20,65,48,.07);
+            backdrop-filter: blur(14px);
+        }
+
+        .login-brand {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 52px 38px;
+            color: #fff;
+            background:
+                radial-gradient(circle at 18% 8%, rgba(255,255,255,.16), transparent 32%),
+                linear-gradient(150deg, #246b52 0%, var(--login-forest) 52%, var(--login-deep) 100%);
+            position: relative;
+            isolation: isolate;
+        }
+
+        .login-brand::after {
+            content: "";
+            position: absolute;
+            z-index: -1;
+            width: 420px; height: 420px;
+            right: -240px; bottom: -260px;
+            border: 1px solid rgba(255,255,255,.13);
+            border-radius: 50%;
+            box-shadow: 0 0 0 42px rgba(255,255,255,.035), 0 0 0 84px rgba(255,255,255,.025);
+        }
+
+        .brand-logo-wrap {
+            width: 116px; height: 116px;
+            display: grid; place-items: center;
+            padding: 7px;
+            border-radius: 50%;
+            background: rgba(255,255,255,.96);
+            box-shadow: 0 8px 26px rgba(0,0,0,.16);
+            margin-bottom: 25px;
+        }
+
+        .brand-logo { display: block; width: 100%; height: 100%; object-fit: contain; border-radius: 50%; }
+
+        .brand-title {
+            margin: 0;
+            font-size: clamp(1.45rem, 2.4vw, 1.85rem);
+            line-height: 1.2;
+            font-weight: 750;
+            letter-spacing: -.035em;
+        }
+
+        .brand-subtitle { margin: 9px 0 0; color: rgba(255,255,255,.78); font-size: .92rem; }
+
+        .brand-rule { width: 72px; height: 3px; border-radius: 10px; background: #a8e7c5; margin: 27px 0 20px; }
+
+        .brand-tagline { margin: 0; font-size: .92rem; color: rgba(255,255,255,.88); letter-spacing: .02em; }
+
+        .login-content { padding: 56px clamp(28px, 5vw, 58px); display: flex; flex-direction: column; justify-content: center; }
+
+        .login-eyebrow {
+            margin: 0 0 9px;
+            color: var(--login-green);
+            text-transform: uppercase;
+            letter-spacing: .14em;
+            font-size: .7rem;
+            font-weight: 750;
+        }
+
+        .login-heading { margin: 0; color: var(--login-ink); font-size: clamp(1.8rem, 3vw, 2.25rem); font-weight: 750; letter-spacing: -.045em; }
+
+        .login-description { margin: 10px 0 30px; color: var(--login-muted); font-size: .91rem; line-height: 1.6; }
+
+        .form-label { margin-bottom: 8px; color: #40564a; font-size: .8rem; font-weight: 650; }
+
+        .form-control {
+            min-height: 49px;
+            padding: 12px 14px;
+            border: 1px solid #dce8e0;
+            border-radius: 11px;
+            background: #fbfdfb;
+            color: var(--login-ink);
+            font-size: .9rem;
+            transition: border-color .18s ease, box-shadow .18s ease, background .18s ease;
+        }
+
+        .form-control::placeholder { color: #9aa99f; }
+        .form-control:focus { border-color: #58a987; background: #fff; box-shadow: 0 0 0 .22rem rgba(35,131,99,.12); }
+
+        .login-button {
+            width: 100%;
+            min-height: 50px;
+            margin-top: 7px;
+            border: 0;
+            border-radius: 11px;
+            color: #fff;
+            background: linear-gradient(105deg, #1b654b, #238363);
+            font-size: .92rem;
+            font-weight: 700;
+            letter-spacing: .015em;
+            box-shadow: 0 7px 16px rgba(35,131,99,.2);
+            transition: transform .18s ease, box-shadow .18s ease, filter .18s ease;
+        }
+
+        .login-button:hover { color: #fff; filter: brightness(1.06); transform: translateY(-1px); box-shadow: 0 10px 20px rgba(35,131,99,.24); }
+        .login-button:focus-visible { outline: 3px solid rgba(35,131,99,.3); outline-offset: 3px; }
+        .login-error { margin: 18px 0 0; border-radius: 10px; font-size: .82rem; }
+
+        .login-footer { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 28px; color: #809187; font-size: .75rem; text-align: center; }
+        .footer-shield { display: inline-grid; place-items: center; width: 19px; height: 19px; flex: 0 0 19px; border-radius: 50%; color: #238363; background: #e5f5ec; font-size: .72rem; font-weight: 800; }
+
+        @@media (max-width: 720px) {
+            body { padding: 20px 14px; }
+            .login-shell { max-width: 480px; grid-template-columns: 1fr; border-radius: 22px; }
+            .login-brand { padding: 30px 24px 27px; }
+            .brand-logo-wrap { width: 76px; height: 76px; margin-bottom: 15px; }
+            .brand-title { font-size: 1.45rem; }
+            .brand-subtitle { margin-top: 5px; font-size: .82rem; }
+            .brand-rule { margin: 15px 0 11px; width: 52px; }
+            .brand-tagline { font-size: .8rem; }
+            .login-content { padding: 32px 26px 30px; }
+            .login-description { margin-bottom: 23px; }
+        }
+
+        @@media (max-width: 380px) {
+            .login-content { padding: 28px 20px; }
+            .login-brand { padding-inline: 18px; }
+        }
+
+        @@media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { transition-duration: .01ms !important; animation-duration: .01ms !important; }
+        }
+    </style>
+</head>
+<body>
+    <main class="login-shell" aria-labelledby="loginHeading">
+        <section class="login-brand" aria-label="Colegio de Montalban Clinic branding">
+            <div class="brand-logo-wrap">
+                <img src="~/images/cdm-logo.jpg" asp-append-version="true" alt="Colegio de Montalban seal" class="brand-logo" />
+            </div>
+            <h1 class="brand-title">Clinic Monitoring<br />System</h1>
+            <p class="brand-subtitle">Colegio de Montalban Clinic</p>
+            <span class="brand-rule" aria-hidden="true"></span>
+            <p class="brand-tagline">Your Health. Our Priority.</p>
+        </section>
+
+        <section class="login-content">
+            <p class="login-eyebrow">Clinic staff portal</p>
+            <h2 id="loginHeading" class="login-heading">Welcome back!</h2>
+            <p class="login-description">Sign in with your staff account to access the Clinic Monitoring System.</p>
+
+            <form method="post">
+                <div class="mb-3">
+                    <label asp-for="Username" class="form-label">Username</label>
+                    <input asp-for="Username" class="form-control" autocomplete="username" placeholder="Enter your username" />
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Password" class="form-label">Password</label>
+                    <input asp-for="Password" type="password" class="form-control" autocomplete="current-password" placeholder="Enter your password" />
+                </div>
+
+                <button class="btn login-button" type="submit">Sign in to CMS</button>
+            </form>
+
+            @if (!string.IsNullOrEmpty(Model.ErrorMessage))
+            {
+                <div class="alert alert-danger login-error" role="alert">
+                    @Model.ErrorMessage
+                </div>
+            }
+
+            <div class="login-footer">
+                <span class="footer-shield" aria-hidden="true">✓</span>
+                <span>Secure access · Clinic staff only</span>
+            </div>
+        </section>
+    </main>
+</body>
+</html>

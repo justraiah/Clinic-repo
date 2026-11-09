@@ -24,6 +24,7 @@ namespace Capstone_Clinic.Data
         public DbSet<VitalSignLog> VitalSignLogs { get; set; }
         public DbSet<Alert> Alerts { get; set; }
         public DbSet<Staff> Staffs { get; set; }
+        public DbSet<IoTMeasurementRequest> IoTMeasurementRequests { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -45,6 +46,12 @@ namespace Capstone_Clinic.Data
                 .HasOne(a => a.VitalSignLog)
                 .WithMany(v => v.Alerts)
                 .HasForeignKey(a => a.VitalLogId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PendingVitalReading>()
+                .HasOne(r => r.Request)
+                .WithOne()
+                .HasForeignKey<PendingVitalReading>(r => r.RequestId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
     }

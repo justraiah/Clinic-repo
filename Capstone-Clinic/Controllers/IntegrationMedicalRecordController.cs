@@ -1,5 +1,7 @@
-﻿using Capstone_Clinic.Data;
+using Capstone_Clinic.Data;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
@@ -219,9 +221,8 @@ public class IntegrationMedicalRecordController : ControllerBase
         if (string.IsNullOrWhiteSpace(integrationKey))
             return false;
 
-        return string.Equals(
-            integrationKey,
-            configuredKey,
-            StringComparison.Ordinal);
+        return CryptographicOperations.FixedTimeEquals(
+            Encoding.UTF8.GetBytes(integrationKey),
+            Encoding.UTF8.GetBytes(configuredKey));
     }
 }

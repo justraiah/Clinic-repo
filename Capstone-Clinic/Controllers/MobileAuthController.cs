@@ -96,9 +96,6 @@ public class MobileAuthController : ControllerBase
                 "StudentNumber",
                 student.StudentNumber)
         };
-        Console.WriteLine(
-    $"JWT key length: {Encoding.UTF8.GetByteCount(_configuration["Jwt:Key"] ?? "")} bytes");
-
         var key = new SymmetricSecurityKey(
             Encoding.UTF8.GetBytes(
                 _configuration["Jwt:Key"]!));

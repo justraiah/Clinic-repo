@@ -8,11 +8,23 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.OpenApi.Models;
 using Microsoft.AspNetCore.Identity;
 using Capstone_Clinic.Models;
+using Capstone_Clinic.Models.Authorization;
 
 QuestPDF.Settings.License = LicenseType.Community;
 
 var builder = WebApplication.CreateBuilder(args);
-Console.WriteLine($"JWT key length loaded by Program.cs: {System.Text.Encoding.UTF8.GetByteCount(builder.Configuration["Jwt:Key"] ?? "")} bytes");
+
+// Do not start the application with a missing/weak JWT signing key.
+// Configure Jwt:Key through .NET User Secrets for development and a secret
+// store/environment variable for hosted environments.
+var jwtKey = builder.Configuration["Jwt:Key"];
+if (string.IsNullOrWhiteSpace(jwtKey) ||
+    System.Text.Encoding.UTF8.GetByteCount(jwtKey) < 32)
+{
+    throw new InvalidOperationException(
+        "Jwt:Key must be configured as a secret with at least 32 bytes. " +
+        "Use .NET User Secrets in development and environment/secret-store configuration when hosted.");
+}
 
 // Add services to the container.
 builder.Services.AddAuthentication(options =>
@@ -31,7 +43,14 @@ builder.Services.AddAuthentication(options =>
     options =>
     {
         options.LoginPath = "/Login";
-        options.AccessDeniedPath = "/Login";
+        options.AccessDeniedPath = "/AccessDenied";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+            ? CookieSecurePolicy.SameAsRequest
+            : CookieSecurePolicy.Always;
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+        options.SlidingExpiration = true;
     })
 .AddCookie(
     "StudentScheme",
@@ -39,6 +58,13 @@ builder.Services.AddAuthentication(options =>
     {
         options.LoginPath = "/StudentLogin";
         options.AccessDeniedPath = "/StudentLogin";
+        options.Cookie.HttpOnly = true;
+        options.Cookie.SameSite = SameSiteMode.Lax;
+        options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
+            ? CookieSecurePolicy.SameAsRequest
+            : CookieSecurePolicy.Always;
+        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+        options.SlidingExpiration = true;
     })
 .AddJwtBearer(
     "MobileJwt",
@@ -51,23 +77,35 @@ builder.Services.AddAuthentication(options =>
                 ValidateAudience = true,
                 ValidateLifetime = true,
                 ValidateIssuerSigningKey = true,
+                ClockSkew = TimeSpan.FromSeconds(30),
 
                 ValidIssuer = builder.Configuration["Jwt:Issuer"],
                 ValidAudience = builder.Configuration["Jwt:Audience"],
 
                 IssuerSigningKey =
                     new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
-                        System.Text.Encoding.UTF8.GetBytes(
-                            builder.Configuration["Jwt:Key"]!))
+                        System.Text.Encoding.UTF8.GetBytes(jwtKey))
             };
     });
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    // All interactive CMS pages require a recognized staff role.
+    options.AddPolicy("StaffAccess", policy =>
+        policy.RequireRole(StaffRoles.Admin, StaffRoles.ClinicPersonnel));
+
+    // Account creation is a privileged administrative function.
+    options.AddPolicy("AdminOnly", policy =>
+        policy.RequireRole(StaffRoles.Admin));
+});
 builder.Services.AddHttpClient<Esp32Service>(c => c.Timeout = TimeSpan.FromSeconds(90));
+builder.Services.AddSingleton<IoTDevicePresence>();
 
 builder.Services.AddRazorPages(options =>
 {
-    options.Conventions.AuthorizeFolder("/");
+    options.Conventions.AuthorizeFolder("/", "StaffAccess");
     options.Conventions.AllowAnonymousToPage("/Login");
+    options.Conventions.AllowAnonymousToPage("/AccessDenied");
+    options.Conventions.AuthorizeFolder("/StaffManagement", "AdminOnly");
 });
 builder.Services.AddControllers();
 builder.Services.AddCors(options =>

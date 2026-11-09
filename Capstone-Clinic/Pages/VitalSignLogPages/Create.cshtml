@@ -376,7 +376,7 @@
             </h2>
 
             <p class="form-panel-description">
-                Heart rate and oxygen saturation can be obtained from the connected sensor.
+                Heart rate and oxygen saturation are requested from the clinic sensor through the live CMS.
             </p>
 
         </div>
@@ -384,7 +384,7 @@
         <div class="form-panel-body">
 
             <div class="sensor-note">
-                Use the sensor reading function when the device is available.
+                The sensor must be on Wi-Fi with internet access. Place a finger on it, then request a reading.
                 Values may also be entered manually if necessary.
             </div>
             <div class="mb-3 d-flex align-items-center gap-2">
@@ -442,10 +442,7 @@
             <div class="sensor-action">
 
                 
-                <button type="submit"
-                        formaction="/VitalSignLogPages/Create?handler=ReadSensor"
-                        formmethod="post"
-                        formnovalidate
+                <button type="button"
                         class="btn btn-primary"
                         id="readSensorBtn">
                     Read Heart Rate &amp; SpO₂
@@ -464,9 +461,9 @@
 
                     <div>
 
-                        <strong>Reading sensor...</strong><br />
+                        <strong id="sensorLoadingTitle">Reading sensor...</strong><br />
 
-                        Please keep your finger on the sensor.
+                        <span id="sensorLoadingDetail">Please keep your finger on the sensor.</span>
 
                     </div>
 
@@ -634,21 +631,107 @@
         document.addEventListener("DOMContentLoaded", function () {
             const sensorButton = document.getElementById("readSensorBtn");
             const sensorLoading = document.getElementById("sensorLoading");
-            const form = sensorButton?.closest("form");
+            const loadingTitle = document.getElementById("sensorLoadingTitle");
+            const loadingDetail = document.getElementById("sensorLoadingDetail");
+            const heartRateInput = document.getElementById("VitalSignLog_HeartRate");
+            const spo2Input = document.getElementById("VitalSignLog_OxygenSaturation");
 
-            if (!sensorButton || !form) return;
+            if (!sensorButton) return;
 
-            form.addEventListener("submit", function (event) {
-                if (event.submitter?.id !== "readSensorBtn") {
+            function setLoading(title, detail) {
+                if (loadingTitle) loadingTitle.textContent = title;
+                if (loadingDetail) loadingDetail.textContent = detail;
+                sensorLoading?.classList.remove("d-none");
+            }
+
+            function showSensorError(message) {
+                sensorLoading?.classList.add("d-none");
+                sensorButton.disabled = false;
+                sensorButton.textContent = "Read Heart Rate & SpO₂";
+                window.alert(message);
+            }
+
+            async function readJson(response) {
+                try {
+                    return await response.json();
+                } catch {
+                    return null;
+                }
+            }
+
+            sensorButton.addEventListener("click", async function () {
+                sensorButton.disabled = true;
+                sensorButton.textContent = "Reading Sensor...";
+                setLoading(
+                    "Requesting a measurement...",
+                    "The clinic sensor will pick this up on its next poll."
+                );
+
+                let requestId = "";
+
+                try {
+                    const created = await fetch("/api/iot/vital-signs/requests", {
+                        method: "POST",
+                        headers: { "Accept": "application/json" }
+                    });
+                    const createdBody = await readJson(created);
+
+                    if (!created.ok || !createdBody?.requestId) {
+                        showSensorError("The CMS could not create a sensor request. Sign in again and retry.");
+                        return;
+                    }
+
+                    requestId = createdBody.requestId;
+                } catch {
+                    showSensorError("The CMS could not be reached. Check that this page is the live site, then retry.");
                     return;
                 }
 
-                sensorButton.disabled = true;
-                sensorButton.textContent = "Reading Sensor...";
+                setLoading(
+                    "Reading sensor...",
+                    "Keep a finger still on the MAX30102 until the values appear."
+                );
 
-                if (sensorLoading) {
-                    sensorLoading.classList.remove("d-none");
+                const deadline = Date.now() + 150000;
+
+                while (Date.now() < deadline) {
+                    await new Promise(function (resolve) { setTimeout(resolve, 2000); });
+
+                    try {
+                        const readingResponse = await fetch(
+                            "/api/iot/vital-signs/requests/" + requestId + "/reading",
+                            { headers: { "Accept": "application/json" } }
+                        );
+                        const reading = await readJson(readingResponse);
+
+                        if (readingResponse.status === 200 && reading?.success) {
+                            if (heartRateInput) heartRateInput.value = reading.heartRate;
+                            if (spo2Input) spo2Input.value = reading.spo2;
+                            setLoading(
+                                "Sensor reading received.",
+                                reading.heartRate + " BPM, SpO₂ " + reading.spo2 + "%. Review the form, then save."
+                            );
+                            sensorButton.disabled = false;
+                            sensorButton.textContent = "Read Heart Rate & SpO₂";
+                            return;
+                        }
+
+                        if (readingResponse.status === 409) {
+                            showSensorError(reading?.message || "The sensor did not return a usable reading.");
+                            return;
+                        }
+
+                        if (readingResponse.status === 401) {
+                            showSensorError("Your CMS session expired. Sign in again, then retry the reading.");
+                            return;
+                        }
+                    } catch {
+                        showSensorError("Lost contact with the CMS while waiting for the sensor.");
+                        return;
+                    }
                 }
+
+                showSensorError("The sensor did not return a reading in time. Confirm it is powered, on Wi-Fi, and pointed at this live CMS, then retry.");
             });
         });
     </script>

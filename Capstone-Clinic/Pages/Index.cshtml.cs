@@ -2,19 +2,18 @@ using Capstone_Clinic.Data;
 using Capstone_Clinic.Services;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Capstone_Clinic.Services;
 
 namespace Capstone_Clinic.Pages
 {
     public class IndexModel : PageModel
     {
         private readonly AppDbContext _context;
-        private readonly Esp32Service _esp32Service;
+        private readonly IoTDevicePresence _devicePresence;
 
-        public IndexModel(AppDbContext context, Esp32Service esp32Service)
+        public IndexModel(AppDbContext context, IoTDevicePresence devicePresence)
         {
             _context = context;
-            _esp32Service = esp32Service;
+            _devicePresence = devicePresence;
         }
 
         public int StudentCount { get; set; }
@@ -36,9 +35,9 @@ namespace Capstone_Clinic.Pages
         public async Task OnGetAsync()
         {
             LastUpdated = DateTime.Now;
-            IoTDeviceStatus = await _esp32Service.IsReachableAsync()
+            IoTDeviceStatus = _devicePresence.IsOnline()
                 ? "Connected"
-                : "Disconnected";
+                : "Offline";
 
             StudentCount = await _context.Students.CountAsync();
 

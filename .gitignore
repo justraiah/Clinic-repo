@@ -361,3 +361,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+# Local configuration backups; may contain secrets
+appsettings*.json.backup
+
+# ESP32 Wi-Fi credentials and the live CMS device key
+ESP32/ClinicSensor/secrets.h
+

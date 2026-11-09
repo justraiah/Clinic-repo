@@ -1,0 +1,96 @@
+@page
+@model Capstone_Clinic.Pages.StaffManagement.IndexModel
+@{
+    ViewData["Title"] = "Staff Management";
+}
+
+<div class="container-fluid py-3">
+    <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
+        <div>
+            <h1 class="h3 mb-1">Staff Management</h1>
+            <p class="text-muted mb-0">Create clinic personnel accounts and review existing staff roles.</p>
+        </div>
+        <span class="badge text-bg-dark">Admin only</span>
+    </div>
+
+    @if (TempData["SuccessMessage"] is string successMessage)
+    {
+        <div class="alert alert-success" role="status">@successMessage</div>
+    }
+
+    <div class="row g-4">
+        <div class="col-12 col-xl-5">
+            <section class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="h5 mb-3">Create clinic personnel account</h2>
+                    <p class="small text-muted">New accounts are assigned the ClinicPersonnel role. This form cannot create another administrator.</p>
+                    <form method="post" asp-page-handler="Create">
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.FullName" class="form-label">Full name</label>
+                            <input asp-for="Input.FullName" class="form-control" autocomplete="name" maxlength="100" />
+                            <span asp-validation-for="Input.FullName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Username" class="form-label">Username</label>
+                            <input asp-for="Input.Username" class="form-control" autocomplete="off" maxlength="50" />
+                            <div class="form-text">Letters, numbers, dots, underscores, and hyphens.</div>
+                            <span asp-validation-for="Input.Username" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.Password" class="form-label">Temporary password</label>
+                            <input asp-for="Input.Password" type="password" class="form-control" autocomplete="new-password" minlength="12" maxlength="100" />
+                            <div class="form-text">At least 12 characters. Share it securely and have the account holder change it when a password-change workflow is available.</div>
+                            <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-success">Create clinic account</button>
+                    </form>
+                </div>
+            </section>
+        </div>
+
+        <div class="col-12 col-xl-7">
+            <section class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="h5 mb-3">Existing staff accounts</h2>
+                    @if (Model.StaffAccounts.Count == 0)
+                    {
+                        <p class="text-muted mb-0">No staff accounts were found.</p>
+                    }
+                    else
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead>
+                                    <tr>
+                                        <th scope="col">Name</th>
+                                        <th scope="col">Username</th>
+                                        <th scope="col">Role</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                @foreach (var staff in Model.StaffAccounts)
+                                {
+                                    <tr>
+                                        <td>@staff.FullName</td>
+                                        <td>@staff.Username</td>
+                                        <td><span class="badge @(staff.Role == "Admin" ? "text-bg-dark" : "text-bg-success")">@staff.Role</span></td>
+                                    </tr>
+                                }
+                                </tbody>
+                            </table>
+                        </div>
+                    }
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

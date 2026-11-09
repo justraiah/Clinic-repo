@@ -1,14 +1,15 @@
-// ESP32 + MAX30102 -> CMS
-// Request-driven mode: measure ONLY when the CMS requests GET /
+// ESP32 + MAX30102 -> live CMS
+// Station mode: poll the public CMS for a measurement request, then submit the result.
 //
-// Required secrets.h:
-// WIFI_SSID, WIFI_PASSWORD
+// Copy secrets.h.example to secrets.h and set:
+// WIFI_SSID, WIFI_PASSWORD, CMS_BASE_URL (https), IOT_API_KEY
 
 #include <Wire.h>
 #include <MAX30105.h>
 #include "spo2_algorithm.h"
 #include <WiFi.h>
-#include <WebServer.h>
+#include <HTTPClient.h>
+#include <WiFiClientSecure.h>
 #include "secrets.h"
 
 const byte TOTAL_MEASUREMENTS = 8;
@@ -16,12 +17,12 @@ const int MIN_VALID_READINGS = 3;
 const long FINGER_THRESHOLD = 50000;
 const unsigned long FINGER_WAIT_MS = 10000;
 const unsigned long SAMPLE_TIMEOUT_MS = 2000;
+const unsigned long POLL_INTERVAL_MS = 2000;
 
 const byte SAMPLES = 100;
 uint32_t irBuffer[SAMPLES];
 uint32_t redBuffer[SAMPLES];
 
-WebServer server(80);
 MAX30105 particleSensor;
 
 int beatAvg = 0;
@@ -32,6 +33,8 @@ int32_t heartRateFromSpo2 = 0;
 int8_t validHeartRate = 0;
 int32_t spo2FromAlgorithm = 0;
 int8_t validSpO2 = 0;
+
+String cmsBaseUrl;
 
 bool readNextSample(uint32_t &red, uint32_t &ir) {
   unsigned long start = millis();
@@ -52,25 +55,13 @@ bool readNextSample(uint32_t &red, uint32_t &ir) {
   return true;
 }
 
-String createJsonResponse() {
-  String json = "{";
-  json += "\"success\":true,";
-  json += "\"heartRate\":" + String(beatAvg) + ",";
-  json += "\"spo2\":" + String(spo2) + ",";
-  json += "\"fingerDetected\":true";
-  json += "}";
-
-  return json;
-}
-
 bool measureVitals() {
   fingerDetected = false;
   beatAvg = 0;
   spo2 = 0;
 
-  Serial.println("Request received. Waiting for finger...");
+  Serial.println("Request claimed. Waiting for finger...");
 
-  // Wait for a fresh sensor sample showing a finger.
   unsigned long start = millis();
   bool foundFinger = false;
 
@@ -158,48 +149,172 @@ bool measureVitals() {
   return true;
 }
 
-void handleRoot() {
-  // Prevent browser or proxy caching of an old measurement.
-  server.sendHeader("Cache-Control", "no-store");
+bool httpsRequest(
+  const String &path,
+  bool post,
+  const String &body,
+  int &statusCode,
+  String &response) {
+  WiFiClientSecure client;
+
+  if (strlen(CMS_ROOT_CA) == 0) {
+    client.setInsecure();
+  } else {
+    client.setCACert(CMS_ROOT_CA);
+  }
+
+  HTTPClient http;
+  http.setTimeout(15000);
+
+  if (!http.begin(client, cmsBaseUrl + path)) {
+    statusCode = -1;
+    return false;
+  }
+
+  http.addHeader("Accept", "application/json");
+  http.addHeader("X-IoT-Key", IOT_API_KEY);
+
+  if (post) {
+    http.addHeader("Content-Type", "application/json");
+    statusCode = http.POST(body);
+  } else {
+    statusCode = http.GET();
+  }
+
+  if (statusCode > 0) {
+    response = http.getString();
+  }
+
+  http.end();
+  return statusCode > 0;
+}
+
+bool extractRequestId(const String &payload, String &requestId) {
+  const char *key = "\"requestId\":\"";
+  int start = payload.indexOf(key);
+
+  if (start < 0) {
+    return false;
+  }
+
+  start += strlen(key);
+  int end = payload.indexOf('"', start);
+
+  if (end <= start) {
+    return false;
+  }
+
+  requestId = payload.substring(start, end);
+  return requestId.length() >= 32;
+}
+
+void submitResult(const String &requestId, int heartRate, int oxygen, bool finger) {
+  String body = "{";
+  body += "\"requestId\":\"" + requestId + "\",";
+  body += "\"heartRate\":" + String(heartRate) + ",";
+  body += "\"spo2\":" + String(oxygen) + ",";
+  body += "\"fingerDetected\":";
+  body += finger ? "true" : "false";
+  body += "}";
+
+  int statusCode = 0;
+  String response;
+  bool sent = httpsRequest(
+    "/api/iot/vital-signs/device/result",
+    true,
+    body,
+    statusCode,
+    response);
+
+  Serial.print("Result HTTP status: ");
+  Serial.println(sent ? statusCode : -1);
+}
+
+void pollForWork() {
+  int statusCode = 0;
+  String response;
+
+  bool reached = httpsRequest(
+    "/api/iot/vital-signs/device/next",
+    false,
+    "",
+    statusCode,
+    response);
+
+  if (!reached) {
+    Serial.println("Could not reach the live CMS.");
+    return;
+  }
+
+  if (statusCode == 204) {
+    return;
+  }
+
+  if (statusCode == 401) {
+    Serial.println("Live CMS rejected the device key.");
+    return;
+  }
+
+  if (statusCode != 200) {
+    Serial.print("Unexpected poll status: ");
+    Serial.println(statusCode);
+    return;
+  }
+
+  String requestId;
+  if (!extractRequestId(response, requestId)) {
+    Serial.println("CMS response did not include a request id.");
+    return;
+  }
+
+  Serial.println("Measurement request claimed.");
 
   if (!measureVitals()) {
-    server.send(408, "application/json",
-      "{\"success\":false,\"message\":\"No finger detected or insufficient stable readings\",\"fingerDetected\":false}");
+    submitResult(requestId, 0, 0, false);
     return;
   }
 
-  server.send(200, "application/json", createJsonResponse());
-  Serial.println("Measurement returned to requester.");
+  submitResult(requestId, beatAvg, spo2, true);
 }
-
-
-const char* AP_SSID = "CMS-Clinic-Sensor";
-const char* AP_PASSWORD = "ClinicDemo26";
 
 void connectWiFi() {
-  WiFi.mode(WIFI_AP);
+  WiFi.mode(WIFI_STA);
   WiFi.setSleep(false);
+  WiFi.begin(WIFI_SSID, WIFI_PASSWORD);
 
-  bool started = WiFi.softAP(AP_SSID, AP_PASSWORD);
+  Serial.print("Connecting to Wi-Fi");
 
-  if (!started) {
-    Serial.println("ESP32 access point failed to start.");
+  for (int attempt = 0; attempt < 40 && WiFi.status() != WL_CONNECTED; attempt++) {
+    delay(500);
+    Serial.print(".");
+  }
+
+  Serial.println();
+
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("Wi-Fi connection failed.");
     return;
   }
 
-  Serial.println("ESP32 access point started.");
-  Serial.print("Network name: ");
-  Serial.println(AP_SSID);
-  Serial.print("ESP32 IP: ");
-  Serial.println(WiFi.softAPIP());
+  Serial.print("Wi-Fi connected. ESP32 IP: ");
+  Serial.println(WiFi.localIP());
 }
-
 
 void setup() {
   Serial.begin(115200);
   delay(1000);
 
-  Serial.println("\n===== ESP32 Clinic Sensor: Request-Driven Mode =====");
+  Serial.println("\n===== ESP32 Clinic Sensor: Live CMS polling =====");
+
+  cmsBaseUrl = CMS_BASE_URL;
+  while (cmsBaseUrl.endsWith("/")) {
+    cmsBaseUrl.remove(cmsBaseUrl.length() - 1);
+  }
+
+  if (!cmsBaseUrl.startsWith("https://")) {
+    Serial.println("CMS_BASE_URL must be the public https address of the live CMS.");
+    while (true) delay(1000);
+  }
 
   Wire.begin(21, 22);
 
@@ -214,30 +329,27 @@ void setup() {
 
   Serial.println("MAX30102 ready.");
 
-connectWiFi();
+  connectWiFi();
 
-if (WiFi.getMode() != WIFI_AP) {
-  Serial.println("Access point failed. Restarting...");
-  delay(3000);
-  ESP.restart();
-}
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("Restarting to retry Wi-Fi...");
+    delay(3000);
+    ESP.restart();
+  }
 
-Serial.print("ESP32 IP: ");
-Serial.println(WiFi.softAPIP());  
-
-  server.on("/health", HTTP_GET, []() {
-  server.sendHeader("Cache-Control", "no-store");
-  server.send(200, "application/json",
-              "{\"status\":\"online\",\"sensor\":\"MAX30102\"}");
-});
-
-server.on("/", HTTP_GET, handleRoot);
-server.begin();
-
-  Serial.println("Web server ready. Waiting for a CMS request.");
+  if (strlen(CMS_ROOT_CA) == 0) {
+    Serial.println("HTTPS is on. Server certificate verification is not configured.");
+  }
 }
 
 void loop() {
-  server.handleClient();
-  delay(2);
+  if (WiFi.status() != WL_CONNECTED) {
+    Serial.println("Wi-Fi dropped. Reconnecting...");
+    connectWiFi();
+    delay(2000);
+    return;
+  }
+
+  pollForWork();
+  delay(POLL_INTERVAL_MS);
 }

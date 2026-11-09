@@ -17,5 +17,8 @@ namespace Capstone_Clinic.Models.IoT
         public DateTime ReceivedAt { get; set; }
 
         public bool IsUsed { get; set; }
+        public Guid? RequestId { get; set; }
+
+        public IoTMeasurementRequest? Request { get; set; }
     }
 }

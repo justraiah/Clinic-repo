@@ -23,15 +23,9 @@
         {
             try
             {
-                Console.WriteLine($"Requesting a new reading from ESP32: {_sensorUrl}");
-
                 using var response = await _httpClient.GetAsync(_sensorUrl);
 
                 var json = await response.Content.ReadAsStringAsync();
-
-                Console.WriteLine(
-                    $"ESP32 replied {(int)response.StatusCode}: {json}"
-                );
 
                 if (!response.IsSuccessStatusCode)
                     return null;
@@ -71,9 +65,9 @@
                     FingerDetected = true
                 };
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"ESP32 sensor request ERROR: {ex}");
+                // Keep device/network details and raw sensor payloads out of logs.
                 return null;
             }
         }

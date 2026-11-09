@@ -134,6 +134,33 @@ namespace Capstone_Clinic.Migrations
                     b.ToTable("DentalRecords");
                 });
 
+            modelBuilder.Entity("Capstone_Clinic.Models.IoT.IoTMeasurementRequest", b =>
+                {
+                    b.Property<Guid>("RequestId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("ClaimedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("RequestId");
+
+                    b.ToTable("IoTMeasurementRequests");
+                });
+
             modelBuilder.Entity("Capstone_Clinic.Models.IoT.PendingVitalReading", b =>
                 {
                     b.Property<int>("PendingVitalReadingId")
@@ -154,10 +181,17 @@ namespace Capstone_Clinic.Migrations
                     b.Property<DateTime>("ReceivedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("RequestId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("Spo2")
                         .HasColumnType("int");
 
                     b.HasKey("PendingVitalReadingId");
+
+                    b.HasIndex("RequestId")
+                        .IsUnique()
+                        .HasFilter("[RequestId] IS NOT NULL");
 
                     b.ToTable("PendingVitalReadings");
                 });
@@ -480,6 +514,16 @@ namespace Capstone_Clinic.Migrations
                         .IsRequired();
 
                     b.Navigation("ClinicPatient");
+                });
+
+            modelBuilder.Entity("Capstone_Clinic.Models.IoT.PendingVitalReading", b =>
+                {
+                    b.HasOne("Capstone_Clinic.Models.IoT.IoTMeasurementRequest", "Request")
+                        .WithOne()
+                        .HasForeignKey("Capstone_Clinic.Models.IoT.PendingVitalReading", "RequestId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Request");
                 });
 
             modelBuilder.Entity("Capstone_Clinic.Models.MedicalRecord", b =>

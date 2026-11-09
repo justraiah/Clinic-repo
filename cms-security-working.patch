@@ -1,0 +1,406 @@
+diff --git a/.gitignore b/.gitignore
+index 9491a2f..528ec1a 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -360,4 +360,7 @@ MigrationBackup/
+ .ionide/
+ 
+ # Fody - auto-generated XML schema
+-FodyWeavers.xsd
+\ No newline at end of file
++FodyWeavers.xsd
++# Local configuration backups; may contain secrets
++appsettings*.json.backup
++
+diff --git a/Capstone-Clinic/Controllers/IntegrationMedicalRecordController.cs b/Capstone-Clinic/Controllers/IntegrationMedicalRecordController.cs
+index dced59d..8a3ba2e 100644
+--- a/Capstone-Clinic/Controllers/IntegrationMedicalRecordController.cs
++++ b/Capstone-Clinic/Controllers/IntegrationMedicalRecordController.cs
+@@ -1,5 +1,7 @@
+-???using Capstone_Clinic.Data;
++using Capstone_Clinic.Data;
+ using Microsoft.AspNetCore.Mvc;
++using System.Security.Cryptography;
++using System.Text;
+ using Microsoft.AspNetCore.Http;
+ using Microsoft.EntityFrameworkCore;
+ 
+@@ -219,9 +221,8 @@ public class IntegrationMedicalRecordController : ControllerBase
+         if (string.IsNullOrWhiteSpace(integrationKey))
+             return false;
+ 
+-        return string.Equals(
+-            integrationKey,
+-            configuredKey,
+-            StringComparison.Ordinal);
++        return CryptographicOperations.FixedTimeEquals(
++            Encoding.UTF8.GetBytes(integrationKey),
++            Encoding.UTF8.GetBytes(configuredKey));
+     }
+ }
+\ No newline at end of file
+diff --git a/Capstone-Clinic/Controllers/IoTVitalSignController.cs b/Capstone-Clinic/Controllers/IoTVitalSignController.cs
+index 932c8b5..fc8a8bb 100644
+--- a/Capstone-Clinic/Controllers/IoTVitalSignController.cs
++++ b/Capstone-Clinic/Controllers/IoTVitalSignController.cs
+@@ -2,6 +2,9 @@
+ using Capstone_Clinic.Data;
+ using Capstone_Clinic.Models.IoT;
+ using Microsoft.AspNetCore.Mvc;
++using Microsoft.AspNetCore.Authorization;
++using System.Security.Cryptography;
++using System.Text;
+ using Microsoft.EntityFrameworkCore;
+ 
+ namespace Capstone_Clinic.Controllers;
+@@ -32,10 +35,9 @@ public class IoTVitalSignController : ControllerBase
+ 
+         if (string.IsNullOrWhiteSpace(configuredKey) ||
+             string.IsNullOrWhiteSpace(iotKey) ||
+-            !string.Equals(
+-                iotKey,
+-                configuredKey,
+-                StringComparison.Ordinal))
++            !CryptographicOperations.FixedTimeEquals(
++                Encoding.UTF8.GetBytes(iotKey),
++                Encoding.UTF8.GetBytes(configuredKey)))
+         {
+             return Unauthorized(new
+             {
+@@ -76,13 +78,6 @@ public class IoTVitalSignController : ControllerBase
+         _context.PendingVitalReadings.Add(pendingReading);
+         await _context.SaveChangesAsync();
+ 
+-        Console.WriteLine("===== ESP32 VITAL READING SAVED =====");
+-        Console.WriteLine($"Reading ID: {pendingReading.PendingVitalReadingId}");
+-        Console.WriteLine($"Heart Rate: {pendingReading.HeartRate}");
+-        Console.WriteLine($"SpO2: {pendingReading.Spo2}");
+-        Console.WriteLine($"Received At: {pendingReading.ReceivedAt}");
+-        Console.WriteLine("=====================================");
+-
+         return Ok(new
+         {
+             success = true,
+@@ -94,6 +89,9 @@ public class IoTVitalSignController : ControllerBase
+         });
+     }
+ 
++    // This endpoint returns a stored vital-sign reading and must not be public.
++    // The CMS page calls the ESP32 directly; no anonymous caller is required here.
++    [Authorize]
+     [HttpGet("pending")]
+     public async Task<IActionResult> GetPendingVitalReading()
+     {
+diff --git a/Capstone-Clinic/Controllers/MobileAuthController.cs b/Capstone-Clinic/Controllers/MobileAuthController.cs
+index 2a3793a..ed0e2d7 100644
+--- a/Capstone-Clinic/Controllers/MobileAuthController.cs
++++ b/Capstone-Clinic/Controllers/MobileAuthController.cs
+@@ -96,9 +96,6 @@ public class MobileAuthController : ControllerBase
+                 "StudentNumber",
+                 student.StudentNumber)
+         };
+-        Console.WriteLine(
+-    $"JWT key length: {Encoding.UTF8.GetByteCount(_configuration["Jwt:Key"] ?? "")} bytes");
+-
+         var key = new SymmetricSecurityKey(
+             Encoding.UTF8.GetBytes(
+                 _configuration["Jwt:Key"]!));
+diff --git a/Capstone-Clinic/Models/Services/Esp32Service.cs b/Capstone-Clinic/Models/Services/Esp32Service.cs
+index 3a56773..1488f29 100644
+--- a/Capstone-Clinic/Models/Services/Esp32Service.cs
++++ b/Capstone-Clinic/Models/Services/Esp32Service.cs
+@@ -23,16 +23,10 @@
+         {
+             try
+             {
+-                Console.WriteLine($"Requesting a new reading from ESP32: {_sensorUrl}");
+-
+                 using var response = await _httpClient.GetAsync(_sensorUrl);
+ 
+                 var json = await response.Content.ReadAsStringAsync();
+ 
+-                Console.WriteLine(
+-                    $"ESP32 replied {(int)response.StatusCode}: {json}"
+-                );
+-
+                 if (!response.IsSuccessStatusCode)
+                     return null;
+ 
+@@ -71,9 +65,9 @@
+                     FingerDetected = true
+                 };
+             }
+-            catch (Exception ex)
++            catch
+             {
+-                Console.WriteLine($"ESP32 sensor request ERROR: {ex}");
++                // Keep device/network details and raw sensor payloads out of logs.
+                 return null;
+             }
+         }
+diff --git a/Capstone-Clinic/Pages/Login.cshtml b/Capstone-Clinic/Pages/Login.cshtml
+index 7237945..178a1d5 100644
+--- a/Capstone-Clinic/Pages/Login.cshtml
++++ b/Capstone-Clinic/Pages/Login.cshtml
+@@ -3,9 +3,26 @@
+ 
+ @{
+     ViewData["Title"] = "Clinic Login";
++    Layout = null;
+ }
+-
++<link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+ <style>
++    
++html, body {
++    min-height: 100%;
++    margin: 0;
++    font-family: Arial, Helvetica, sans-serif;
++    background: #f3f7f5;
++}
++
++*, *::before, *::after {
++    box-sizing: border-box;
++}
++
++.login-wrapper {
++    min-height: 100vh;
++}
++
+     .login-wrapper {
+         min-height: calc(100vh - 120px);
+         display: flex;
+diff --git a/Capstone-Clinic/Pages/Logout.cshtml.cs b/Capstone-Clinic/Pages/Logout.cshtml.cs
+index 25a3676..0d21e3c 100644
+--- a/Capstone-Clinic/Pages/Logout.cshtml.cs
++++ b/Capstone-Clinic/Pages/Logout.cshtml.cs
+@@ -1,4 +1,6 @@
++
+ using Microsoft.AspNetCore.Authentication;
++using Microsoft.AspNetCore.Authentication.Cookies;
+ using Microsoft.AspNetCore.Mvc;
+ using Microsoft.AspNetCore.Mvc.RazorPages;
+ 
+@@ -6,10 +8,21 @@ namespace Capstone_Clinic.Pages;
+ 
+ public class LogoutModel : PageModel
+ {
+-    public async Task<IActionResult> OnGet()
++    public async Task<IActionResult> OnGetAsync()
++    {
++        return await SignOutAndRedirectAsync();
++    }
++
++    public async Task<IActionResult> OnPostAsync()
++    {
++        return await SignOutAndRedirectAsync();
++    }
++
++    private async Task<IActionResult> SignOutAndRedirectAsync()
+     {
+-        await HttpContext.SignOutAsync();
++        await HttpContext.SignOutAsync(
++            CookieAuthenticationDefaults.AuthenticationScheme);
+ 
+         return RedirectToPage("/Login");
+     }
+-}
+\ No newline at end of file
++}
+diff --git a/Capstone-Clinic/Pages/Shared/_Layout.cshtml b/Capstone-Clinic/Pages/Shared/_Layout.cshtml
+index fbb65ed..d6dd64d 100644
+--- a/Capstone-Clinic/Pages/Shared/_Layout.cshtml
++++ b/Capstone-Clinic/Pages/Shared/_Layout.cshtml
+@@ -478,6 +478,14 @@
+                         Reports
+                     </a>
+ 
++                    @if (User.IsInRole("Admin"))
++                    {
++                        <a class="cms-nav-link @(currentPage?.StartsWith("/StaffManagement") == true ? "active" : "")"
++                           asp-page="/StaffManagement/Index">
++                            Staff Management
++                        </a>
++                    }
++
+                     <div class="cms-nav-divider"></div>
+ 
+                     <div class="cms-nav-label">
+@@ -634,6 +642,15 @@
+                         <span class="cms-user">
+                             @User.Identity?.Name
+                         </span>
++                        <form method="post" asp-page="/Logout"
++                              class="d-inline"
++                              onsubmit="return confirm('Are you sure you want to log out?');">
++                            <button type="submit" class="btn btn-outline-danger btn-sm">
++                                <i class="bi bi-box-arrow-right me-1"></i>
++                                Logout
++                            </button>
++                        </form>
++
+ 
+                     </div>
+ 
+diff --git a/Capstone-Clinic/Pages/VitalSignLogPages/Create.cshtml.cs b/Capstone-Clinic/Pages/VitalSignLogPages/Create.cshtml.cs
+index 2267bc4..0025799 100644
+--- a/Capstone-Clinic/Pages/VitalSignLogPages/Create.cshtml.cs
++++ b/Capstone-Clinic/Pages/VitalSignLogPages/Create.cshtml.cs
+@@ -107,8 +107,6 @@ public class CreateModel : PageModel
+     // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD.
+     public async Task<IActionResult> OnPostReadSensorAsync()
+     {
+-        Console.WriteLine("READ SENSOR HANDLER REACHED");
+-
+         var medicalRecordId = VitalSignLog.MedicalRecordId;
+ 
+         if (medicalRecordId > 0)
+@@ -144,8 +142,6 @@ public class CreateModel : PageModel
+ 
+     public async Task<IActionResult> OnPostAsync()
+     {
+-        Console.WriteLine("===== SAVE HANDLER =====");
+-
+         if (!ModelState.IsValid)
+         {
+             if (VitalSignLog.MedicalRecordId > 0)
+diff --git a/Capstone-Clinic/Program.cs b/Capstone-Clinic/Program.cs
+index 489614e..de8ce3f 100644
+--- a/Capstone-Clinic/Program.cs
++++ b/Capstone-Clinic/Program.cs
+@@ -8,11 +8,23 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
+ using Microsoft.OpenApi.Models;
+ using Microsoft.AspNetCore.Identity;
+ using Capstone_Clinic.Models;
++using Capstone_Clinic.Models.Authorization;
+ 
+ QuestPDF.Settings.License = LicenseType.Community;
+ 
+ var builder = WebApplication.CreateBuilder(args);
+-Console.WriteLine($"JWT key length loaded by Program.cs: {System.Text.Encoding.UTF8.GetByteCount(builder.Configuration["Jwt:Key"] ?? "")} bytes");
++
++// Do not start the application with a missing/weak JWT signing key.
++// Configure Jwt:Key through .NET User Secrets for development and a secret
++// store/environment variable for hosted environments.
++var jwtKey = builder.Configuration["Jwt:Key"];
++if (string.IsNullOrWhiteSpace(jwtKey) ||
++    System.Text.Encoding.UTF8.GetByteCount(jwtKey) < 32)
++{
++    throw new InvalidOperationException(
++        "Jwt:Key must be configured as a secret with at least 32 bytes. " +
++        "Use .NET User Secrets in development and environment/secret-store configuration when hosted.");
++}
+ 
+ // Add services to the container.
+ builder.Services.AddAuthentication(options =>
+@@ -31,7 +43,14 @@ builder.Services.AddAuthentication(options =>
+     options =>
+     {
+         options.LoginPath = "/Login";
+-        options.AccessDeniedPath = "/Login";
++        options.AccessDeniedPath = "/AccessDenied";
++        options.Cookie.HttpOnly = true;
++        options.Cookie.SameSite = SameSiteMode.Lax;
++        options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
++            ? CookieSecurePolicy.SameAsRequest
++            : CookieSecurePolicy.Always;
++        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
++        options.SlidingExpiration = true;
+     })
+ .AddCookie(
+     "StudentScheme",
+@@ -39,6 +58,13 @@ builder.Services.AddAuthentication(options =>
+     {
+         options.LoginPath = "/StudentLogin";
+         options.AccessDeniedPath = "/StudentLogin";
++        options.Cookie.HttpOnly = true;
++        options.Cookie.SameSite = SameSiteMode.Lax;
++        options.Cookie.SecurePolicy = builder.Environment.IsDevelopment()
++            ? CookieSecurePolicy.SameAsRequest
++            : CookieSecurePolicy.Always;
++        options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
++        options.SlidingExpiration = true;
+     })
+ .AddJwtBearer(
+     "MobileJwt",
+@@ -51,23 +77,34 @@ builder.Services.AddAuthentication(options =>
+                 ValidateAudience = true,
+                 ValidateLifetime = true,
+                 ValidateIssuerSigningKey = true,
++                ClockSkew = TimeSpan.FromSeconds(30),
+ 
+                 ValidIssuer = builder.Configuration["Jwt:Issuer"],
+                 ValidAudience = builder.Configuration["Jwt:Audience"],
+ 
+                 IssuerSigningKey =
+                     new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+-                        System.Text.Encoding.UTF8.GetBytes(
+-                            builder.Configuration["Jwt:Key"]!))
++                        System.Text.Encoding.UTF8.GetBytes(jwtKey))
+             };
+     });
+-builder.Services.AddAuthorization();
++builder.Services.AddAuthorization(options =>
++{
++    // All interactive CMS pages require a recognized staff role.
++    options.AddPolicy("StaffAccess", policy =>
++        policy.RequireRole(StaffRoles.Admin, StaffRoles.ClinicPersonnel));
++
++    // Account creation is a privileged administrative function.
++    options.AddPolicy("AdminOnly", policy =>
++        policy.RequireRole(StaffRoles.Admin));
++});
+ builder.Services.AddHttpClient<Esp32Service>(c => c.Timeout = TimeSpan.FromSeconds(90));
+ 
+ builder.Services.AddRazorPages(options =>
+ {
+-    options.Conventions.AuthorizeFolder("/");
++    options.Conventions.AuthorizeFolder("/", "StaffAccess");
+     options.Conventions.AllowAnonymousToPage("/Login");
++    options.Conventions.AllowAnonymousToPage("/AccessDenied");
++    options.Conventions.AuthorizeFolder("/StaffManagement", "AdminOnly");
+ });
+ builder.Services.AddControllers();
+ builder.Services.AddCors(options =>
+diff --git a/Capstone-Clinic/appsettings.Development.json b/Capstone-Clinic/appsettings.Development.json
+index e1cfee2..678c6dc 100644
+--- a/Capstone-Clinic/appsettings.Development.json
++++ b/Capstone-Clinic/appsettings.Development.json
+@@ -6,5 +6,5 @@
+       "Microsoft.AspNetCore": "Warning"
+     }
+   },
+-  "EnableDevelopmentPasswordReset": true
++  "EnableDevelopmentPasswordReset": false
+ }
+diff --git a/Capstone-Clinic/appsettings.json b/Capstone-Clinic/appsettings.json
+index 123b6e9..548684a 100644
+--- a/Capstone-Clinic/appsettings.json
++++ b/Capstone-Clinic/appsettings.json
+@@ -1,21 +1,20 @@
+ {
+   "ConnectionStrings": {
+-    "DefaultConnection": "Server=(localdb)\\MSSQLLocalDB;Database=CapstoneClinicDB;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=True",
+-    "AppDbContext": "Server=(localdb)\\mssqllocaldb;Database=AppDbContext;Trusted_Connection=True;MultipleActiveResultSets=true"
++    "DefaultConnection": "",
++    "AppDbContext": ""
+   },
+   "Jwt": {
+-    //"Key": "CMS-Mobile-Development-Key-Change-This-Before-Production-2026",
+-    "Key": "7f3a9c2e6b1d4a8f5e0c7b3d9a2f6e1c8d4b7a0e5f9c2d6b3a1e8f4c7d0b5a9e",
++    "Key": "",
+     "Issuer": "Capstone-Clinic",
+     "Audience": "Capstone-Clinic-Mobile"
+   },
+   "Integration": {
+-    "ApiKey": "CMS-Mother-Integration-2026-CHANGE-ME",
++    "ApiKey": "",
+     "BackendBaseUrl": "http://localhost:5018",
+     "Esp32BaseUrl": "http://192.168.4.1/"
+   },
+   "IoT": {
+-    "ApiKey": "YOUR_NEW_RANDOM_IOT_KEY"
++    "ApiKey": ""
+   },
+   "Logging": {
+     "LogLevel": {

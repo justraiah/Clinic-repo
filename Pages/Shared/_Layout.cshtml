@@ -1,0 +1,787 @@
+﻿@using Microsoft.EntityFrameworkCore
+@inject Capstone_Clinic.Data.AppDbContext DbContext
+
+@{
+    var currentPage = ViewContext.RouteData.Values["page"]?.ToString();
+
+    var activeAlerts = new List<dynamic>();
+    var activeAlertCount = 0;
+    var hasCriticalAlert = false;
+
+    if (User.Identity?.IsAuthenticated == true)
+    {
+        activeAlertCount = await DbContext.Alerts
+    .CountAsync(a => a.Status == "Active");
+
+        hasCriticalAlert = await (
+            from alert in DbContext.Alerts
+            join vital in DbContext.VitalSignLogs
+                on alert.VitalLogId equals vital.VitalSignLogId
+            where alert.Status == "Active"
+                && vital.Status == "Critical"
+            select alert.AlertId
+        ).AnyAsync();
+
+        activeAlerts = await (
+            from alert in DbContext.Alerts
+            join vital in DbContext.VitalSignLogs
+                on alert.VitalLogId equals vital.VitalSignLogId
+            join clinicPatient in DbContext.ClinicPatients
+                on vital.ClinicPatientId equals clinicPatient.ClinicPatientId
+            join medical in DbContext.MedicalRecords
+                on vital.MedicalRecordId equals medical.MedicalRecordId
+            join student in DbContext.Students
+                on medical.StudentId equals student.StudentId into studentGroup
+            from student in studentGroup.DefaultIfEmpty()
+            where alert.Status == "Active"
+            orderby alert.CreatedAt descending
+            select new
+            {
+                AlertId = alert.AlertId,
+                PatientName = student != null
+                    ? student.FullName
+                    : clinicPatient.FullName ?? "Community Member",
+                Severity = vital.Status,
+                AlertType = alert.AlertType,
+                CreatedAt = alert.CreatedAt
+            }
+                ).Take(5).ToListAsync<dynamic>();
+
+        activeAlertCount = await DbContext.Alerts
+            .CountAsync(a => a.Status == "Active");
+
+        hasCriticalAlert = activeAlerts.Any(a => a.Severity == "Critical");
+    }
+}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - Clinic Monitoring System</title>
+
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/Capstone_Clinic.styles.css" asp-append-version="true" />
+
+    
+    <style>
+            :root {
+                --cms-sidebar: #174C3C;
+                --cms-sidebar-hover: #24634F;
+                --cms-sidebar-text: #E0F2E8;
+                --cms-sidebar-muted: #A7C8B8;
+                --cms-accent: #A7E8C5;
+                --cms-bg: #F3F7F4;
+                --cms-border: #DCE7DF;
+                --cms-text: #20352B;
+                --cms-surface: #FFFFFF;
+                --cms-text-muted: #64786D;
+                --cms-danger: #DC4545;
+                --cms-danger-soft: #FDECEC;
+            }
+
+            html,
+            body {
+                min-height: 100%;
+            }
+
+            body {
+                margin: 0;
+                background: var(--cms-bg);
+                color: var(--cms-text);
+            }
+
+            /* ==============================
+                   APP SHELL
+                   ============================== */
+
+            .cms-app {
+                min-height: 100vh;
+            }
+
+            .cms-sidebar {
+                position: fixed;
+                top: 0;
+                left: 0;
+                bottom: 0;
+                width: 245px;
+                background: var(--cms-sidebar);
+                color: white;
+                z-index: 1040;
+                display: flex;
+                flex-direction: column;
+                border-right: 1px solid rgba(255,255,255,.12);
+            }
+
+            .cms-brand {
+                padding: 24px 22px;
+                border-bottom: 1px solid rgba(255,255,255,.12);
+            }
+
+            .cms-brand-header {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+            }
+
+            .cms-brand-logo {
+                width: 52px;
+                height: 52px;
+                object-fit: cover;
+                border-radius: 50%;
+                flex-shrink: 0;
+                background: white;
+                border: 2px solid rgba(167,232,197,.55);
+            }
+
+            .cms-brand-title {
+                font-size: 1.05rem;
+                font-weight: 700;
+                letter-spacing: .2px;
+                color: #FFFFFF;
+            }
+
+            .cms-brand-subtitle {
+                margin-top: 3px;
+                font-size: .72rem;
+                color: var(--cms-sidebar-muted);
+            }
+
+            .cms-nav {
+                padding: 20px 12px;
+                flex: 1;
+            }
+
+            .cms-nav-label {
+                padding: 0 12px 8px;
+                font-size: .68rem;
+                font-weight: 700;
+                letter-spacing: .08em;
+                color: var(--cms-sidebar-muted);
+                text-transform: uppercase;
+            }
+
+            .cms-nav-link {
+                display: flex;
+                align-items: center;
+                width: 100%;
+                padding: 10px 12px;
+                margin-bottom: 3px;
+                border-radius: 8px;
+                color: var(--cms-sidebar-text);
+                text-decoration: none;
+                font-size: .9rem;
+                transition: background .15s ease, color .15s ease;
+            }
+
+                .cms-nav-link:hover {
+                    background: var(--cms-sidebar-hover);
+                    color: #FFFFFF;
+                }
+
+                .cms-nav-link.active {
+                    background: var(--cms-sidebar-hover);
+                    color: #FFFFFF;
+                    font-weight: 600;
+                    box-shadow: inset 0 0 0 1px rgba(167,232,197,.12);
+                }
+
+                    .cms-nav-link.active::before {
+                        content: "";
+                        width: 3px;
+                        height: 18px;
+                        margin-right: 9px;
+                        margin-left: -12px;
+                        background: var(--cms-accent);
+                        border-radius: 0 3px 3px 0;
+                        flex-shrink: 0;
+                    }
+
+            .cms-nav-divider {
+                height: 1px;
+                background: rgba(255,255,255,.12);
+                margin: 18px 12px;
+            }
+
+            .cms-quick-action {
+                display: block;
+                padding: 9px 12px;
+                margin-bottom: 4px;
+                border-radius: 8px;
+                color: var(--cms-sidebar-text);
+                text-decoration: none;
+                font-size: .82rem;
+                transition: background .15s ease, color .15s ease;
+            }
+
+                .cms-quick-action:hover {
+                    background: var(--cms-sidebar-hover);
+                    color: #FFFFFF;
+                }
+
+            .cms-sidebar-footer {
+                padding: 14px 12px;
+                border-top: 1px solid rgba(255,255,255,.12);
+            }
+
+            .cms-user-name {
+                padding: 8px 12px;
+                font-size: .78rem;
+                color: var(--cms-sidebar-muted);
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+
+            .cms-logout {
+                color: #F4B5B5 !important;
+            }
+
+                .cms-logout:hover {
+                    color: #FFD4D4 !important;
+                    background: rgba(220,69,69,.14);
+                }
+
+            /* ==============================
+                   MAIN AREA
+                   ============================== */
+
+            .cms-main {
+                margin-left: 245px;
+                min-height: 100vh;
+            }
+
+            .cms-header {
+                height: 68px;
+                background: var(--cms-surface);
+                border-bottom: 1px solid var(--cms-border);
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 30px;
+                position: sticky;
+                top: 0;
+                z-index: 1030;
+                box-shadow: 0 2px 8px rgba(32,53,43,.035);
+            }
+
+            .cms-header-title {
+                font-size: 1rem;
+                font-weight: 700;
+                color: var(--cms-text);
+            }
+
+            .cms-header-actions {
+                display: flex;
+                align-items: center;
+                gap: 18px;
+            }
+
+            .cms-user {
+                font-size: .85rem;
+                color: var(--cms-text-muted);
+            }
+
+            .cms-content {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 30px;
+            }
+
+            /* ==============================
+                   NOTIFICATIONS
+                   ============================== */
+
+            .cms-notification {
+                color: var(--cms-text-muted);
+                text-decoration: none;
+                font-size: .88rem;
+                cursor: pointer;
+                transition: color .15s ease;
+            }
+
+                .cms-notification:hover {
+                    color: var(--cms-sidebar);
+                }
+
+                .cms-notification.critical {
+                    color: var(--cms-danger);
+                    font-weight: 700;
+                }
+
+            .cms-notification-badge {
+                font-size: .65rem;
+                vertical-align: top;
+                margin-left: 3px;
+            }
+
+            .cms-notification-menu {
+                min-width: 350px;
+                background: var(--cms-surface);
+                border: 1px solid var(--cms-border);
+                border-radius: 10px;
+                box-shadow: 0 12px 32px rgba(32,53,43,.12);
+            }
+
+            /* ==============================
+                   MOBILE
+                   ============================== */
+
+            .cms-menu-button {
+                display: none;
+                border: 0;
+                background: transparent;
+                font-size: 1.25rem;
+                color: var(--cms-sidebar);
+                cursor: pointer;
+            }
+
+            .cms-sidebar-overlay {
+                display: none;
+            }
+
+            @@media (max-width: 991.98px) {
+
+                .cms-sidebar {
+                    transform: translateX(-100%);
+                    transition: transform .2s ease;
+                }
+
+                    .cms-sidebar.open {
+                        transform: translateX(0);
+                    }
+
+                .cms-sidebar-overlay {
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(15,23,42,.45);
+                    z-index: 1035;
+                }
+
+                    .cms-sidebar-overlay.show {
+                        display: block;
+                    }
+
+                .cms-main {
+                    margin-left: 0;
+                }
+
+                .cms-menu-button {
+                    display: inline-block;
+                }
+
+                .cms-header {
+                    padding: 0 18px;
+                }
+
+                .cms-content {
+                    padding: 20px;
+                }
+
+                .cms-user {
+                    display: none;
+                }
+            }
+
+            @@media (max-width: 575.98px) {
+
+                .cms-content {
+                    padding: 15px;
+                }
+
+                .cms-notification-menu {
+                    position: fixed !important;
+                    left: 15px !important;
+                    right: 15px !important;
+                    width: auto;
+                    min-width: 0;
+                }
+            }
+    </style>
+
+</head>
+
+<body>
+
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div class="cms-app">
+
+            <!-- SIDEBAR -->
+            <aside class="cms-sidebar" id="cmsSidebar">
+
+                <div class="cms-brand">
+                    <div class="cms-brand-header">
+                        <img src="~/images/cdm-logo.jpg"
+                             alt="Colegio de Montalban Logo"
+                             class="cms-brand-logo" />
+
+                        <div>
+                            <div class="cms-brand-title">
+                                CdM Clinic
+                            </div>
+
+                            <div class="cms-brand-subtitle">
+                                Clinic Monitoring System
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <nav class="cms-nav">
+
+                    <div class="cms-nav-label">
+                        Main
+                    </div>
+
+                    <a class="cms-nav-link @(currentPage == "/Index" ? "active" : "")"
+                       asp-page="/Index">
+                        Dashboard
+                    </a>
+
+                    <a class="cms-nav-link @(currentPage == "/Student/Search" ? "active" : "")"
+                       asp-page="/Student/Search">
+                        Patients
+                    </a>
+
+                    <a class="cms-nav-link @(currentPage == "/MedicalRecordPages/Index" ? "active" : "")"
+                       asp-page="/MedicalRecordPages/Index">
+                        Medical Records
+                    </a>
+
+                    <a class="cms-nav-link @(currentPage?.StartsWith("/DentalRecordPages") == true ? "active" : "")"
+                       asp-page="/DentalRecordPages/Index">
+                        Dental Records
+                    </a>
+
+                    <a class="cms-nav-link @(currentPage?.StartsWith("/ReferralPages") == true ? "active" : "")"
+                       asp-page="/ReferralPages/Index">
+                        Referrals
+                    </a>
+
+                    <a class="cms-nav-link @(currentPage?.StartsWith("/VitalSignLogPages") == true ? "active" : "")"
+                       asp-page="/VitalSignLogPages/Index">
+                        Vital Signs
+                    </a>
+
+                    <a class="cms-nav-link @(currentPage?.StartsWith("/AlertPages") == true ? "active" : "")"
+                       asp-page="/AlertPages/Index">
+                        Alerts
+                    </a>
+
+                    <a class="cms-nav-link @(currentPage?.StartsWith("/Reports") == true ? "active" : "")"
+                       asp-page="/Reports/Index">
+                        Reports
+                    </a>
+
+                    @if (User.IsInRole("Admin"))
+                    {
+                        <a class="cms-nav-link @(currentPage?.StartsWith("/StaffManagement") == true ? "active" : "")"
+                           asp-page="/StaffManagement/Index">
+                            Staff Management
+                        </a>
+                    }
+
+                    <div class="cms-nav-divider"></div>
+
+                    <div class="cms-nav-label">
+                        Quick Actions
+                    </div>
+
+                    <a class="cms-quick-action"
+                       asp-page="/MedicalRecordPages/Create">
+                        + New Consultation
+                    </a>
+
+                    <a class="cms-quick-action"
+                       asp-page="/Student/Search">
+                        + Record Vital Signs
+                    </a>
+
+                    <a class="cms-quick-action"
+                       asp-page="/Student/Create">
+                        + Register Patient
+                    </a>
+
+                </nav>
+
+                <div class="cms-sidebar-footer">
+
+                    <div class="cms-user-name">
+                        @User.Identity?.Name
+                    </div>
+
+                    <a class="cms-nav-link cms-logout"
+                       asp-page="/Logout">
+                        Logout
+                    </a>
+
+                </div>
+
+            </aside>
+
+            <div class="cms-sidebar-overlay" id="cmsSidebarOverlay"></div>
+
+            <!-- MAIN -->
+            <div class="cms-main">
+
+                <header class="cms-header">
+
+                    <div class="d-flex align-items-center gap-2">
+
+                        <button class="cms-menu-button"
+                                type="button"
+                                id="cmsMenuButton"
+                                aria-label="Open navigation">
+                            ☰
+                        </button>
+
+                        <div class="cms-header-title">
+                            @(ViewData["Title"] ?? "Clinic Dashboard")
+                        </div>
+
+                    </div>
+
+                    <div class="cms-header-actions">
+
+                        <!-- Notifications -->
+                        <div class="dropdown">
+
+                            <a class="cms-notification dropdown-toggle @(hasCriticalAlert ? "critical" : "")"
+                               href="#"
+                               id="notificationDropdown"
+                               role="button"
+                               data-bs-toggle="dropdown"
+                               aria-expanded="false">
+
+                                Notifications
+
+                                @if (activeAlertCount > 0)
+                                {
+                                    <span class="badge bg-danger rounded-pill cms-notification-badge">
+                                        @activeAlertCount
+                                    </span>
+                                }
+
+                            </a>
+
+                            <ul class="dropdown-menu dropdown-menu-end shadow cms-notification-menu"
+                                aria-labelledby="notificationDropdown"
+                                style="max-height: 380px; overflow-y: auto;">
+
+                                <li>
+                                    <h6 class="dropdown-header">
+                                        Active Notifications
+                                    </h6>
+                                </li>
+
+                                @if (activeAlerts.Count == 0)
+                                {
+                                    <li>
+                                        <span class="dropdown-item-text text-muted">
+                                            No active alerts.
+                                        </span>
+                                    </li>
+                                }
+                                else
+                                {
+                                    @foreach (var alert in activeAlerts)
+                                    {
+                                        <li>
+                                            <a class="dropdown-item"
+                                               asp-page="/AlertPages/Index">
+
+                                                <div class="fw-semibold">
+                                                    @if (alert.Severity == "Critical")
+                                                    {
+                                                        <span class="text-danger">
+                                                            Critical
+                                                        </span>
+                                                    }
+                                                    else
+                                                    {
+                                                        <span class="text-warning">
+                                                            Warning
+                                                        </span>
+                                                    }
+                                                </div>
+
+                                                <div>
+                                                    @alert.PatientName
+                                                </div>
+
+                                                <small class="text-muted">
+                                                    @alert.AlertType
+                                                    · @alert.CreatedAt.ToString("MMM d, h:mm tt")
+                                                </small>
+
+                                            </a>
+                                        </li>
+                                    }
+                                }
+
+                                <li>
+                                    <hr class="dropdown-divider" />
+                                </li>
+
+                                <li>
+                                    <a class="dropdown-item text-center fw-semibold"
+                                       asp-page="/AlertPages/Index">
+                                        View All Alerts
+                                    </a>
+                                </li>
+
+                            </ul>
+
+                        </div>
+
+                        <span class="cms-user">
+                            @User.Identity?.Name
+                        </span>
+
+                    </div>
+
+                </header>
+
+                <main role="main" class="cms-content">
+                    @RenderBody()
+                </main>
+
+            </div>
+
+        </div>
+    }
+    else
+    {
+        <!-- LOGIN / PUBLIC PAGES -->
+        <main role="main">
+            @RenderBody()
+        </main>
+    }
+
+    <!-- Critical Alert Popup -->
+    @if (TempData["CriticalAlertMessage"] != null)
+    {
+        <div class="modal fade"
+             id="criticalAlertModal"
+             tabindex="-1"
+             aria-labelledby="criticalAlertModalLabel"
+             aria-hidden="true">
+
+            <div class="modal-dialog modal-dialog-centered">
+
+                <div class="modal-content border-danger">
+
+                    <div class="modal-header bg-danger text-white">
+
+                        <h5 class="modal-title"
+                            id="criticalAlertModalLabel">
+                            Critical Vital Sign Alert
+                        </h5>
+
+                        <button type="button"
+                                class="btn-close btn-close-white"
+                                data-bs-dismiss="modal"
+                                aria-label="Close">
+                        </button>
+
+                    </div>
+
+                    <div class="modal-body">
+
+                        <p class="fw-semibold mb-2">
+                            Immediate attention is required.
+                        </p>
+
+                        <p class="mb-0">
+                            @TempData["CriticalAlertMessage"]
+                        </p>
+
+                    </div>
+
+                    <div class="modal-footer">
+
+                        <a asp-page="/AlertPages/Index"
+                           class="btn btn-danger">
+                            View Alerts
+                        </a>
+
+                        <button type="button"
+                                class="btn btn-secondary"
+                                data-bs-dismiss="modal">
+                            Close
+                        </button>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <script>
+                document.addEventListener("DOMContentLoaded", function () {
+
+                    const modalElement =
+                        document.getElementById("criticalAlertModal");
+
+                    if (modalElement) {
+
+                        const criticalAlertModal =
+                            new bootstrap.Modal(modalElement);
+
+                        criticalAlertModal.show();
+                    }
+
+                });
+        </script>
+    }
+
+    <footer class="border-top footer text-muted">
+        <div class="container">
+            &copy; 2026 Clinic Monitoring System
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    <script>
+            document.addEventListener("DOMContentLoaded", function () {
+
+                const menuButton =
+                    document.getElementById("cmsMenuButton");
+
+                const sidebar =
+                    document.getElementById("cmsSidebar");
+
+                const overlay =
+                    document.getElementById("cmsSidebarOverlay");
+
+                if (menuButton && sidebar && overlay) {
+
+                    menuButton.addEventListener("click", function () {
+                        sidebar.classList.add("open");
+                        overlay.classList.add("show");
+                    });
+
+                    overlay.addEventListener("click", function () {
+                        sidebar.classList.remove("open");
+                        overlay.classList.remove("show");
+                    });
+
+                }
+
+            });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+
+</body>
+</html>

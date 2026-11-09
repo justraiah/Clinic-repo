@@ -13,14 +13,14 @@ public class CreateModel : PageModel
 {
 
     private readonly AppDbContext _context;
-    private readonly Esp32Service _esp32Service;
+    private readonly IoTDevicePresence _devicePresence;
 
     public CreateModel(
         AppDbContext context,
-        Esp32Service esp32Service)
+        IoTDevicePresence devicePresence)
     {
         _context = context;
-        _esp32Service = esp32Service;
+        _devicePresence = devicePresence;
     }
 
     public string StudentNumber { get; set; } = "";
@@ -104,48 +104,8 @@ public class CreateModel : PageModel
     public int SelectedStudentId { get; set; }
     public SelectList StudentList { get; set; } = default!;
 
-    // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD.
-    public async Task<IActionResult> OnPostReadSensorAsync()
-    {
-        Console.WriteLine("READ SENSOR HANDLER REACHED");
-
-        var medicalRecordId = VitalSignLog.MedicalRecordId;
-
-        if (medicalRecordId > 0)
-        {
-            LoadMedicalRecordStudent(medicalRecordId);
-        }
-
-        var reading = await _esp32Service.GetVitalsAsync();
-
-        if (reading == null || !reading.FingerDetected)
-        {
-            TempData["ErrorMessage"] =
-                "No pending sensor reading was available. Please try again.";
-        }
-        else
-        {
-            VitalSignLog.HeartRate = reading.AverageHeartRate > 0
-                ? reading.AverageHeartRate
-                : (int)Math.Round(reading.HeartRate);
-
-            VitalSignLog.OxygenSaturation = reading.Spo2;
-
-            ModelState.Remove("VitalSignLog.HeartRate");
-            ModelState.Remove("VitalSignLog.OxygenSaturation");
-
-            TempData["SuccessMessage"] =
-                $"Sensor reading received: {VitalSignLog.HeartRate} BPM, " +
-                $"SpO₂ {VitalSignLog.OxygenSaturation}%.";
-        }
-
-        return Page();
-    }
-
     public async Task<IActionResult> OnPostAsync()
     {
-        Console.WriteLine("===== SAVE HANDLER =====");
-
         if (!ModelState.IsValid)
         {
             if (VitalSignLog.MedicalRecordId > 0)
@@ -263,10 +223,11 @@ public class CreateModel : PageModel
             "/MedicalRecordPages/Details",
             new { id = VitalSignLog.MedicalRecordId });
     }
-    private async Task CheckIoTDeviceStatusAsync()
+    private Task CheckIoTDeviceStatusAsync()
     {
-        IoTDeviceStatus = await _esp32Service.IsReachableAsync()
+        IoTDeviceStatus = _devicePresence.IsOnline()
             ? "Connected"
-            : "Disconnected";
+            : "Offline";
+        return Task.CompletedTask;
     }
 }
