@@ -33,6 +33,7 @@ public class MobileVitalSignController : ControllerBase
         }
 
         var vitalSigns = await _context.VitalSignLogs
+            .AsNoTracking()
             .Where(vs => _context.MedicalRecords
                 .Any(mr =>
                     mr.MedicalRecordId == vs.MedicalRecordId &&

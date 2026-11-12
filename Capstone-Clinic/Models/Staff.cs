@@ -21,4 +21,5 @@ public class Staff
     [Required]
     [StringLength(30)]
     public string Role { get; set; } = "";
+    public bool IsActive { get; set; } = true;
 }

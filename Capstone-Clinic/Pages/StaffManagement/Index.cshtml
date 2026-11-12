@@ -4,56 +4,70 @@
     ViewData["Title"] = "Staff Management";
 }
 
-<div class="container-fluid py-3">
+<div class="container-fluid py-3 staff-management-page">
     <div class="d-flex flex-wrap align-items-start justify-content-between gap-3 mb-4">
         <div>
             <h1 class="h3 mb-1">Staff Management</h1>
-            <p class="text-muted mb-0">Create clinic personnel accounts and review existing staff roles.</p>
+            <p class="text-muted mb-0">Create, update, deactivate, and reset clinic staff accounts.</p>
         </div>
-        <span class="badge text-bg-dark">Admin only</span>
+        <span class="badge admin-only-badge">Admin only</span>
     </div>
 
     @if (TempData["SuccessMessage"] is string successMessage)
     {
         <div class="alert alert-success" role="status">@successMessage</div>
     }
+    @if (TempData["ErrorMessage"] is string errorMessage)
+    {
+        <div class="alert alert-danger" role="alert">@errorMessage</div>
+    }
 
     <div class="row g-4">
-        <div class="col-12 col-xl-5">
+        <div class="col-12 col-xl-4">
             <section class="card border-0 shadow-sm">
                 <div class="card-body p-4">
                     <h2 class="h5 mb-3">Create clinic personnel account</h2>
                     <p class="small text-muted">New accounts are assigned the ClinicPersonnel role. This form cannot create another administrator.</p>
                     <form method="post" asp-page-handler="Create">
                         <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
-
                         <div class="mb-3">
                             <label asp-for="Input.FullName" class="form-label">Full name</label>
                             <input asp-for="Input.FullName" class="form-control" autocomplete="name" maxlength="100" />
                             <span asp-validation-for="Input.FullName" class="text-danger small"></span>
                         </div>
-
                         <div class="mb-3">
                             <label asp-for="Input.Username" class="form-label">Username</label>
                             <input asp-for="Input.Username" class="form-control" autocomplete="off" maxlength="50" />
                             <div class="form-text">Letters, numbers, dots, underscores, and hyphens.</div>
                             <span asp-validation-for="Input.Username" class="text-danger small"></span>
                         </div>
-
                         <div class="mb-3">
                             <label asp-for="Input.Password" class="form-label">Temporary password</label>
-                            <input asp-for="Input.Password" type="password" class="form-control" autocomplete="new-password" minlength="12" maxlength="100" />
-                            <div class="form-text">At least 12 characters. Share it securely and have the account holder change it when a password-change workflow is available.</div>
+                            <div class="input-group">
+                                <input asp-for="Input.Password"
+                                       type="password"
+                                       class="form-control"
+                                       id="createPassword"
+                                       autocomplete="new-password"
+                                       minlength="12"
+                                       maxlength="100" />
+
+                                <button type="button"
+                                        class="btn btn-outline-secondary password-toggle"
+                                        data-target="createPassword">
+                                    Show
+                                </button>
+                            </div>
+                            <div class="form-text">At least 12 characters. Share it through a secure channel.</div>
                             <span asp-validation-for="Input.Password" class="text-danger small"></span>
                         </div>
-
                         <button type="submit" class="btn btn-success">Create clinic account</button>
                     </form>
                 </div>
             </section>
         </div>
 
-        <div class="col-12 col-xl-7">
+        <div class="col-12 col-xl-8">
             <section class="card border-0 shadow-sm">
                 <div class="card-body p-4">
                     <h2 class="h5 mb-3">Existing staff accounts</h2>
@@ -64,26 +78,65 @@
                     else
                     {
                         <div class="table-responsive">
-                            <table class="table table-hover align-middle mb-0">
+                            <table class="table table-hover align-middle">
                                 <thead>
-                                    <tr>
-                                        <th scope="col">Name</th>
-                                        <th scope="col">Username</th>
-                                        <th scope="col">Role</th>
-                                    </tr>
+                                    <tr><th>Name / username</th><th>Role</th><th>Status</th><th>Account actions</th></tr>
                                 </thead>
                                 <tbody>
                                 @foreach (var staff in Model.StaffAccounts)
                                 {
                                     <tr>
-                                        <td>@staff.FullName</td>
-                                        <td>@staff.Username</td>
+                                        <td style="min-width:190px">
+                                            <form method="post" asp-page-handler="Update" class="d-flex gap-1 mb-1">
+                                                <input type="hidden" name="staffId" value="@staff.StaffId" />
+                                                <input class="form-control form-control-sm" name="fullName" value="@staff.FullName" maxlength="100" aria-label="Full name for @staff.Username" />
+                                                <button type="submit" class="btn btn-sm btn-outline-primary">Save</button>
+                                            </form>
+                                            <small class="text-muted">@staff.Username</small>
+                                        </td>
                                         <td><span class="badge @(staff.Role == "Admin" ? "text-bg-dark" : "text-bg-success")">@staff.Role</span></td>
+                                        <td><span class="badge @(staff.IsActive ? "text-bg-success" : "text-bg-secondary")">@(staff.IsActive ? "Active" : "Inactive")</span></td>
+                                        <td style="min-width:220px">
+                                            <form method="post" asp-page-handler="ToggleStatus" class="d-inline">
+                                                <input type="hidden" name="staffId" value="@staff.StaffId" />
+                                                <button type="submit" class="btn btn-sm @(staff.IsActive ? "btn-outline-danger" : "btn-outline-success")">
+                                                    @(staff.IsActive ? "Deactivate" : "Activate")
+                                                </button>
+                                            </form>
+                                            <details class="mt-2">
+                                                <summary class="small text-primary" style="cursor:pointer">Reset password</summary>
+                                                <form method="post" asp-page-handler="ResetPassword" class="mt-2">
+                                                    <input type="hidden" name="staffId" value="@staff.StaffId" />
+                                                    <div class="input-group input-group-sm mb-1">
+                                                        <input type="password"
+                                                               name="newPassword"
+                                                               id="resetPassword-@staff.StaffId"
+                                                               class="form-control"
+                                                               minlength="12"
+                                                               maxlength="100"
+                                                               autocomplete="new-password"
+                                                               placeholder="New temporary password"
+                                                               required />
+
+                                                        <button type="button"
+                                                                class="btn btn-outline-secondary password-toggle"
+                                                                data-target="resetPassword-@staff.StaffId">
+                                                            Show
+                                                            </button>
+                                                        </div>
+
+                                                        <button type="submit" class="btn btn-sm btn-warning">
+                                                            Reset Password
+                                                        </button>
+                                                    </form>
+                                            </details>
+                                        </td>
                                     </tr>
                                 }
                                 </tbody>
                             </table>
                         </div>
+                        <p class="small text-muted mb-0">Deactivation preserves staff records. The last active administrator and your currently signed-in account cannot be deactivated.</p>
                     }
                 </div>
             </section>
@@ -93,4 +146,19 @@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <script>
+        document.querySelectorAll(".password-toggle").forEach(button => {
+            button.addEventListener("click", function () {
+                const input = document.getElementById(this.dataset.target);
+
+                if (!input) return;
+
+                const showPassword = input.type === "password";
+
+                input.type = showPassword ? "text" : "password";
+                this.textContent = showPassword ? "Hide" : "Show";
+            });
+        });
+    </script>
 }

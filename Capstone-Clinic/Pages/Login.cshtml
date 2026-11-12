@@ -234,7 +234,20 @@
 
                 <div class="mb-4">
                     <label asp-for="Password" class="form-label">Password</label>
-                    <input asp-for="Password" type="password" class="form-control" autocomplete="current-password" placeholder="Enter your password" />
+                    <div class="input-group">
+                        <input asp-for="Password"
+                               type="password"
+                               class="form-control"
+                               id="loginPassword"
+                               autocomplete="current-password"
+                               placeholder="Enter your password" />
+
+                        <button type="button"
+                                class="btn btn-outline-secondary password-toggle"
+                                data-target="loginPassword">
+                            Show
+                        </button>
+                    </div>
                 </div>
 
                 <button class="btn login-button" type="submit">Sign in to CMS</button>
@@ -253,5 +266,19 @@
             </div>
         </section>
     </main>
+    <script>
+            document.querySelectorAll(".password-toggle").forEach(button => {
+                button.addEventListener("click", function () {
+                    const input = document.getElementById(this.dataset.target);
+
+                    if (!input) return;
+
+                    const showPassword = input.type === "password";
+
+                    input.type = showPassword ? "text" : "password";
+                    this.textContent = showPassword ? "Hide" : "Show";
+                });
+            });
+    </script>
 </body>
 </html>

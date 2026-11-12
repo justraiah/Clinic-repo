@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
 using System.Text;
+using System.Data;
 
 namespace Capstone_Clinic.Controllers;
 
@@ -141,9 +142,10 @@ public class IoTVitalSignController : ControllerBase
     // ESP32: Submit a reading for its claimed request.
     [AllowAnonymous]
     [HttpPost("device/result")]
+
     public async Task<IActionResult> ReceiveMeasurementResult(
-        [FromBody] IoTVitalSignRequest? request,
-        [FromHeader(Name = "X-IoT-Key")] string? iotKey)
+    [FromBody] IoTVitalSignRequest? request,
+    [FromHeader(Name = "X-IoT-Key")] string? iotKey)
     {
         if (!IsValidIoTKey(iotKey))
         {
@@ -172,7 +174,8 @@ public class IoTVitalSignController : ControllerBase
             request.Spo2 <= 100;
 
         await using var transaction =
-            await _context.Database.BeginTransactionAsync();
+            await _context.Database.BeginTransactionAsync(
+                IsolationLevel.Serializable);
 
         var measurementRequest =
             await _context.IoTMeasurementRequests
@@ -185,6 +188,51 @@ public class IoTVitalSignController : ControllerBase
             {
                 success = false,
                 message = "Measurement request not found."
+            });
+        }
+
+        // Handle retries of an already completed measurement.
+        if (measurementRequest.Status == "Completed")
+        {
+            var existingReading =
+                await _context.PendingVitalReadings
+                    .FirstOrDefaultAsync(r =>
+                        r.RequestId == request.RequestId);
+
+            if (existingReading == null)
+            {
+                return Conflict(new
+                {
+                    success = false,
+                    message = "Measurement was completed, but its reading could not be found."
+                });
+            }
+
+            await transaction.CommitAsync();
+
+            return Ok(new
+            {
+                success = true,
+                duplicate = true,
+                message = "Measurement was already received successfully.",
+                requestId = request.RequestId,
+                readingId = existingReading.PendingVitalReadingId,
+                heartRate = existingReading.HeartRate,
+                spo2 = existingReading.Spo2
+            });
+        }
+
+        // Handle retries of an already failed measurement.
+        if (measurementRequest.Status == "Failed")
+        {
+            await transaction.CommitAsync();
+
+            return Ok(new
+            {
+                success = false,
+                duplicate = true,
+                requestId = request.RequestId,
+                message = "The sensor did not obtain a valid reading."
             });
         }
 
@@ -248,6 +296,7 @@ public class IoTVitalSignController : ControllerBase
         return Ok(new
         {
             success = true,
+            duplicate = false,
             message = "Vital-sign reading received successfully.",
             requestId = request.RequestId,
             readingId = pendingReading.PendingVitalReadingId,
@@ -260,14 +309,20 @@ public class IoTVitalSignController : ControllerBase
     [Authorize]
     [HttpGet("requests/{requestId:guid}/reading")]
     public async Task<IActionResult> GetReadingForRequest(
-        Guid requestId)
+    Guid requestId)
     {
+        await using var transaction =
+            await _context.Database.BeginTransactionAsync(
+                IsolationLevel.Serializable);
+
         var measurementRequest =
             await _context.IoTMeasurementRequests
                 .FirstOrDefaultAsync(r => r.RequestId == requestId);
 
         if (measurementRequest == null)
         {
+            await transaction.CommitAsync();
+
             return NotFound(new
             {
                 success = false,
@@ -280,11 +335,21 @@ public class IoTVitalSignController : ControllerBase
             measurementRequest.ExpiresAt <= DateTime.UtcNow)
         {
             measurementRequest.Status = "Expired";
+
             await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return Conflict(new
+            {
+                success = false,
+                message = "Measurement request has expired."
+            });
         }
 
         if (measurementRequest.Status == "Expired")
         {
+            await transaction.CommitAsync();
+
             return Conflict(new
             {
                 success = false,
@@ -294,6 +359,8 @@ public class IoTVitalSignController : ControllerBase
 
         if (measurementRequest.Status == "Failed")
         {
+            await transaction.CommitAsync();
+
             return Conflict(new
             {
                 success = false,
@@ -308,6 +375,8 @@ public class IoTVitalSignController : ControllerBase
 
         if (reading == null)
         {
+            await transaction.CommitAsync();
+
             return Accepted(new
             {
                 success = false,
@@ -320,6 +389,7 @@ public class IoTVitalSignController : ControllerBase
         reading.IsUsed = true;
 
         await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
 
         return Ok(new
         {

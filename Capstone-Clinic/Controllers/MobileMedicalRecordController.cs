@@ -33,6 +33,7 @@ public class MobileMedicalRecordController : ControllerBase
         }
 
         var medicalRecords = await _context.MedicalRecords
+            .AsNoTracking()
             .Where(mr => mr.StudentId == studentId)
             .OrderByDescending(mr => mr.VisitDate)
             .Select(mr => new

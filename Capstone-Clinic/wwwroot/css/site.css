@@ -404,3 +404,55 @@ a {
         min-width: 0;
     }
 }
+/* Staff Management: enforce readable text contrast */
+.staff-management-page {
+    color: #20352d;
+}
+
+    .staff-management-page h1,
+    .staff-management-page h2,
+    .staff-management-page label {
+        color: #20352d;
+    }
+
+    .staff-management-page .text-muted,
+    .staff-management-page .form-text {
+        color: #596b61 !important;
+    }
+
+    .staff-management-page .table {
+        color: #20352d;
+        --bs-table-color: #20352d;
+    }
+
+        .staff-management-page .table thead th {
+            background-color: #edf4f0;
+            color: #344f42;
+        }
+
+        .staff-management-page .table tbody td {
+            color: #20352d;
+        }
+
+    .staff-management-page .badge.text-bg-dark {
+        background-color: #20352d !important;
+        color: #ffffff !important;
+    }
+
+    .staff-management-page .badge.text-bg-success {
+        background-color: #237a52 !important;
+        color: #ffffff !important;
+    }
+
+    .staff-management-page .badge.text-bg-secondary {
+        background-color: #596b61 !important;
+        color: #ffffff !important;
+    }
+
+    /* Admin-only label */
+    .staff-management-page .admin-only-badge {
+        background-color: #20352d !important;
+        color: #ffffff !important;
+        padding: 7px 11px;
+        border-radius: 6px;
+    }

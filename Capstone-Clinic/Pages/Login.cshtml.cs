@@ -40,58 +40,77 @@ public class LoginModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
-        var username = Username.Trim().ToLowerInvariant();
+        var normalizedUsername =
+            (Username ?? string.Empty).Trim().ToUpperInvariant();
 
+        var password = Password ?? string.Empty;
+
+        // Reject empty credentials.
+        if (string.IsNullOrWhiteSpace(normalizedUsername) ||
+            string.IsNullOrEmpty(password))
+        {
+            ErrorMessage = "Invalid username or password.";
+            return Page();
+        }
+
+        // Check account lockout.
         lock (FailedLoginLock)
         {
-            if (FailedLogins.TryGetValue(username, out var attemptInfo) &&
-                attemptInfo.LockedUntil > DateTime.UtcNow)
+            if (FailedLogins.TryGetValue(
+                normalizedUsername, out var attemptInfo))
             {
-                ErrorMessage = "Too many failed login attempts. Please try again later.";
-                return Page();
-            }
+                if (attemptInfo.LockedUntil > DateTime.UtcNow)
+                {
+                    ErrorMessage =
+                        "Too many failed login attempts. Please try again later.";
+                    return Page();
+                }
 
-            if (attemptInfo.LockedUntil <= DateTime.UtcNow &&
-                attemptInfo.Attempts >= MaxFailedAttempts)
-            {
-                FailedLogins.Remove(username);
+                if (attemptInfo.Attempts >= MaxFailedAttempts)
+                {
+                    FailedLogins.Remove(normalizedUsername);
+                }
             }
         }
 
+        // Username lookup is case-insensitive.
         var staff = await _context.Staffs
-            .FirstOrDefaultAsync(s => s.Username == Username);
+            .FirstOrDefaultAsync(s =>
+                s.Username.ToUpper() == normalizedUsername);
 
-        var passwordValid = false;
+        var passwordResult = PasswordVerificationResult.Failed;
 
         if (staff != null &&
             !string.IsNullOrWhiteSpace(staff.PasswordHash))
         {
-            var passwordResult =
-                _passwordHasher.VerifyHashedPassword(
-                    staff,
-                    staff.PasswordHash,
-                    Password);
-
-            passwordValid =
-                passwordResult != PasswordVerificationResult.Failed;
+            passwordResult = _passwordHasher.VerifyHashedPassword(
+                staff,
+                staff.PasswordHash,
+                password);
         }
+
+        // Inactive accounts cannot authenticate.
+        var passwordValid =
+            staff != null &&
+            staff.IsActive &&
+            passwordResult != PasswordVerificationResult.Failed;
 
         if (!passwordValid)
         {
             lock (FailedLoginLock)
             {
                 var attempts = FailedLogins.TryGetValue(
-                    username,
+                    normalizedUsername,
                     out var existing)
-                    ? existing.Attempts + 1
-                    : 1;
+                        ? existing.Attempts + 1
+                        : 1;
 
                 var lockedUntil =
                     attempts >= MaxFailedAttempts
                         ? DateTime.UtcNow.Add(LockoutDuration)
                         : DateTime.MinValue;
 
-                FailedLogins[username] =
+                FailedLogins[normalizedUsername] =
                     (attempts, lockedUntil);
             }
 
@@ -99,9 +118,20 @@ public class LoginModel : PageModel
             return Page();
         }
 
+        // Upgrade old password hashes when required.
+        if (passwordResult ==
+            PasswordVerificationResult.SuccessRehashNeeded)
+        {
+            staff!.PasswordHash =
+                _passwordHasher.HashPassword(staff, password);
+
+            await _context.SaveChangesAsync();
+        }
+
+        // Clear failed attempts after successful login.
         lock (FailedLoginLock)
         {
-            FailedLogins.Remove(username);
+            FailedLogins.Remove(normalizedUsername);
         }
 
         var claims = new List<Claim>

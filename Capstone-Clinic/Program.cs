@@ -51,6 +51,41 @@ builder.Services.AddAuthentication(options =>
             : CookieSecurePolicy.Always;
         options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
         options.SlidingExpiration = true;
+
+        options.Events = new CookieAuthenticationEvents
+        {
+            OnValidatePrincipal = async context =>
+            {
+                var userId = context.Principal?
+                    .FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?
+                    .Value;
+
+                if (!int.TryParse(userId, out var staffId))
+                {
+                    context.RejectPrincipal();
+
+                    await context.HttpContext.SignOutAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme);
+
+                    return;
+                }
+
+                var db = context.HttpContext.RequestServices
+                    .GetRequiredService<AppDbContext>();
+
+                var isActive = await db.Staffs
+                    .AsNoTracking()
+                    .AnyAsync(s => s.StaffId == staffId && s.IsActive);
+
+                if (!isActive)
+                {
+                    context.RejectPrincipal();
+
+                    await context.HttpContext.SignOutAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme);
+                }
+            }
+        };
     })
 .AddCookie(
     "StudentScheme",
