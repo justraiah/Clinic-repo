@@ -5,93 +5,295 @@
     ViewData["Title"] = "My Profile";
 }
 
+<style>
+    .profile-heading {
+        margin-bottom: 28px;
+    }
+
+    .profile-subtitle {
+        color: #718096;
+        font-size: .9rem;
+    }
+
+    .profile-card {
+        background: #fff;
+        border: 1px solid #e2e8e2;
+        border-radius: 12px;
+        box-shadow: 0 3px 12px rgba(32, 53, 43, .045);
+        height: 100%;
+    }
+
+    .profile-card-header {
+        padding: 22px 24px;
+        border-bottom: 1px solid #edf1ed;
+    }
+
+    .profile-card-body {
+        padding: 24px;
+    }
+
+    .profile-avatar {
+        width: 66px;
+        height: 66px;
+        border-radius: 50%;
+        background: #e2f3e9;
+        color: #176044;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+
+    .profile-detail {
+        padding: 14px 0;
+        border-bottom: 1px solid #edf1ed;
+    }
+
+        .profile-detail:last-child {
+            border-bottom: 0;
+        }
+
+    .profile-label {
+        display: block;
+        color: #718096;
+        font-size: .78rem;
+        margin-bottom: 5px;
+    }
+
+    .profile-value {
+        color: #24382d;
+        font-weight: 600;
+    }
+
+    .profile-section-description {
+        color: #718096;
+        font-size: .83rem;
+    }
+
+    .profile-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: #16804a;
+        background: #e8f7ee;
+        padding: 6px 11px;
+        border-radius: 20px;
+        font-size: .78rem;
+        font-weight: 600;
+    }
+
+    .profile-status-dot {
+        width: 7px;
+        height: 7px;
+        background: #16a34a;
+        border-radius: 50%;
+    }
+
+    .profile-divider {
+        border-top: 1px solid #edf1ed;
+        margin: 24px 0;
+    }
+</style>
+
 <div class="container-fluid py-3">
-    <div class="mb-4">
-        <h1 class="h3 mb-1">My Profile</h1>
-        <p class="text-muted mb-0">
-            View your staff information and manage your password.
+
+    <div class="profile-heading">
+        <h1 class="h3 fw-semibold mb-1">My Profile</h1>
+        <p class="profile-subtitle mb-0">
+            Manage your personal information and account security.
         </p>
     </div>
 
     @if (TempData["SuccessMessage"] is string success)
     {
-        <div class="alert alert-success" role="status">
+        <div class="alert alert-success alert-dismissible fade show" role="status">
             @success
+            <button type="button" class="btn-close"
+                    data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] is string error)
+    {
+        <div class="alert alert-danger" role="alert">
+            @error
         </div>
     }
 
     <div class="row g-4">
-        <div class="col-12 col-lg-5">
-            <section class="card border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <h2 class="h5 mb-4">Account Information</h2>
 
-                    <div class="mb-3">
-                        <label class="form-label text-muted">Full Name</label>
-                        <div class="fw-semibold">@Model.CurrentStaff?.FullName</div>
-                    </div>
+        <!-- PROFILE INFORMATION -->
+        <div class="col-12 col-xl-5">
 
-                    <div class="mb-3">
-                        <label class="form-label text-muted">Username</label>
-                        <div class="fw-semibold">@Model.CurrentStaff?.Username</div>
-                    </div>
+            <section class="profile-card">
 
-                    <div class="mb-0">
-                        <label class="form-label text-muted">Role</label>
+                <div class="profile-card-header">
+                    <h2 class="h5 fw-semibold mb-1">Personal Information</h2>
+                    <p class="profile-section-description mb-0">
+                        Update the personal information associated with your account.
+                    </p>
+                </div>
+
+                <div class="profile-card-body">
+
+                    <div class="d-flex align-items-center gap-3 mb-4">
+
+                        <div class="profile-avatar">
+                            @(string.IsNullOrWhiteSpace(Model.CurrentStaff?.FullName)
+                                ? "?"
+                                : Model.CurrentStaff.FullName.Trim()[0].ToString().ToUpper())
+                        </div>
+
                         <div>
-                            <span class="badge text-bg-success">
-                                @Model.CurrentStaff?.Role
-                            </span>
+                            <div class="fw-semibold fs-5">
+                                @Model.CurrentStaff?.FullName
+                            </div>
+                            <div class="text-muted small">
+                                @Model.CurrentStaff?.Username
+                            </div>
+                            <div class="mt-2">
+                                <span class="profile-status">
+                                    <span class="profile-status-dot"></span>
+                                    Active Account
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="profile-detail">
+                        <span class="profile-label">Username</span>
+                        <span class="profile-value">
+                            @Model.CurrentStaff?.Username
+                        </span>
+                        <div class="form-text">
+                            Contact an administrator if your username needs to change.
                         </div>
                     </div>
-                </div>
-            </section>
-        </div>
 
-        <div class="col-12 col-lg-7">
-            <section class="card border-0 shadow-sm">
-                <div class="card-body p-4">
-                    <h2 class="h5 mb-2">Change Password</h2>
-                    <p class="text-muted small mb-4">
-                        Verify your current password before setting a new one.
+                    <div class="profile-detail">
+                        <span class="profile-label">Account Role</span>
+                        <span class="badge text-bg-success">
+                            @Model.CurrentStaff?.Role
+                        </span>
+                    </div>
+
+                    <div class="profile-divider"></div>
+
+                    <h3 class="h6 fw-semibold mb-1">Edit Personal Information</h3>
+                    <p class="profile-section-description mb-3">
+                        You can update your own full name.
                     </p>
 
+                    <form method="post" asp-page-handler="UpdateProfile">
+
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger small mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="ProfileInput.FullName"
+                                   class="form-label fw-semibold">
+                                Full Name
+                            </label>
+
+                            <input asp-for="ProfileInput.FullName"
+                                   class="form-control"
+                                   maxlength="100"
+                                   autocomplete="name" />
+
+                            <span asp-validation-for="ProfileInput.FullName"
+                                  class="text-danger small"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-success">
+                            Save Changes
+                        </button>
+
+                    </form>
+
+                </div>
+            </section>
+
+        </div>
+
+        <!-- ACCOUNT SECURITY -->
+        <div class="col-12 col-xl-7">
+
+            <section class="profile-card">
+
+                <div class="profile-card-header">
+                    <h2 class="h5 fw-semibold mb-1">Account Security</h2>
+                    <p class="profile-section-description mb-0">
+                        Keep your account secure by regularly updating your password.
+                    </p>
+                </div>
+
+                <div class="profile-card-body">
+
+                    <div class="d-flex align-items-center gap-3 mb-4">
+                        <div class="profile-avatar">
+                            <span>&#128274;</span>
+                        </div>
+                        <div>
+                            <div class="fw-semibold">Password Management</div>
+                            <div class="profile-section-description">
+                                Your password is securely stored as a hash.
+                            </div>
+                        </div>
+                    </div>
+
                     <form method="post" asp-page-handler="ChangePassword">
+
                         <div asp-validation-summary="ModelOnly"
                              class="text-danger small mb-3"></div>
 
                         <div class="mb-3">
                             <label asp-for="Input.CurrentPassword"
-                                   class="form-label">Current Password</label>
+                                   class="form-label fw-semibold">
+                                Current Password
+                            </label>
+
                             <input asp-for="Input.CurrentPassword"
                                    type="password"
                                    class="form-control"
                                    autocomplete="current-password" />
+
                             <span asp-validation-for="Input.CurrentPassword"
                                   class="text-danger small"></span>
                         </div>
 
                         <div class="mb-3">
                             <label asp-for="Input.NewPassword"
-                                   class="form-label">New Password</label>
+                                   class="form-label fw-semibold">
+                                New Password
+                            </label>
+
                             <input asp-for="Input.NewPassword"
                                    type="password"
                                    class="form-control"
                                    autocomplete="new-password" />
+
                             <div class="form-text">
                                 Use at least 12 characters.
                             </div>
+
                             <span asp-validation-for="Input.NewPassword"
                                   class="text-danger small"></span>
                         </div>
 
                         <div class="mb-4">
                             <label asp-for="Input.ConfirmPassword"
-                                   class="form-label">Confirm New Password</label>
+                                   class="form-label fw-semibold">
+                                Confirm New Password
+                            </label>
+
                             <input asp-for="Input.ConfirmPassword"
                                    type="password"
                                    class="form-control"
                                    autocomplete="new-password" />
+
                             <span asp-validation-for="Input.ConfirmPassword"
                                   class="text-danger small"></span>
                         </div>
@@ -99,10 +301,14 @@
                         <button type="submit" class="btn btn-success">
                             Change Password
                         </button>
+
                     </form>
+
                 </div>
             </section>
+
         </div>
+
     </div>
 </div>
 

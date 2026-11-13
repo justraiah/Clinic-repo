@@ -25,14 +25,50 @@ public class ProfileModel : PageModel
     [BindProperty]
     public ChangePasswordInput Input { get; set; } = new();
 
+    [BindProperty]
+    public UpdateProfileInput ProfileInput { get; set; } = new();
+
     public async Task<IActionResult> OnGetAsync()
     {
         return await LoadProfileAsync() ? Page() : RedirectToPage("/Login");
     }
 
+    public async Task<IActionResult> OnPostUpdateProfileAsync()
+    {
+        ModelState.Clear();
+
+        ProfileInput.FullName = ProfileInput.FullName?.Trim() ?? string.Empty;
+
+        if (!TryValidateModel(ProfileInput, nameof(ProfileInput)))
+        {
+            await LoadProfileAsync();
+            return Page();
+        }
+
+        var staffIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+        if (!int.TryParse(staffIdClaim, out var staffId))
+            return RedirectToPage("/Login");
+
+        var staff = await _context.Staffs
+            .SingleOrDefaultAsync(s => s.StaffId == staffId && s.IsActive);
+
+        if (staff == null)
+            return RedirectToPage("/Login");
+
+        staff.FullName = ProfileInput.FullName;
+
+        await _context.SaveChangesAsync();
+
+        TempData["SuccessMessage"] = "Your profile has been updated successfully.";
+
+        return RedirectToPage();
+    }
     public async Task<IActionResult> OnPostChangePasswordAsync()
     {
-        if (!ModelState.IsValid)
+        ModelState.Clear();
+
+        if (!TryValidateModel(Input, nameof(Input)))
         {
             await LoadProfileAsync();
             return Page();
@@ -104,12 +140,24 @@ public class ProfileModel : PageModel
                 FullName = s.FullName,
                 Username = s.Username,
                 Role = s.Role
+
             })
             .SingleOrDefaultAsync();
+        if (CurrentStaff != null && !ModelState.ContainsKey("ProfileInput.FullName"))
+        {
+            ProfileInput.FullName = CurrentStaff.FullName;
+        }
 
         return CurrentStaff != null;
     }
 
+    public sealed class UpdateProfileInput
+    {
+        [Required(ErrorMessage = "Enter your full name.")]
+        [StringLength(100, MinimumLength = 2,
+            ErrorMessage = "Your name must contain 2 to 100 characters.")]
+        public string FullName { get; set; } = string.Empty;
+    }
     public sealed class ChangePasswordInput
     {
         [Required(ErrorMessage = "Enter your current password.")]
