@@ -517,6 +517,11 @@
                         @User.Identity?.Name
                     </div>
 
+                    <a class="cms-nav-link @(currentPage == "/Profile" ? "active" : "")"
+                       asp-page="/Profile">
+                        My Profile
+                    </a>
+
                     <a class="cms-nav-link cms-logout"
                        asp-page="/Logout">
                         Logout

@@ -1,0 +1,111 @@
+﻿@page
+@model Capstone_Clinic.Pages.ProfileModel
+
+@{
+    ViewData["Title"] = "My Profile";
+}
+
+<div class="container-fluid py-3">
+    <div class="mb-4">
+        <h1 class="h3 mb-1">My Profile</h1>
+        <p class="text-muted mb-0">
+            View your staff information and manage your password.
+        </p>
+    </div>
+
+    @if (TempData["SuccessMessage"] is string success)
+    {
+        <div class="alert alert-success" role="status">
+            @success
+        </div>
+    }
+
+    <div class="row g-4">
+        <div class="col-12 col-lg-5">
+            <section class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="h5 mb-4">Account Information</h2>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Full Name</label>
+                        <div class="fw-semibold">@Model.CurrentStaff?.FullName</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label text-muted">Username</label>
+                        <div class="fw-semibold">@Model.CurrentStaff?.Username</div>
+                    </div>
+
+                    <div class="mb-0">
+                        <label class="form-label text-muted">Role</label>
+                        <div>
+                            <span class="badge text-bg-success">
+                                @Model.CurrentStaff?.Role
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <div class="col-12 col-lg-7">
+            <section class="card border-0 shadow-sm">
+                <div class="card-body p-4">
+                    <h2 class="h5 mb-2">Change Password</h2>
+                    <p class="text-muted small mb-4">
+                        Verify your current password before setting a new one.
+                    </p>
+
+                    <form method="post" asp-page-handler="ChangePassword">
+                        <div asp-validation-summary="ModelOnly"
+                             class="text-danger small mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.CurrentPassword"
+                                   class="form-label">Current Password</label>
+                            <input asp-for="Input.CurrentPassword"
+                                   type="password"
+                                   class="form-control"
+                                   autocomplete="current-password" />
+                            <span asp-validation-for="Input.CurrentPassword"
+                                  class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Input.NewPassword"
+                                   class="form-label">New Password</label>
+                            <input asp-for="Input.NewPassword"
+                                   type="password"
+                                   class="form-control"
+                                   autocomplete="new-password" />
+                            <div class="form-text">
+                                Use at least 12 characters.
+                            </div>
+                            <span asp-validation-for="Input.NewPassword"
+                                  class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Input.ConfirmPassword"
+                                   class="form-label">Confirm New Password</label>
+                            <input asp-for="Input.ConfirmPassword"
+                                   type="password"
+                                   class="form-control"
+                                   autocomplete="new-password" />
+                            <span asp-validation-for="Input.ConfirmPassword"
+                                  class="text-danger small"></span>
+                        </div>
+
+                        <button type="submit" class="btn btn-success">
+                            Change Password
+                        </button>
+                    </form>
+                </div>
+            </section>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
