@@ -191,6 +191,55 @@
         color: #1e40af;
         font-size: .76rem;
     }
+    .measurement-monitor {
+        margin-top: 18px;
+        padding: 16px;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        background: #f8fafc;
+    }
+
+    .measurement-progress-track {
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .measurement-progress-fill {
+        height: 100%;
+        width: 0%;
+        background: #2563eb;
+        transition: width .3s ease;
+    }
+
+    .measurement-window {
+        display: grid;
+        grid-template-columns: 75px 1fr 110px;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: .78rem;
+    }
+
+        .measurement-window:last-child {
+            border-bottom: none;
+        }
+
+    .window-accepted {
+        color: #16a34a;
+        font-weight: 600;
+    }
+
+    .window-rejected {
+        color: #dc2626;
+        font-weight: 600;
+    }
+
+    .window-pending {
+        color: #94a3b8;
+    }
 
     @@media (max-width: 767.98px) {
         .measurement-grid,
@@ -220,7 +269,6 @@
             .status-dot.offline {
                 background: #dc2626;
             }
-
     }
 </style>
 
@@ -471,11 +519,84 @@
 
             </div>
 
+            
+            <!-- Live Measurement Modal -->
+            <div class="modal fade"
+                 id="measurementModal"
+                 tabindex="-1"
+                 aria-labelledby="measurementModalTitle"
+                 aria-hidden="true"
+                 data-bs-backdrop="static"
+                 data-bs-keyboard="false">
+
+                <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+
+                    <div class="modal-content">
+
+                        <div class="modal-header">
+                            <div>
+                                <h5 class="modal-title" id="measurementModalTitle">
+                                    Live Sensor Measurement
+                                </h5>
+                                <small class="text-muted">
+                                    Keep your finger still on the sensor.
+                                </small>
+                            </div>
+                        </div>
+
+                        <div class="modal-body">
+
+                            <div id="measurementMonitor" class="measurement-monitor">
+
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <strong class="small">Measurement Progress</strong>
+                                    <span id="measurementProgressCount" class="small text-muted">
+                                        0 / 8 windows
+                                    </span>
+                                </div>
+
+                                <div class="measurement-progress-track mb-3">
+                                    <div id="measurementProgressBar"
+                                         class="measurement-progress-fill">
+                                    </div>
+                                </div>
+
+                                <div class="d-flex justify-content-between small mb-2">
+                                    <span class="text-success" id="acceptedCount">Accepted: 0</span>
+                                    <span class="text-danger" id="rejectedCount">Rejected: 0</span>
+                                </div>
+
+                                <div id="measurementProgressRows"></div>
+
+                                <div id="measurementFinalResult"
+                                     class="alert alert-success mt-3 mb-0 d-none">
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button"
+                                    class="btn btn-primary"
+                                    id="useSensorReadingBtn"
+                                    disabled>
+                                Use This Reading
+                            </button>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+
+
         </div>
 
     </div>
 
 
+    <!-- Manual Measurements -->
     <!-- Manual Measurements -->
 
     <div class="form-panel manual-section">
@@ -635,6 +756,27 @@
             const loadingDetail = document.getElementById("sensorLoadingDetail");
             const heartRateInput = document.getElementById("VitalSignLog_HeartRate");
             const spo2Input = document.getElementById("VitalSignLog_OxygenSaturation");
+            const measurementMonitor = document.getElementById("measurementMonitor");
+            const progressBar = document.getElementById("measurementProgressBar");
+            const progressCount = document.getElementById("measurementProgressCount");
+            const progressRows = document.getElementById("measurementProgressRows");
+            const acceptedCount = document.getElementById("acceptedCount");
+            const rejectedCount = document.getElementById("rejectedCount");
+            const finalResult = document.getElementById("measurementFinalResult");
+                    const measurementModalElement =
+            document.getElementById("measurementModal");
+
+        const measurementModal = measurementModalElement
+            ? bootstrap.Modal.getOrCreateInstance(measurementModalElement)
+            : null;
+
+        const useSensorReadingBtn =
+            document.getElementById("useSensorReadingBtn");
+
+        const loadingSpinner =
+            sensorLoading?.querySelector(".spinner-border");
+
+        let completedReading = null;
 
             if (!sensorButton) return;
 
@@ -645,11 +787,16 @@
             }
 
             function showSensorError(message) {
-                sensorLoading?.classList.add("d-none");
-                sensorButton.disabled = false;
-                sensorButton.textContent = "Read Heart Rate & SpO₂";
-                window.alert(message);
-            }
+            measurementModal?.hide();
+
+            sensorLoading?.classList.remove("d-none");
+            loadingSpinner?.classList.add("d-none");
+
+            sensorButton.disabled = false;
+            sensorButton.textContent = "Read Heart Rate & SpO₂";
+
+            window.alert(message);
+           }
 
             async function readJson(response) {
                 try {
@@ -658,10 +805,152 @@
                     return null;
                 }
             }
+                    useSensorReadingBtn?.addEventListener("click", function () {
+            if (!completedReading) return;
+
+            if (heartRateInput) {
+                heartRateInput.value = completedReading.heartRate;
+            }
+
+            if (spo2Input) {
+                spo2Input.value = completedReading.spo2;
+            }
+
+            measurementModal?.hide();
+
+            sensorButton.disabled = false;
+            sensorButton.textContent = "Read Heart Rate & SpO₂";
+
+            loadingSpinner?.classList.add("d-none");
+
+            setLoading(
+                "Sensor reading received.",
+                completedReading.heartRate +
+                " BPM, SpO₂ " +
+                completedReading.spo2 +
+                "%. Review the form, then save."
+            );
+        });
+
+                    function renderMeasurementProgress(data) {
+            if (!data || !Array.isArray(data.updates)) return;
+
+            measurementMonitor?.classList.remove("d-none");
+
+                    const updates = data.updates;
+
+        const total = updates.length > 0
+            ? updates[0].totalWindows
+            : 8;
+
+        const completed = updates.length;
+            const accepted = updates.filter(x => x.accepted).length;
+            const rejected = updates.filter(x => !x.accepted).length;
+
+            if (progressCount) {
+                progressCount.textContent = `${completed} / ${total} windows`;
+            }
+
+            if (progressBar) {
+                progressBar.style.width =
+                    `${Math.min(100, completed / total * 100)}%`;
+            }
+
+            if (acceptedCount) {
+                acceptedCount.textContent = `Accepted: ${accepted}`;
+            }
+
+            if (rejectedCount) {
+                rejectedCount.textContent = `Rejected: ${rejected}`;
+            }
+
+            if (!progressRows) return;
+
+            progressRows.replaceChildren();
+
+            for (let i = 1; i <= total; i++) {
+                const reading = updates.find(x => x.windowNumber === i);
+
+                const row = document.createElement("div");
+                row.className = "measurement-window";
+
+                const windowLabel = document.createElement("strong");
+                windowLabel.textContent = `Window ${i}`;
+
+                const values = document.createElement("span");
+                const status = document.createElement("span");
+                        if (!reading) {
+            values.textContent = "Awaiting actual reading...";
+            status.textContent = "Pending";
+            status.className = "window-pending";
+        } else {
+            const hr = reading.validHeartRate
+                ? `${reading.heartRate} BPM`
+                : "Invalid HR";
+
+            const spo2 = reading.validSpO2
+                ? `${reading.spo2}%`
+                : "Invalid SpO₂";
+
+            values.textContent = `${hr} · ${spo2}`;
+
+            status.textContent = reading.accepted
+                ? "Accepted"
+                : "Rejected";
+
+            status.className = reading.accepted
+                ? "window-accepted"
+                : "window-rejected";
+
+            row.title = reading.message || "";
+        }
+
+                row.append(windowLabel, values, status);
+                progressRows.appendChild(row);
+            }
+        }
+
+        async function refreshMeasurementProgress(requestId) {
+            try {
+                const response = await fetch(
+                    `/api/iot/vital-signs/requests/${requestId}/progress`,
+                    {
+                        headers: {
+                            "Accept": "application/json"
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    console.warn("Progress polling failed:", response.status);
+                    return;
+                }
+
+                const data = await readJson(response);
+                renderMeasurementProgress(data);
+
+            } catch (error) {
+                console.warn("Could not retrieve measurement progress:", error);
+            }
+        }
 
             sensorButton.addEventListener("click", async function () {
                 sensorButton.disabled = true;
                 sensorButton.textContent = "Reading Sensor...";
+                        completedReading = null;
+
+        useSensorReadingBtn.disabled = true;
+
+        finalResult.classList.add("d-none");
+
+        renderMeasurementProgress({
+            updates: []
+        });
+
+        loadingSpinner?.classList.remove("d-none");
+        sensorLoading?.classList.add("d-none");
+
+        measurementModal?.show();
                 setLoading(
                     "Requesting a measurement...",
                     "The clinic sensor will pick this up on its next poll."
@@ -696,6 +985,7 @@
 
                 while (Date.now() < deadline) {
                     await new Promise(function (resolve) { setTimeout(resolve, 2000); });
+                    await refreshMeasurementProgress(requestId);
 
                     try {
                         const readingResponse = await fetch(
@@ -704,17 +994,21 @@
                         );
                         const reading = await readJson(readingResponse);
 
-                        if (readingResponse.status === 200 && reading?.success) {
-                            if (heartRateInput) heartRateInput.value = reading.heartRate;
-                            if (spo2Input) spo2Input.value = reading.spo2;
-                            setLoading(
-                                "Sensor reading received.",
-                                reading.heartRate + " BPM, SpO₂ " + reading.spo2 + "%. Review the form, then save."
-                            );
-                            sensorButton.disabled = false;
-                            sensorButton.textContent = "Read Heart Rate & SpO₂";
-                            return;
-                        }
+                    if (readingResponse.status === 200 && reading?.success) {
+
+                        completedReading = reading;
+
+                        await refreshMeasurementProgress(requestId);
+
+                        finalResult.textContent =
+                            `Final Average: ${reading.heartRate} BPM · SpO₂ ${reading.spo2}%`;
+
+                        finalResult.classList.remove("d-none");
+
+                        useSensorReadingBtn.disabled = false;
+
+                        return;
+                    }
 
                         if (readingResponse.status === 409) {
                             showSensorError(reading?.message || "The sensor did not return a usable reading.");

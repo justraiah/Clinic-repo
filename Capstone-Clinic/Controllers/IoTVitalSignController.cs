@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
+using System.Collections.Concurrent;    
 using System.Text;
 using System.Data;
 
@@ -18,6 +19,15 @@ public class IoTVitalSignController : ControllerBase
     private readonly AppDbContext _context;
     private readonly IConfiguration _configuration;
     private readonly IoTDevicePresence _presence;
+    private static readonly ConcurrentDictionary<Guid, ProgressBucket>
+    _measurementProgress = new();
+
+    private sealed class ProgressBucket
+    {
+        public readonly object Lock = new();
+        public readonly List<IoTMeasurementProgressUpdate> Updates = new();
+        public DateTime LastUpdatedUtc { get; set; } = DateTime.UtcNow;
+    }
 
     public IoTVitalSignController(
         AppDbContext context,
@@ -139,6 +149,162 @@ public class IoTVitalSignController : ControllerBase
         });
     }
 
+
+    // ESP32: Submit one intermediate measurement window.
+    [AllowAnonymous]
+    [HttpPost("device/progress")]
+    public async Task<IActionResult> ReceiveMeasurementProgress(
+        [FromBody] IoTMeasurementProgressRequest? request,
+        [FromHeader(Name = "X-IoT-Key")] string? iotKey)
+    {
+        if (!IsValidIoTKey(iotKey))
+        {
+            return Unauthorized(new
+            {
+                success = false,
+                message = "Invalid IoT credentials."
+            });
+        }
+
+        _presence.MarkSeen();
+
+        if (request == null ||
+            request.RequestId == Guid.Empty ||
+            request.WindowNumber < 1 ||
+            request.TotalWindows < 1 ||
+            request.WindowNumber > request.TotalWindows ||
+            request.TotalWindows > 20 ||
+            request.HeartRate < -999 ||
+            request.HeartRate > 300 ||
+            request.Spo2 < -999 ||
+            request.Spo2 > 100)
+        {
+            return BadRequest(new
+            {
+                success = false,
+                message = "Invalid measurement progress data."
+            });
+        }
+
+        var measurementRequest =
+            await _context.IoTMeasurementRequests
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r =>
+                    r.RequestId == request.RequestId);
+
+        if (measurementRequest == null)
+        {
+            return NotFound(new
+            {
+                success = false,
+                message = "Measurement request not found."
+            });
+        }
+
+        if (measurementRequest.Status != "Claimed" ||
+            measurementRequest.ExpiresAt <= DateTime.UtcNow)
+        {
+            return Conflict(new
+            {
+                success = false,
+                message = "Measurement request is no longer active."
+            });
+        }
+
+        var bucket = _measurementProgress.GetOrAdd(
+            request.RequestId,
+            _ => new ProgressBucket());
+
+        lock (bucket.Lock)
+        {
+            // Replace a window if the ESP32 retries its submission.
+            bucket.Updates.RemoveAll(
+                x => x.WindowNumber == request.WindowNumber);
+
+            bucket.Updates.Add(new IoTMeasurementProgressUpdate
+            {
+                WindowNumber = request.WindowNumber,
+                TotalWindows = request.TotalWindows,
+                HeartRate = request.HeartRate,
+                Spo2 = request.Spo2,
+                ValidHeartRate = request.ValidHeartRate,
+                ValidSpO2 = request.ValidSpO2,
+                Accepted = request.Accepted,
+                Message = request.Message ?? "",
+                ReceivedAt = DateTime.UtcNow
+            });
+
+            bucket.Updates.Sort(
+                (a, b) => a.WindowNumber.CompareTo(b.WindowNumber));
+
+            bucket.LastUpdatedUtc = DateTime.UtcNow;
+        }
+
+        // Remove stale progress sessions.
+        foreach (var item in _measurementProgress)
+        {
+            if (DateTime.UtcNow - item.Value.LastUpdatedUtc >
+                TimeSpan.FromMinutes(10))
+            {
+                _measurementProgress.TryRemove(item.Key, out _);
+            }
+        }
+
+        return Ok(new
+        {
+            success = true,
+            requestId = request.RequestId,
+            windowNumber = request.WindowNumber
+        });
+    }
+
+    // CMS: Retrieve all intermediate readings for one request.
+    [Authorize]
+    [HttpGet("requests/{requestId:guid}/progress")]
+    public async Task<IActionResult> GetMeasurementProgress(Guid requestId)
+    {
+        var measurementRequest =
+            await _context.IoTMeasurementRequests
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r =>
+                    r.RequestId == requestId);
+
+        if (measurementRequest == null)
+        {
+            return NotFound(new
+            {
+                success = false,
+                message = "Measurement request not found."
+            });
+        }
+
+        if (!_measurementProgress.TryGetValue(
+            requestId, out var bucket))
+        {
+            return Ok(new
+            {
+                success = true,
+                requestId,
+                status = measurementRequest.Status,
+                updates = Array.Empty<IoTMeasurementProgressUpdate>()
+            });
+        }
+
+        IoTMeasurementProgressUpdate[] updates;
+
+        lock (bucket.Lock)
+        {
+            updates = bucket.Updates.ToArray();
+        }
+
+        return Ok(new
+        {
+            success = true,
+            requestId,
+            status = measurementRequest.Status,
+            updates
+        });
+    }
     // ESP32: Submit a reading for its claimed request.
     [AllowAnonymous]
     [HttpPost("device/result")]
@@ -495,4 +661,46 @@ public class IoTVitalSignRequest
     public int Spo2 { get; set; }
 
     public bool FingerDetected { get; set; }
+}
+
+public class IoTMeasurementProgressRequest
+{
+    public Guid RequestId { get; set; }
+
+    public int WindowNumber { get; set; }
+
+    public int TotalWindows { get; set; }
+
+    public int HeartRate { get; set; }
+
+    public int Spo2 { get; set; }
+
+    public bool ValidHeartRate { get; set; }
+
+    public bool ValidSpO2 { get; set; }
+
+    public bool Accepted { get; set; }
+
+    public string? Message { get; set; }
+}
+
+public class IoTMeasurementProgressUpdate
+{
+    public int WindowNumber { get; set; }
+
+    public int TotalWindows { get; set; }
+
+    public int HeartRate { get; set; }
+
+    public int Spo2 { get; set; }
+
+    public bool ValidHeartRate { get; set; }
+
+    public bool ValidSpO2 { get; set; }
+
+    public bool Accepted { get; set; }
+
+    public string Message { get; set; } = "";
+
+    public DateTime ReceivedAt { get; set; }
 }
