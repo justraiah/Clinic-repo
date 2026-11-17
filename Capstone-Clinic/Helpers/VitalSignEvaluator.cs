@@ -38,7 +38,7 @@ namespace Capstone_Clinic.Helpers
                 remarks.Add("Hypothermia");
             }
 
-            // Heart Rate
+            // Pulse Rate
             if (vital.HeartRate > 120)
             {
                 vital.Status = "Critical";

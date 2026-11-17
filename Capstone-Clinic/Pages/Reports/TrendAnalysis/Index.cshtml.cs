@@ -137,14 +137,14 @@ namespace Capstone_Clinic.Pages.Reports.TrendAnalysis
                 Insights.Add("No health alerts have been generated.");
             }
 
-            // Heart Rate
+            // Pulse Rate
             if (AverageHeartRate >= 60 && AverageHeartRate <= 100)
             {
-                Insights.Add($"Average heart rate ({AverageHeartRate:F1} BPM) is within the normal adult range.");
+                Insights.Add($"Average pulse rate ({AverageHeartRate:F1} BPM) is within the normal adult range.");
             }
             else
             {
-                Insights.Add($"Average heart rate ({AverageHeartRate:F1} BPM) falls outside the normal range.");
+                Insights.Add($"Average pulse rate ({AverageHeartRate:F1} BPM) falls outside the normal range.");
             }
 
             // Consultation Frequency

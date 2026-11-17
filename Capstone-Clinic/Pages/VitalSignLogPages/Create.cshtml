@@ -424,7 +424,7 @@
             </h2>
 
             <p class="form-panel-description">
-                Heart rate and oxygen saturation are requested from the clinic sensor through the live CMS.
+                Pulse rate and oxygen saturation are requested from the clinic sensor through the live CMS.
             </p>
 
         </div>
@@ -449,7 +449,7 @@
 
                     <label asp-for="VitalSignLog.HeartRate"
                            class="form-label">
-                        Heart Rate (BPM)
+                        Pulse Rate (BPM)
                     </label>
 
                     <input asp-for="VitalSignLog.HeartRate"
@@ -493,7 +493,7 @@
                 <button type="button"
                         class="btn btn-primary"
                         id="readSensorBtn">
-                    Read Heart Rate &amp; SpO₂
+                    Read Pulse Rate &amp; SpO₂
                 </button>
 
             </div>
@@ -793,7 +793,7 @@
             loadingSpinner?.classList.add("d-none");
 
             sensorButton.disabled = false;
-            sensorButton.textContent = "Read Heart Rate & SpO₂";
+            sensorButton.textContent = "Read Pulse Rate & SpO₂";
 
             window.alert(message);
            }
@@ -819,7 +819,7 @@
             measurementModal?.hide();
 
             sensorButton.disabled = false;
-            sensorButton.textContent = "Read Heart Rate & SpO₂";
+            sensorButton.textContent = "Read Pulse Rate & SpO₂";
 
             loadingSpinner?.classList.add("d-none");
 
@@ -886,7 +886,7 @@
         } else {
             const hr = reading.validHeartRate
                 ? `${reading.heartRate} BPM`
-                : "Invalid HR";
+                : "Invalid PR";
 
             const spo2 = reading.validSpO2
                 ? `${reading.spo2}%`

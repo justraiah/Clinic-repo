@@ -98,7 +98,7 @@ namespace Capstone_Clinic.Services
             Row("Total Consultations", totalConsultations.ToString());
             Row("Patients Served", patientsServed.ToString());
             Row("Health Alerts", healthAlerts.ToString());
-            Row("Average Heart Rate", $"{averageHeartRate:F1} BPM");
+            Row("Average Pulse Rate", $"{averageHeartRate:F1} BPM");
         });
     });
 
