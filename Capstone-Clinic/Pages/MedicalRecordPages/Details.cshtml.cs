@@ -28,7 +28,7 @@ public class DetailsModel : PageModel
     public Capstone_Clinic.Models.Student? Student { get; set; }
     public List<MedicalRequirement> MedicalRequirements { get; set; } = new();
 
-    public int StudentAge { get; set; }
+    public int? StudentAge { get; set; }
 
     public List<VitalSignLog> RecentVitalSigns { get; set; } = new();
 
@@ -56,14 +56,18 @@ public class DetailsModel : PageModel
             Student = await _context.Students
                 .FirstOrDefaultAsync(s => s.StudentId == MedicalRecord.StudentId);
 
-            if (Student != null && Student.DateOfBirth != default)
+            if (Student?.DateOfBirth.HasValue == true)
             {
-                StudentAge = DateTime.Today.Year - Student.DateOfBirth.Year;
+                StudentAge = DateTime.Today.Year - Student.DateOfBirth.Value.Year;
 
-                if (Student.DateOfBirth.Date > DateTime.Today.AddYears(-StudentAge))
+                if (Student.DateOfBirth.Value.Date > DateTime.Today.AddYears(-StudentAge.Value))
                 {
                     StudentAge--;
                 }
+            }
+            else
+            {
+                StudentAge = null;
             }
             if (Student != null)
             {

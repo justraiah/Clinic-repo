@@ -15,7 +15,7 @@ namespace Capstone_Clinic.Models
         public string FullName { get; set; } = "";
         
         [DataType(DataType.Date)]
-        public DateTime DateOfBirth { get; set; }
+        public DateTime? DateOfBirth { get; set; }
 
         public string Course { get; set; } = "";
 

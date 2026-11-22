@@ -66,9 +66,12 @@ public class CreateModel : PageModel
             return NotFound();
         }
 
-        StudentAge = DateTime.Today.Year - Student.DateOfBirth.Year;
+        StudentAge = Student.DateOfBirth.HasValue
+        ? DateTime.Today.Year - Student.DateOfBirth.Value.Year
+        : null;
 
-        if (Student.DateOfBirth.Date > DateTime.Today.AddYears(-StudentAge))
+        if (Student.DateOfBirth.HasValue &&
+            Student.DateOfBirth.Value.Date > DateTime.Today.AddYears(-StudentAge!.Value))
         {
             StudentAge--;
         }
@@ -86,7 +89,7 @@ public class CreateModel : PageModel
 
     public Capstone_Clinic.Models.Student? Student { get; set; }
 
-    public int StudentAge { get; set; }
+    public int? StudentAge { get; set; }
     [BindProperty]
     public string? CommunityPatientType { get; set; }
 
@@ -199,9 +202,12 @@ public class CreateModel : PageModel
 
                 if (Student != null)
                 {
-                    StudentAge = DateTime.Today.Year - Student.DateOfBirth.Year;
+                    StudentAge = Student.DateOfBirth.HasValue
+                    ? DateTime.Today.Year - Student.DateOfBirth.Value.Year
+                    : null;
 
-                    if (Student.DateOfBirth.Date > DateTime.Today.AddYears(-StudentAge))
+                    if (Student.DateOfBirth.HasValue &&
+                        Student.DateOfBirth.Value.Date > DateTime.Today.AddYears(-StudentAge!.Value))
                     {
                         StudentAge--;
                     }

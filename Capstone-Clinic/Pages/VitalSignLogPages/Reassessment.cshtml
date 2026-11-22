@@ -1,0 +1,1042 @@
+﻿
+@page "{id:int}"
+@model Capstone_Clinic.Pages.VitalSignLogPages.ReassessmentModel
+
+@{
+    ViewData["Title"] = "Vital Signs Reassessment";
+}
+
+<style>
+    .reassessment-header {
+        margin-bottom: 24px;
+    }
+
+    .reassessment-title {
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: #1e3a5f;
+        margin-bottom: 5px;
+        position: relative;
+        padding-left: 14px;
+    }
+
+    .reassessment-title::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 4px;
+        bottom: 4px;
+        width: 4px;
+        border-radius: 3px;
+        background: #16a34a;
+    }
+
+    .reassessment-subtitle {
+        color: #64748b;
+        font-size: .88rem;
+        margin: 0;
+    }
+
+    .reassessment-panel {
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 18px;
+    }
+
+    .reassessment-panel-header {
+        padding: 16px 20px;
+        background: #fbfcfe;
+        border-bottom: 1px solid #e2e6eb;
+        border-left: 3px solid #16a34a;
+    }
+
+    .reassessment-panel-title {
+        margin: 0;
+        color: #1f2933;
+        font-size: .95rem;
+        font-weight: 600;
+    }
+
+    .reassessment-panel-description {
+        margin: 3px 0 0;
+        color: #94a3b8;
+        font-size: .74rem;
+    }
+
+    .reassessment-panel-body {
+        padding: 20px;
+    }
+
+    .pre-section {
+        border-top: 3px solid #64748b;
+    }
+
+    .post-section {
+        border-top: 3px solid #16a34a;
+    }
+
+    .reassessment-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    }
+
+    .iot-vitals-section {
+        border: 1px solid #bbdfc6;
+        background: #f4faf5;
+        border-radius: 10px;
+        padding: 18px;
+        margin-bottom: 22px;
+    }
+
+    .iot-vitals-header {
+        color: #166534;
+        font-size: .9rem;
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .iot-vitals-description {
+        font-size: .75rem;
+        color: #64748b;
+        margin-bottom: 16px;
+    }
+
+    .iot-vitals-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+    }
+
+    .iot-vital-field {
+        padding: 16px;
+        border: 1px solid #cfe5d4;
+        background: #ffffff;
+        border-radius: 8px;
+    }
+
+    .iot-vital-field label {
+        color: #166534;
+        font-size: .8rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+
+    .iot-vital-field .form-control {
+        font-size: .95rem;
+        border-color: #cfe5d4;
+    }
+
+    .iot-vital-field .form-control:focus {
+        border-color: #16a34a;
+        box-shadow: 0 0 0 .15rem rgba(22, 163, 74, .10);
+    }
+
+    .manual-vitals-header {
+        font-size: .88rem;
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 12px;
+    }
+
+    @@media (max-width: 767.98px) {
+        .reassessment-grid,
+        .iot-vitals-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .reassessment-field {
+        padding: 15px;
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 7px;
+    }
+
+    .reassessment-field label {
+        color: #475569;
+        font-size: .76rem;
+        font-weight: 600;
+        margin-bottom: 7px;
+    }
+
+    .reassessment-field .form-control {
+        font-size: .82rem;
+        border-color: #d8dee6;
+    }
+
+    .reassessment-field .form-control:focus {
+        border-color: #16a34a;
+        box-shadow: 0 0 0 .15rem rgba(22, 163, 74, .10);
+    }
+
+    .pre-field .form-control {
+        background: #f1f5f9;
+    }
+
+    .sensor-note {
+        color: #64748b;
+        font-size: .74rem;
+        margin-bottom: 14px;
+    }
+
+    .sensor-action {
+        margin-top: 14px;
+    }
+
+    .sensor-action .btn {
+        font-size: .78rem;
+    }
+
+    .sensor-loading {
+        border: 1px solid #bfdbfe;
+        background: #eff6ff;
+        color: #1e40af;
+        font-size: .76rem;
+    }
+
+    .measurement-monitor {
+        margin-top: 18px;
+        padding: 16px;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        background: #f8fafc;
+    }
+
+    .measurement-progress-track {
+        height: 8px;
+        background: #e2e8f0;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .measurement-progress-fill {
+        height: 100%;
+        width: 0%;
+        background: #16a34a;
+        transition: width .3s ease;
+    }
+
+    .measurement-window {
+        display: grid;
+        grid-template-columns: 75px 1fr 110px;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 0;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: .78rem;
+    }
+
+    .measurement-window:last-child {
+        border-bottom: none;
+    }
+
+    .window-accepted {
+        color: #16a34a;
+        font-weight: 600;
+    }
+
+    .window-rejected {
+        color: #dc2626;
+        font-weight: 600;
+    }
+
+    .window-pending {
+        color: #94a3b8;
+    }
+
+    .reassessment-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 20px;
+    }
+
+    .reassessment-actions .btn {
+        font-size: .75rem;
+    }
+
+    @@media (max-width: 767.98px) {
+        .reassessment-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .reassessment-actions .btn {
+            width: 100%;
+        }
+
+        .measurement-window {
+            grid-template-columns: 65px 1fr 85px;
+            font-size: .72rem;
+        }
+    }
+</style>
+
+<div class="container mt-3">
+
+    <!-- Header -->
+    <div class="reassessment-header">
+        <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
+            <div>
+                <h1 class="reassessment-title">
+                    Vital Signs Reassessment
+                </h1>
+
+                <p class="reassessment-subtitle">
+                    Review the initial readings and record the patient's post-rest reassessment.
+                </p>
+            </div>
+
+            <a asp-page="./Index"
+               asp-route-medicalRecordId="@Model.MedicalRecordId"
+               class="btn btn-outline-secondary">
+                Back to Vital Signs History
+            </a>
+        </div>
+    </div>
+
+    <div class="alert alert-info">
+        <strong>Reassessment:</strong> This updates the original vital-sign consultation.
+        It does not create a new consultation record.
+    </div>
+
+    <form method="post">
+
+        <input type="hidden" asp-for="VitalSignLogId" />
+        <input type="hidden" asp-for="MedicalRecordId" />
+
+        <div asp-validation-summary="ModelOnly"
+             class="text-danger mb-3">
+        </div>
+
+        <!-- Initial / Pre Readings -->
+        <div class="reassessment-panel pre-section">
+
+            <div class="reassessment-panel-header">
+                <h2 class="reassessment-panel-title">
+                    Initial Vital Signs (Pre) — Read-only
+                </h2>
+
+                <p class="reassessment-panel-description">
+                    Original readings recorded before consultation.
+                </p>
+            </div>
+
+            <div class="reassessment-panel-body">
+                <div class="reassessment-grid">
+
+                    <div class="reassessment-field pre-field">
+                        <label class="form-label">Temperature</label>
+                        <input class="form-control"
+                               value="@Model.Temperature.ToString("F1") °C"
+                               readonly />
+                    </div>
+
+                    <div class="reassessment-field pre-field">
+                        <label class="form-label">Pulse Rate</label>
+                        <input class="form-control"
+                               value="@Model.HeartRate BPM"
+                               readonly />
+                    </div>
+
+                    <div class="reassessment-field pre-field">
+                        <label class="form-label">Respiratory Rate</label>
+                        <input class="form-control"
+                               value="@Model.RespiratoryRate breaths/min"
+                               readonly />
+                    </div>
+
+                    <div class="reassessment-field pre-field">
+                        <label class="form-label">SpO₂</label>
+                        <input class="form-control"
+                               value="@Model.OxygenSaturation%"
+                               readonly />
+                    </div>
+
+                    <div class="reassessment-field pre-field">
+                        <label class="form-label">Blood Pressure</label>
+                        <input class="form-control"
+                               value="@Model.SystolicBP/@Model.DiastolicBP mmHg"
+                               readonly />
+                    </div>
+
+                    <div class="reassessment-field pre-field">
+                        <label class="form-label">Initial Recorded</label>
+                        <input class="form-control"
+                               value="@Model.RecordedAt.ToString("MMM dd, yyyy hh:mm tt")"
+                               readonly />
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Post Readings -->
+        <div class="reassessment-panel post-section">
+
+            <div class="reassessment-panel-header">
+                <h2 class="reassessment-panel-title">
+                    Post-Rest Reassessment
+                </h2>
+
+                <p class="reassessment-panel-description">
+                    Record the patient's updated readings after resting.
+                </p>
+            </div>
+
+            <div class="reassessment-panel-body">
+
+                <p class="sensor-note">
+                    Use the ESP32 MAX30102 sensor to read Pulse Rate and SpO₂.
+                    The remaining vital signs are entered manually. Sensor readings can still be edited before saving.
+
+                <!-- Sensor -->
+                <div class="mb-3">
+
+                    <div class="sensor-action">
+                        <button type="button"
+                                class="btn btn-success"
+                                id="readSensorBtn">
+                            Read Post-Rest Pulse Rate &amp; SpO₂
+                        </button>
+                    </div>
+
+                    <div id="sensorLoading"
+                         class="alert sensor-loading mt-3 d-none">
+
+                        <div class="d-flex align-items-center">
+
+                            <div class="spinner-border spinner-border-sm me-2"
+                                 role="status">
+                            </div>
+
+                            <div>
+                                <strong id="sensorLoadingTitle">Reading sensor...</strong><br />
+                                <span id="sensorLoadingDetail">
+                                    Please keep your finger on the sensor.
+                                </span>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Live Measurement Modal -->
+                <div class="modal fade"
+                     id="measurementModal"
+                     tabindex="-1"
+                     aria-labelledby="measurementModalTitle"
+                     aria-hidden="true"
+                     data-bs-backdrop="static"
+                     data-bs-keyboard="false">
+
+                    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+
+                        <div class="modal-content">
+
+                            <div class="modal-header">
+                                <div>
+                                    <h5 class="modal-title" id="measurementModalTitle">
+                                        Live Sensor Measurement
+                                    </h5>
+
+                                    <small class="text-muted">
+                                        Keep your finger still on the sensor.
+                                    </small>
+                                </div>
+                            </div>
+
+                            <div class="modal-body">
+
+                                <div id="measurementMonitor"
+                                     class="measurement-monitor">
+
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <strong class="small">Measurement Progress</strong>
+
+                                        <span id="measurementProgressCount"
+                                              class="small text-muted">
+                                            0 / 8 windows
+                                        </span>
+                                    </div>
+
+                                    <div class="measurement-progress-track mb-3">
+                                        <div id="measurementProgressBar"
+                                             class="measurement-progress-fill">
+                                        </div>
+                                    </div>
+
+                                    <div class="d-flex justify-content-between small mb-2">
+                                        <span class="text-success" id="acceptedCount">
+                                            Accepted: 0
+                                        </span>
+
+                                        <span class="text-danger" id="rejectedCount">
+                                            Rejected: 0
+                                        </span>
+                                    </div>
+
+                                    <div id="measurementProgressRows"></div>
+
+                                    <div id="measurementFinalResult"
+                                         class="alert alert-success mt-3 mb-0 d-none">
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            <div class="modal-footer">
+                                <button type="button"
+                                        class="btn btn-success"
+                                        id="useSensorReadingBtn"
+                                        disabled>
+                                    Use This Reading
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <hr />
+
+                    <!-- IoT Vital Signs -->
+                    <div class="iot-vitals-section">
+
+                        <h3 class="iot-vitals-header">
+                            IoT Vital Signs
+                        </h3>
+
+                        <p class="iot-vitals-description">
+                            Pulse Rate and oxygen saturation readings from the MAX30102 sensor.
+                            You may also manually edit these values.
+                        </p>
+
+                        <div class="iot-vitals-grid">
+
+                            <!-- Pulse Rate -->
+                            <div class="iot-vital-field">
+
+                                <label asp-for="PostHeartRate" class="form-label">
+                                    Pulse Rate (BPM)
+                                </label>
+
+                                <input asp-for="PostHeartRate"
+                                       type="number"
+                                       min="1"
+                                       max="300"
+                                       class="form-control"
+                                       placeholder="e.g. 75" />
+
+                                <span asp-validation-for="PostHeartRate"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+                            <!-- SpO2 -->
+                            <div class="iot-vital-field">
+
+                                <label asp-for="PostOxygenSaturation" class="form-label">
+                                    SpO₂ (%)
+                                </label>
+
+                                <input asp-for="PostOxygenSaturation"
+                                       type="number"
+                                       min="1"
+                                       max="100"
+                                       class="form-control"
+                                       placeholder="e.g. 98" />
+
+                                <span asp-validation-for="PostOxygenSaturation"
+                                      class="text-danger small">
+                                </span>
+
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                    <!-- Manual Vital Signs -->
+                    <h3 class="manual-vitals-header">
+                        Other Reassessment Vital Signs
+                    </h3>
+
+                    <div class="reassessment-grid">
+
+                        <!-- Temperature -->
+                        <div class="reassessment-field">
+
+                            <label asp-for="PostTemperature" class="form-label">
+                                Temperature (°C)
+                            </label>
+
+                            <input asp-for="PostTemperature"
+                                   type="number"
+                                   step="0.1"
+                                   class="form-control"
+                                   placeholder="e.g. 36.5" />
+
+                            <span asp-validation-for="PostTemperature"
+                                  class="text-danger small">
+                            </span>
+
+                        </div>
+
+                        <!-- Respiratory Rate -->
+                        <div class="reassessment-field">
+
+                            <label asp-for="PostRespiratoryRate" class="form-label">
+                                Respiratory Rate (breaths/min)
+                            </label>
+
+                            <input asp-for="PostRespiratoryRate"
+                                   type="number"
+                                   min="1"
+                                   max="100"
+                                   class="form-control"
+                                   placeholder="e.g. 16" />
+
+                            <span asp-validation-for="PostRespiratoryRate"
+                                  class="text-danger small">
+                            </span>
+
+                        </div>
+
+                        <!-- Systolic BP -->
+                        <div class="reassessment-field">
+
+                            <label asp-for="PostSystolicBP" class="form-label">
+                                Systolic BP (mmHg)
+                            </label>
+
+                            <input asp-for="PostSystolicBP"
+                                   type="number"
+                                   min="20"
+                                   max="300"
+                                   class="form-control"
+                                   placeholder="e.g. 120" />
+
+                            <span asp-validation-for="PostSystolicBP"
+                                  class="text-danger small">
+                            </span>
+
+                        </div>
+
+                        <!-- Diastolic BP -->
+                        <div class="reassessment-field">
+
+                            <label asp-for="PostDiastolicBP" class="form-label">
+                                Diastolic BP (mmHg)
+                            </label>
+
+                            <input asp-for="PostDiastolicBP"
+                                   type="number"
+                                   min="20"
+                                   max="200"
+                                   class="form-control"
+                                   placeholder="e.g. 80" />
+
+                            <span asp-validation-for="PostDiastolicBP"
+                                  class="text-danger small">
+                            </span>
+
+                        </div>
+
+                    </div>
+
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="reassessment-actions mb-4">
+
+            <button type="submit"
+                    class="btn btn-success px-4">
+                Save Reassessment
+            </button>
+
+            <a asp-page="./Index"
+               asp-route-medicalRecordId="@Model.MedicalRecordId"
+               class="btn btn-outline-secondary">
+                Cancel
+            </a>
+
+        </div>
+
+    </form>
+
+</div>
+
+@section Scripts {
+
+    <partial name="_ValidationScriptsPartial" />
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+
+        const sensorButton = document.getElementById("readSensorBtn");
+        const sensorLoading = document.getElementById("sensorLoading");
+        const loadingTitle = document.getElementById("sensorLoadingTitle");
+        const loadingDetail = document.getElementById("sensorLoadingDetail");
+
+        // Existing backend property is HeartRate, but UI terminology is Pulse Rate
+        const pulseRateInput = document.getElementById("PostHeartRate");
+        const spo2Input = document.getElementById("PostOxygenSaturation");
+
+        const measurementMonitor = document.getElementById("measurementMonitor");
+        const progressBar = document.getElementById("measurementProgressBar");
+        const progressCount = document.getElementById("measurementProgressCount");
+        const progressRows = document.getElementById("measurementProgressRows");
+        const acceptedCount = document.getElementById("acceptedCount");
+        const rejectedCount = document.getElementById("rejectedCount");
+        const finalResult = document.getElementById("measurementFinalResult");
+
+        const measurementModalElement = document.getElementById("measurementModal");
+
+        const measurementModal = measurementModalElement
+            ? bootstrap.Modal.getOrCreateInstance(measurementModalElement)
+            : null;
+
+        const useSensorReadingBtn = document.getElementById("useSensorReadingBtn");
+        const loadingSpinner = sensorLoading?.querySelector(".spinner-border");
+
+        let completedReading = null;
+
+        if (!sensorButton) return;
+
+        function setLoading(title, detail) {
+            if (loadingTitle) loadingTitle.textContent = title;
+            if (loadingDetail) loadingDetail.textContent = detail;
+
+            sensorLoading?.classList.remove("d-none");
+        }
+
+        function resetSensorButton() {
+            sensorButton.disabled = false;
+            sensorButton.textContent = "Read Post-Rest Pulse Rate & SpO₂";
+        }
+
+        function showSensorError(message) {
+            measurementModal?.hide();
+
+            sensorLoading?.classList.remove("d-none");
+            sensorLoading?.classList.remove("alert-success");
+            sensorLoading?.classList.add("alert-warning");
+
+            loadingSpinner?.classList.add("d-none");
+
+            setLoading("Sensor reading failed.", message);
+
+            resetSensorButton();
+
+            window.alert(message);
+        }
+
+        async function readJson(response) {
+            try {
+                return await response.json();
+            } catch {
+                return null;
+            }
+        }
+
+        // Apply the accepted IoT reading to the two isolated fields
+        useSensorReadingBtn?.addEventListener("click", function () {
+
+            if (!completedReading) return;
+
+            if (pulseRateInput) {
+                pulseRateInput.value = completedReading.heartRate;
+            }
+
+            if (spo2Input) {
+                spo2Input.value = completedReading.spo2;
+            }
+
+            measurementModal?.hide();
+
+            resetSensorButton();
+
+            loadingSpinner?.classList.add("d-none");
+
+            sensorLoading?.classList.remove("alert-warning");
+            sensorLoading?.classList.add("alert-success");
+
+            setLoading(
+                "Sensor reading received.",
+                completedReading.heartRate +
+                " BPM Pulse Rate, SpO₂ " +
+                completedReading.spo2 +
+                "%. You can edit these values or continue entering the other readings."
+            );
+        });
+
+        function renderMeasurementProgress(data) {
+
+            if (!data || !Array.isArray(data.updates)) return;
+
+            measurementMonitor?.classList.remove("d-none");
+
+            const updates = data.updates;
+
+            const total = updates.length > 0
+                ? updates[0].totalWindows
+                : 8;
+
+            const completed = updates.length;
+            const accepted = updates.filter(x => x.accepted).length;
+            const rejected = updates.filter(x => !x.accepted).length;
+
+            if (progressCount) {
+                progressCount.textContent = `${completed} / ${total} windows`;
+            }
+
+            if (progressBar) {
+                progressBar.style.width =
+                    `${Math.min(100, completed / total * 100)}%`;
+            }
+
+            if (acceptedCount) {
+                acceptedCount.textContent = `Accepted: ${accepted}`;
+            }
+
+            if (rejectedCount) {
+                rejectedCount.textContent = `Rejected: ${rejected}`;
+            }
+
+            if (!progressRows) return;
+
+            progressRows.replaceChildren();
+
+            for (let i = 1; i <= total; i++) {
+
+                const reading = updates.find(x => x.windowNumber === i);
+
+                const row = document.createElement("div");
+                row.className = "measurement-window";
+
+                const windowLabel = document.createElement("strong");
+                windowLabel.textContent = `Window ${i}`;
+
+                const values = document.createElement("span");
+                const status = document.createElement("span");
+
+                if (!reading) {
+
+                    values.textContent = "Awaiting actual reading...";
+                    status.textContent = "Pending";
+                    status.className = "window-pending";
+
+                } else {
+
+                    const pulseRate = reading.validHeartRate
+                        ? `${reading.heartRate} BPM`
+                        : "Invalid Pulse Rate";
+
+                    const spo2 = reading.validSpO2
+                        ? `${reading.spo2}%`
+                        : "Invalid SpO₂";
+
+                    values.textContent = `${pulseRate} · ${spo2}`;
+
+                    status.textContent = reading.accepted
+                        ? "Accepted"
+                        : "Rejected";
+
+                    status.className = reading.accepted
+                        ? "window-accepted"
+                        : "window-rejected";
+
+                    row.title = reading.message || "";
+                }
+
+                row.append(windowLabel, values, status);
+                progressRows.appendChild(row);
+            }
+        }
+
+        async function refreshMeasurementProgress(requestId) {
+
+            try {
+
+                const response = await fetch(
+                    `/api/iot/vital-signs/requests/${requestId}/progress`,
+                    {
+                        headers: {
+                            "Accept": "application/json"
+                        }
+                    }
+                );
+
+                if (!response.ok) {
+                    console.warn("Progress polling failed:", response.status);
+                    return;
+                }
+
+                const data = await readJson(response);
+                renderMeasurementProgress(data);
+
+            } catch (error) {
+
+                console.warn("Could not retrieve measurement progress:", error);
+            }
+        }
+
+        // Start sensor measurement
+        sensorButton.addEventListener("click", async function () {
+
+            sensorButton.disabled = true;
+            sensorButton.textContent = "Reading Sensor...";
+
+            completedReading = null;
+
+            if (useSensorReadingBtn) {
+                useSensorReadingBtn.disabled = true;
+            }
+
+            finalResult?.classList.add("d-none");
+
+            sensorLoading?.classList.remove("alert-warning");
+            sensorLoading?.classList.remove("alert-success");
+
+            loadingSpinner?.classList.remove("d-none");
+            sensorLoading?.classList.add("d-none");
+
+            renderMeasurementProgress({
+                updates: []
+            });
+
+            measurementModal?.show();
+
+            setLoading(
+                "Requesting a measurement...",
+                "The clinic sensor will pick this up on its next poll."
+            );
+
+            let requestId = "";
+
+            try {
+
+                const created = await fetch(
+                    "/api/iot/vital-signs/requests",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Accept": "application/json"
+                        }
+                    }
+                );
+
+                const createdBody = await readJson(created);
+
+                if (!created.ok || !createdBody?.requestId) {
+
+                    showSensorError(
+                        "The CMS could not create a sensor request. Sign in again and retry."
+                    );
+
+                    return;
+                }
+
+                requestId = createdBody.requestId;
+
+            } catch {
+
+                showSensorError(
+                    "The CMS could not be reached. Check that this page is the live site, then retry."
+                );
+
+                return;
+            }
+
+            setLoading(
+                "Reading sensor...",
+                "Keep a finger still on the MAX30102 until the values appear."
+            );
+
+            const deadline = Date.now() + 150000;
+
+            while (Date.now() < deadline) {
+
+                await new Promise(function (resolve) {
+                    setTimeout(resolve, 2000);
+                });
+
+                await refreshMeasurementProgress(requestId);
+
+                try {
+
+                    const readingResponse = await fetch(
+                        "/api/iot/vital-signs/requests/" + requestId + "/reading",
+                        {
+                            headers: {
+                                "Accept": "application/json"
+                            }
+                        }
+                    );
+
+                    const reading = await readJson(readingResponse);
+
+                    if (readingResponse.status === 200 && reading?.success) {
+
+                        completedReading = reading;
+
+                        await refreshMeasurementProgress(requestId);
+
+                        if (finalResult) {
+                            finalResult.textContent =
+                                `Final Average: Pulse Rate ${reading.heartRate} BPM · SpO₂ ${reading.spo2}%`;
+
+                            finalResult.classList.remove("d-none");
+                        }
+
+                        if (useSensorReadingBtn) {
+                            useSensorReadingBtn.disabled = false;
+                        }
+
+                        return;
+                    }
+
+                    if (readingResponse.status === 409) {
+
+                        showSensorError(
+                            reading?.message || "The sensor did not return a usable reading."
+                        );
+
+                        return;
+                    }
+
+                    if (readingResponse.status === 401) {
+
+                        showSensorError(
+                            "Your CMS session expired. Sign in again, then retry the reading."
+                        );
+
+                        return;
+                    }
+
+                } catch {
+
+                    showSensorError(
+                        "Lost contact with the CMS while waiting for the sensor."
+                    );
+
+                    return;
+                }
+            }
+
+            showSensorError(
+                "The sensor did not return a reading in time. Confirm it is powered, on Wi-Fi, and pointed at this live CMS, then retry."
+            );
+
+        });
+
+    });
+</script>
+}

@@ -520,7 +520,9 @@
                     </div>
 
                     <div class="info-value">
-                        @Model.StudentAge years old
+                        @(Model.StudentAge.HasValue
+                            ? $"{Model.StudentAge} years old"
+                            : "Age not provided")
                     </div>
 
                 </div>
@@ -533,7 +535,9 @@
                     </div>
 
                     <div class="info-value">
-                        @Model.Student.DateOfBirth.ToString("MMMM dd, yyyy")
+                        @(Model.Student.DateOfBirth.HasValue
+                            ? Model.Student.DateOfBirth.Value.ToString("MMMM dd, yyyy")
+                            : "Not provided")
                     </div>
 
                 </div>

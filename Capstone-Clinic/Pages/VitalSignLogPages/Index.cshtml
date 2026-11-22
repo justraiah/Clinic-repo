@@ -670,12 +670,18 @@ else
                                 <td>
 
                                     <div class="action-group">
-
                                         <a class="btn btn-sm btn-outline-primary"
                                            asp-page="./Details"
                                            asp-route-id="@item.VitalSignLogId"
                                            asp-route-medicalRecordId="@Model.MedicalRecordId">
                                             View
+                                        </a>
+
+                                        <a class="btn btn-sm btn-outline-success"
+                                           asp-page="./Reassessment"
+                                           asp-route-id="@item.VitalSignLogId"
+                                           asp-route-medicalRecordId="@Model.MedicalRecordId">
+                                            Reassess
                                         </a>
 
                                         <a class="btn btn-sm btn-outline-secondary"

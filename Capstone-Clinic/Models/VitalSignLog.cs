@@ -29,9 +29,30 @@ namespace Capstone_Clinic.Models
 
         [Range(20, 200)]
         public int DiastolicBP { get; set; }
+
+        // Post-consultation measurements
+        [Range(20.0, 50.0)]
+        public double? PostTemperature { get; set; }
+
+        [Range(1, 300)]
+        public int? PostHeartRate { get; set; }
+
+        public int? PostRespiratoryRate { get; set; }
+
+        [Range(1, 100)]
+        public int? PostOxygenSaturation { get; set; }
+
+        [Range(20, 300)]
+        public int? PostSystolicBP { get; set; }
+
+        [Range(20, 200)]
+        public int? PostDiastolicBP { get; set; }
+
         public string VisitReason { get; set; } = "";
 
         public DateTime RecordedAt { get; set; }
+
+        public string MeasurementStage { get; set; } = "Pre";
 
         public int StaffId { get; set; }
         public string Status { get; set; } = "Normal";

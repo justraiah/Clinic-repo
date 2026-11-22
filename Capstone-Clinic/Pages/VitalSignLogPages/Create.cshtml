@@ -412,7 +412,6 @@
          class="text-danger mb-3">
     </div>
 
-
     <!-- Sensor Readings -->
 
     <div class="form-panel sensor-section">
@@ -420,11 +419,11 @@
         <div class="form-panel-header">
 
             <h2 class="form-panel-title">
-                Sensor Readings
+                Pre-Consultation — Sensor Readings
             </h2>
 
             <p class="form-panel-description">
-                Pulse rate and oxygen saturation are requested from the clinic sensor through the live CMS.
+                Initial pulse rate and oxygen saturation readings before consultation.
             </p>
 
         </div>
@@ -595,8 +594,6 @@
 
     </div>
 
-
-    <!-- Manual Measurements -->
     <!-- Manual Measurements -->
 
     <div class="form-panel manual-section">
@@ -604,11 +601,11 @@
         <div class="form-panel-header">
 
             <h2 class="form-panel-title">
-                Manual Measurements
+                Pre-Consultation — Manual Measurements
             </h2>
 
             <p class="form-panel-description">
-                Enter the remaining measurements and consultation information.
+                Record the patient's initial temperature, respiratory rate, blood pressure, and visit reason.
             </p>
 
         </div>
@@ -714,7 +711,6 @@
         </div>
 
     </div>
-
 
     <!-- Hidden Staff -->
 
@@ -826,7 +822,7 @@
             setLoading(
                 "Sensor reading received.",
                 completedReading.heartRate +
-                " BPM, SpO₂ " +
+                " BPM Pulse Rate, SpO₂ " +
                 completedReading.spo2 +
                 "%. Review the form, then save."
             );
@@ -886,7 +882,7 @@
         } else {
             const hr = reading.validHeartRate
                 ? `${reading.heartRate} BPM`
-                : "Invalid PR";
+                : "Invalid Pulse Rate";
 
             const spo2 = reading.validSpO2
                 ? `${reading.spo2}%`
@@ -1001,7 +997,7 @@
                         await refreshMeasurementProgress(requestId);
 
                         finalResult.textContent =
-                            `Final Average: ${reading.heartRate} BPM · SpO₂ ${reading.spo2}%`;
+                            `Final Average: Pulse Rate ${reading.heartRate} BPM · SpO₂ ${reading.spo2}%`;
 
                         finalResult.classList.remove("d-none");
 

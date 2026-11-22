@@ -361,7 +361,7 @@ namespace Capstone_Clinic.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("DateOfBirth")
+                    b.Property<DateTime?>("DateOfBirth")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("FullName")
@@ -446,11 +446,33 @@ namespace Capstone_Clinic.Migrations
                     b.Property<int>("HeartRate")
                         .HasColumnType("int");
 
+                    b.Property<string>("MeasurementStage")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("MedicalRecordId")
                         .HasColumnType("int");
 
                     b.Property<int>("OxygenSaturation")
                         .HasColumnType("int");
+
+                    b.Property<int?>("PostDiastolicBP")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PostHeartRate")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PostOxygenSaturation")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PostRespiratoryRate")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("PostSystolicBP")
+                        .HasColumnType("int");
+
+                    b.Property<double?>("PostTemperature")
+                        .HasColumnType("float");
 
                     b.Property<DateTime>("RecordedAt")
                         .HasColumnType("datetime2");

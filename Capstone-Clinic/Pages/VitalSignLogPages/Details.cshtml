@@ -231,6 +231,47 @@
             width: 100%;
         }
     }
+        .vital-comparison-section {
+        margin-bottom: 22px;
+    }
+
+    .vital-comparison-heading {
+        font-size: .9rem;
+        font-weight: 600;
+        color: #334155;
+        margin-bottom: 12px;
+    }
+
+    .vital-comparison-grid {
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 12px;
+    }
+
+    .pre-card {
+        border-top-color: #2563eb;
+    }
+
+    .post-card {
+        border-top-color: #16a34a;
+        background: #f8fffb;
+    }
+
+    .post-section-header {
+        border-left-color: #16a34a;
+    }
+
+    @@media (max-width: 767.98px) {
+        .vital-comparison-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    .measurement-change {
+        margin-top: 8px;
+        font-size: .72rem;
+        color: #64748b;
+        font-weight: 500;
+    }
 </style>
 
 
@@ -356,91 +397,171 @@
 
 </div>
 
-
 <!-- Vital Measurements -->
+
+@{
+    var vital = Model.VitalSignLog;
+
+    var hasPost = vital.PostTemperature.HasValue
+        || vital.PostHeartRate.HasValue
+        || vital.PostRespiratoryRate.HasValue
+        || vital.PostOxygenSaturation.HasValue
+        || vital.PostSystolicBP.HasValue
+        || vital.PostDiastolicBP.HasValue;
+}
 
 <div class="details-panel">
 
     <div class="details-panel-header">
-
-        <h2 class="details-panel-title">
-            Vital Measurements
-        </h2>
-
+        <h2 class="details-panel-title">Vital Measurements</h2>
         <p class="details-panel-description">
-            Recorded physiological measurements for this visit.
+            Initial measurements and post-rest reassessment for this visit.
         </p>
-
     </div>
 
     <div class="details-panel-body">
 
-        <div class="measurement-grid">
+        <!-- PRE -->
+        <div class="vital-comparison-section">
 
-            <div class="measurement-card">
+            <h3 class="vital-comparison-heading">
+                Initial Vital Signs (Pre)
+            </h3>
 
-                <div class="measurement-label">
-                    Temperature
+            <div class="vital-comparison-grid">
+
+                <div class="measurement-card pre-card">
+                    <div class="measurement-label">Temperature</div>
+                    <div class="measurement-value">
+                        @($"{vital.Temperature:F1} °C")
+                    </div>
                 </div>
 
-                <div class="measurement-value">
-                    @($"{Model.VitalSignLog.Temperature:F1} °C")
+                <div class="measurement-card pre-card">
+                    <div class="measurement-label">Pulse Rate</div>
+                    <div class="measurement-value">
+                        @($"{vital.HeartRate} BPM")
+                    </div>
                 </div>
 
-            </div>
-
-            <div class="measurement-card">
-
-                <div class="measurement-label">
-                    Pulse Rate
+                <div class="measurement-card pre-card">
+                    <div class="measurement-label">Respiratory Rate</div>
+                    <div class="measurement-value">
+                        @($"{vital.RespiratoryRate} breaths/min")
+                    </div>
                 </div>
 
-                <div class="measurement-value">
-                    @($"{Model.VitalSignLog.HeartRate} BPM")
+                <div class="measurement-card pre-card">
+                    <div class="measurement-label">SpO₂</div>
+                    <div class="measurement-value">
+                        @($"{vital.OxygenSaturation}%")
+                    </div>
                 </div>
 
-            </div>
-
-            <div class="measurement-card">
-
-                <div class="measurement-label">
-                    Respiratory Rate
-                </div>
-
-                <div class="measurement-value">
-                    @($"{Model.VitalSignLog.RespiratoryRate} breaths/min")
-                </div>
-
-            </div>
-
-            <div class="measurement-card">
-
-                <div class="measurement-label">
-                    SpO₂
-                </div>
-
-                <div class="measurement-value">
-                    @($"{Model.VitalSignLog.OxygenSaturation}%")
+                <div class="measurement-card pre-card">
+                    <div class="measurement-label">Blood Pressure</div>
+                    <div class="measurement-value">
+                        @($"{vital.SystolicBP}/{vital.DiastolicBP} mmHg")
+                    </div>
                 </div>
 
             </div>
-
-            <div class="measurement-card">
-
-                <div class="measurement-label">
-                    Blood Pressure
-                </div>
-
-                <div class="measurement-value">
-                    @($"{Model.VitalSignLog.SystolicBP}/{Model.VitalSignLog.DiastolicBP} mmHg")
-                </div>
-
-            </div>
-
         </div>
 
-    </div>
+        <!-- POST -->
+        @if (hasPost)
+        {
+            <div class="vital-comparison-section">
 
+                <h3 class="vital-comparison-heading">
+                    Post-Rest Reassessment (Post)
+                </h3>
+
+                <div class="vital-comparison-grid">
+
+                    <div class="measurement-card post-card">
+                        <div class="measurement-label">Temperature</div>
+                        <div class="measurement-value">
+                            @(vital.PostTemperature.HasValue
+                                ? $"{vital.PostTemperature.Value:F1} °C"
+                                : "—")
+                        </div>
+                        <div class="measurement-change">
+                        @(vital.PostTemperature.HasValue
+                            ? $"Change: {vital.PostTemperature.Value - vital.Temperature:+0.0;-0.0;0.0} °C"
+                            : "Change: —")
+                        </div>
+                    </div>
+
+                    <div class="measurement-card post-card">
+                        <div class="measurement-label">Pulse Rate</div>
+                        <div class="measurement-value">
+                            @(vital.PostHeartRate.HasValue
+                                ? $"{vital.PostHeartRate} BPM"
+                                : "—")
+                        </div>
+                        <div class="measurement-change">
+                        @(vital.PostHeartRate.HasValue
+                            ? $"Change: {vital.PostHeartRate.Value - vital.HeartRate:+0.0;-0.0;0.0} BPM"
+                            : "Change: —")
+                        </div>
+                    </div>
+
+                    <div class="measurement-card post-card">
+                        <div class="measurement-label">Respiratory Rate</div>
+                        <div class="measurement-value">
+                            @(vital.PostRespiratoryRate.HasValue
+                                ? $"{vital.PostRespiratoryRate} breaths/min"
+                                : "—")
+                        </div>
+                        <div class="measurement-change">
+                        @(vital.PostRespiratoryRate.HasValue
+                            ? $"Change: {vital.PostRespiratoryRate.Value - vital.RespiratoryRate:+0.0;-0.0;0.0} breaths/min"
+                            : "Change: —")
+                        </div>
+                    </div>
+
+                    <div class="measurement-card post-card">
+                        <div class="measurement-label">SpO₂</div>
+                        <div class="measurement-value">
+                            @(vital.PostOxygenSaturation.HasValue
+                                ? $"{vital.PostOxygenSaturation}%"
+                                : "—")
+                        </div>
+                        <div class="measurement-change">
+                        @(vital.PostOxygenSaturation.HasValue
+                            ? $"Change: {vital.PostOxygenSaturation.Value - vital.OxygenSaturation:+0.0;-0.0;0.0}%"
+                            : "Change: —")
+                        </div>
+                    </div>
+
+                    <div class="measurement-card post-card">
+                        <div class="measurement-label">Blood Pressure</div>
+                        <div class="measurement-value">
+                            @(vital.PostSystolicBP.HasValue && vital.PostDiastolicBP.HasValue
+                                ? $"{vital.PostSystolicBP}/{vital.PostDiastolicBP} mmHg"
+                                : "—")
+                        </div>
+                        <div class="measurement-change">
+                        @(vital.PostSystolicBP.HasValue && vital.PostDiastolicBP.HasValue
+                            ? $"Change: {vital.PostSystolicBP.Value - vital.SystolicBP:+0.0;-0.0;0.0}/{vital.PostDiastolicBP.Value - vital.DiastolicBP:+0.0;-0.0;0.0} mmHg"
+                            : "Change: —")
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-light border mt-3 mb-0">
+                <span class="text-muted">
+                    No post-rest reassessment has been recorded for this visit yet.
+                </span>
+            </div>
+        }
+
+    </div>
 </div>
 
 
