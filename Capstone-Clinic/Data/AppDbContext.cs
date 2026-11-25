@@ -22,6 +22,7 @@ namespace Capstone_Clinic.Data
         public DbSet<Referral> Referrals { get; set; }
 
         public DbSet<VitalSignLog> VitalSignLogs { get; set; }
+        public DbSet<VitalSignReassessment> VitalSignReassessments { get; set; }
         public DbSet<Alert> Alerts { get; set; }
         public DbSet<Staff> Staffs { get; set; }
         public DbSet<IoTMeasurementRequest> IoTMeasurementRequests { get; set; }
@@ -40,6 +41,12 @@ namespace Capstone_Clinic.Data
                 .HasOne(v => v.MedicalRecord)
                 .WithMany(m => m.VitalSignLogs)
                 .HasForeignKey(v => v.MedicalRecordId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<VitalSignReassessment>()
+                .HasOne(r => r.VitalSignLog)
+                .WithMany()
+                .HasForeignKey(r => r.VitalSignLogId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Alert>()

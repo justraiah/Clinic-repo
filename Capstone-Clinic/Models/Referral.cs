@@ -26,6 +26,6 @@ namespace Capstone_Clinic.Models
         [Required]
         public string Status { get; set; } = "Pending";
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = Capstone_Clinic.Helpers.TimeHelper.Now;
     }
 }

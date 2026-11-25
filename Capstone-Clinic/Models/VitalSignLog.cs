@@ -49,6 +49,9 @@ namespace Capstone_Clinic.Models
         public int? PostDiastolicBP { get; set; }
 
         public string VisitReason { get; set; } = "";
+        public DateTime? TimeIn { get; set; }
+
+        public DateTime? TimeOut { get; set; }
 
         public DateTime RecordedAt { get; set; }
 

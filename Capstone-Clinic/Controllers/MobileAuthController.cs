@@ -151,7 +151,7 @@ public class MobileAuthController : ControllerBase
 
         var hasher = new PasswordHasher<Models.StudentAccount>();
         account.PasswordHash = hasher.HashPassword(account, "Test123!");
-        account.UpdatedAt = DateTime.Now;
+        account.UpdatedAt = Capstone_Clinic.Helpers.TimeHelper.Now;
 
         await _context.SaveChangesAsync();
 

@@ -38,8 +38,8 @@ public class CreateModel : PageModel
             {
                 ClinicPatientId = clinicPatient.ClinicPatientId,
                 VisitDate = DateTime.Today,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now
+                CreatedAt = Capstone_Clinic.Helpers.TimeHelper.Now,
+                UpdatedAt = Capstone_Clinic.Helpers.TimeHelper.Now
             };
 
             return Page();
@@ -51,8 +51,8 @@ public class CreateModel : PageModel
             MedicalRecord = new MedicalRecord
             {
                 VisitDate = DateTime.Today,
-                CreatedAt = DateTime.Now,
-                UpdatedAt = DateTime.Now
+                CreatedAt = Capstone_Clinic.Helpers.TimeHelper.Now,
+                UpdatedAt = Capstone_Clinic.Helpers.TimeHelper.Now
             };
 
             return Page();
@@ -80,8 +80,8 @@ public class CreateModel : PageModel
         {
             StudentId = Student.StudentId,
             VisitDate = DateTime.Today,
-            CreatedAt = DateTime.Now,
-            UpdatedAt = DateTime.Now
+            CreatedAt = Capstone_Clinic.Helpers.TimeHelper.Now,
+            UpdatedAt = Capstone_Clinic.Helpers.TimeHelper.Now
         };
 
         return Page();
@@ -217,8 +217,8 @@ public class CreateModel : PageModel
             return Page();
         }
 
-        MedicalRecord.CreatedAt = DateTime.Now;
-        MedicalRecord.UpdatedAt = DateTime.Now;
+        MedicalRecord.CreatedAt = Capstone_Clinic.Helpers.TimeHelper.Now;
+        MedicalRecord.UpdatedAt = Capstone_Clinic.Helpers.TimeHelper.Now;
 
         _context.MedicalRecords.Add(MedicalRecord);
         await _context.SaveChangesAsync();

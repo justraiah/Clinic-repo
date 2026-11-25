@@ -497,6 +497,12 @@ namespace Capstone_Clinic.Migrations
                     b.Property<double>("Temperature")
                         .HasColumnType("float");
 
+                    b.Property<DateTime?>("TimeIn")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("TimeOut")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("VisitReason")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -508,6 +514,60 @@ namespace Capstone_Clinic.Migrations
                     b.HasIndex("MedicalRecordId");
 
                     b.ToTable("VitalSignLogs");
+                });
+
+            modelBuilder.Entity("Capstone_Clinic.Models.VitalSignReassessment", b =>
+                {
+                    b.Property<int>("VitalSignReassessmentId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("VitalSignReassessmentId"));
+
+                    b.Property<int>("DiastolicBP")
+                        .HasColumnType("int");
+
+                    b.Property<int>("HeartRate")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OxygenSaturation")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ReassessmentNumber")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("RecordedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Remarks")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("RespiratoryRate")
+                        .HasColumnType("int");
+
+                    b.Property<int>("StaffId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SystolicBP")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Temperature")
+                        .HasColumnType("float");
+
+                    b.Property<int>("VitalSignLogId")
+                        .HasColumnType("int");
+
+                    b.HasKey("VitalSignReassessmentId");
+
+                    b.HasIndex("StaffId");
+
+                    b.HasIndex("VitalSignLogId");
+
+                    b.ToTable("VitalSignReassessments");
                 });
 
             modelBuilder.Entity("Capstone_Clinic.Models.Alert", b =>
@@ -612,6 +672,25 @@ namespace Capstone_Clinic.Migrations
                     b.Navigation("ClinicPatient");
 
                     b.Navigation("MedicalRecord");
+                });
+
+            modelBuilder.Entity("Capstone_Clinic.Models.VitalSignReassessment", b =>
+                {
+                    b.HasOne("Capstone_Clinic.Models.Staff", "Staff")
+                        .WithMany()
+                        .HasForeignKey("StaffId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Capstone_Clinic.Models.VitalSignLog", "VitalSignLog")
+                        .WithMany()
+                        .HasForeignKey("VitalSignLogId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Staff");
+
+                    b.Navigation("VitalSignLog");
                 });
 
             modelBuilder.Entity("Capstone_Clinic.Models.MedicalRecord", b =>

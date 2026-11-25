@@ -5,12 +5,12 @@
     ViewData["Title"] = "Medical Record";
 }
 
-    <style>
-        .record-header {
-            margin-bottom: 24px;
-        }
+<style>
+    .record-header {
+        margin-bottom: 24px;
+    }
 
-        .record-title {
+    .record-title {
         font-size: 1.7rem;
         font-weight: 600;
         color: #1e3a5f;
@@ -30,19 +30,19 @@
         background: #2563eb;
     }
 
-        .record-subtitle {
-            color: #64748b;
-            font-size: .88rem;
-            margin: 0;
-        }
+    .record-subtitle {
+        color: #64748b;
+        font-size: .88rem;
+        margin: 0;
+    }
 
-        .record-meta {
-            color: #94a3b8;
-            font-size: .75rem;
-            margin-top: 8px;
-        }
+    .record-meta {
+        color: #94a3b8;
+        font-size: .75rem;
+        margin-top: 8px;
+    }
 
-        .record-panel {
+    .record-panel {
         background: #ffffff;
         border: 1px solid #e2e6eb;
         border-radius: 8px;
@@ -51,7 +51,7 @@
         box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
     }
 
-        .record-panel-header {
+    .record-panel-header {
         padding: 16px 20px;
         border-bottom: 1px solid #e2e6eb;
         background: #fbfcfe;
@@ -83,12 +83,12 @@
     }
 
     .summary-card {
-    background: #ffffff;
-    border: 1px solid #e2e6eb;
-    border-radius: 7px;
-    padding: 17px;
-    border-top: 3px solid #2563eb;
-    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+        background: #ffffff;
+        border: 1px solid #e2e6eb;
+        border-radius: 7px;
+        padding: 17px;
+        border-top: 3px solid #2563eb;
+        box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
     }
 
     .summary-label {
@@ -107,8 +107,9 @@
     .summary-value.critical {
         color: #dc2626;
     }
+
     .summary-card:has(.summary-value.critical) {
-    border-top-color: #dc2626;
+        border-top-color: #dc2626;
     }
 
     .summary-value.warning {
@@ -269,8 +270,12 @@
         font-size: .78rem;
     }
 
-    @@media (max-width: 767.98px) {
+    .reassess-btn {
+        white-space: nowrap;
+        font-size: .72rem;
+    }
 
+    @@media (max-width: 767.98px) {
         .summary-grid {
             grid-template-columns: 1fr;
         }
@@ -297,7 +302,6 @@
     }
 </style>
 
-
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success alert-dismissible fade show mb-4"
@@ -312,7 +316,6 @@
 
     </div>
 }
-
 
 <!-- Patient Header -->
 
@@ -354,7 +357,6 @@
 
 </div>
 
-
 <!-- Record Summary -->
 
 <div class="summary-grid">
@@ -375,7 +377,6 @@
 
     </div>
 
-
     <div class="summary-card">
 
         <div class="summary-label">
@@ -391,7 +392,6 @@
         </div>
 
     </div>
-
 
     <div class="summary-card">
 
@@ -432,7 +432,6 @@
 
 </div>
 
-
 <!-- Actions -->
 
 <div class="record-actions">
@@ -442,7 +441,6 @@
        class="btn btn-outline-secondary">
         Edit Record
     </a>
-
 
     @if (Model.Student != null)
     {
@@ -461,13 +459,11 @@
         </a>
     }
 
-
     <a asp-page="/VitalSignLogPages/Create"
        asp-route-medicalRecordId="@Model.MedicalRecord.MedicalRecordId"
        class="btn btn-outline-primary">
         Record Vital Signs
     </a>
-
 
     <a asp-page="/Student/Search"
        class="btn btn-outline-secondary">
@@ -475,7 +471,6 @@
     </a>
 
 </div>
-
 
 <!-- Patient Information -->
 
@@ -492,7 +487,6 @@
         </p>
 
     </div>
-
 
     <div class="record-panel-body">
 
@@ -512,7 +506,6 @@
 
                 </div>
 
-
                 <div class="info-item">
 
                     <div class="info-label">
@@ -527,7 +520,6 @@
 
                 </div>
 
-                
                 <div class="info-item">
 
                     <div class="info-label">
@@ -542,8 +534,6 @@
 
                 </div>
 
-
-
                 <div class="info-item">
 
                     <div class="info-label">
@@ -555,7 +545,6 @@
                     </div>
 
                 </div>
-
 
                 <div class="info-item">
 
@@ -587,7 +576,6 @@
 
                 </div>
 
-
                 <div class="info-item">
 
                     <div class="info-label">
@@ -599,7 +587,6 @@
                     </div>
 
                 </div>
-
 
                 <div class="info-item">
 
@@ -614,7 +601,6 @@
                     </div>
 
                 </div>
-
 
                 <div class="info-item">
 
@@ -633,10 +619,9 @@
             </div>
         }
 
-        </div>
+    </div>
 
 </div>
-
 
 <!-- Medical Requirements -->
 
@@ -665,12 +650,10 @@
                     <table class="table history-table align-middle mb-0">
 
                         <thead>
-
                             <tr>
                                 <th>Requirement</th>
                                 <th>Status</th>
                             </tr>
-
                         </thead>
 
                         <tbody>
@@ -746,9 +729,7 @@
     </div>
 }
 
-
 <!-- Recent Vital Signs -->
-
 
 <div class="record-panel">
 
@@ -763,7 +744,6 @@
         </p>
 
     </div>
-
 
     <div class="record-panel-body p-0">
 
@@ -783,10 +763,10 @@
                             <th>SpO₂</th>
                             <th>Blood Pressure</th>
                             <th>Status</th>
+                            <th>Action</th>
                         </tr>
 
                     </thead>
-
 
                     <tbody>
 
@@ -841,6 +821,14 @@
 
                                 </td>
 
+                                <td>
+                                    <a asp-page="/VitalSignLogPages/Reassessment"
+                                       asp-route-id="@vital.VitalSignLogId"
+                                       class="btn btn-sm btn-outline-success reassess-btn">
+                                        Reassess
+                                    </a>
+                                </td>
+
                             </tr>
                         }
 
@@ -849,7 +837,6 @@
                 </table>
 
             </div>
-
 
             <div class="p-3 border-top">
 
@@ -873,7 +860,6 @@
 
 </div>
 
-
 <!-- Consultation -->
 
 <div class="record-panel">
@@ -890,7 +876,6 @@
 
     </div>
 
-
     <div class="record-panel-body">
 
         <div class="record-field">
@@ -905,7 +890,6 @@
 
         </div>
 
-
         <div class="record-field">
 
             <span class="record-field-label">
@@ -918,7 +902,6 @@
 
         </div>
 
-
         <div class="record-field">
 
             <span class="record-field-label">
@@ -930,7 +913,6 @@
             </div>
 
         </div>
-
 
         <div class="record-field">
 
@@ -948,7 +930,6 @@
 
 </div>
 
-
 <!-- Treatment -->
 
 <div class="record-panel">
@@ -965,7 +946,6 @@
 
     </div>
 
-
     <div class="record-panel-body">
 
         <div class="record-field">
@@ -979,7 +959,6 @@
             </div>
 
         </div>
-
 
         <div class="record-field">
 
@@ -997,7 +976,6 @@
 
 </div>
 
-
 <!-- Clinical Notes -->
 
 <div class="record-panel">
@@ -1014,7 +992,6 @@
 
     </div>
 
-
     <div class="record-panel-body">
 
         <div class="record-field-value multiline">
@@ -1024,7 +1001,6 @@
     </div>
 
 </div>
-
 
 <!-- Consultation History -->
 
@@ -1041,7 +1017,6 @@
         </p>
 
     </div>
-
 
     <div class="record-panel-body p-0">
 
@@ -1061,7 +1036,6 @@
                         </tr>
 
                     </thead>
-
 
                     <tbody>
 

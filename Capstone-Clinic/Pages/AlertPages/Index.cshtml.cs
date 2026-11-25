@@ -1,3 +1,4 @@
+
 using Capstone_Clinic.Data;
 using Capstone_Clinic.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -17,68 +18,91 @@ public class IndexModel : PageModel
 
     public List<AlertViewModel> Alerts { get; set; } = new();
     public int CriticalCount { get; set; }
-
     public int WarningCount { get; set; }
-
     public int AcknowledgedCount { get; set; }
 
     public async Task OnGetAsync()
     {
-
         Alerts = await (
-    from alert in _context.Alerts
-    join vital in _context.VitalSignLogs
-        on alert.VitalLogId equals vital.VitalSignLogId
-    join medical in _context.MedicalRecords
-        on vital.MedicalRecordId equals medical.MedicalRecordId
-    join clinicPatient in _context.ClinicPatients
-        on vital.ClinicPatientId equals clinicPatient.ClinicPatientId
-    join student in _context.Students
-        on medical.StudentId equals student.StudentId into studentGroup
-    from student in studentGroup.DefaultIfEmpty()
+            from alert in _context.Alerts
+            join vital in _context.VitalSignLogs
+                on alert.VitalLogId equals vital.VitalSignLogId
+            join medical in _context.MedicalRecords
+                on vital.MedicalRecordId equals medical.MedicalRecordId
+            join clinicPatient in _context.ClinicPatients
+                on vital.ClinicPatientId equals clinicPatient.ClinicPatientId
+            join student in _context.Students
+                on medical.StudentId equals student.StudentId into studentGroup
+            from student in studentGroup.DefaultIfEmpty()
 
-    orderby alert.CreatedAt descending
+            orderby alert.CreatedAt descending
 
-    select new AlertViewModel
-    {
-        AlertId = alert.AlertId,
+            select new AlertViewModel
+            {
+                AlertId = alert.AlertId,
 
-        StudentNumber = student != null
-            ? student.StudentNumber
-            : clinicPatient.Identifier ?? "",
+                StudentNumber = student != null
+                    ? student.StudentNumber
+                    : clinicPatient.Identifier ?? "",
 
-        StudentName = student != null
-            ? student.FullName
-            : clinicPatient.FullName ?? "Community Member",
+                StudentName = student != null
+                    ? student.FullName
+                    : clinicPatient.FullName ?? "Community Member",
 
-        AlertType = alert.AlertType,
-        Severity = vital.Status,
-        Status = alert.Status,
-        CreatedAt = alert.CreatedAt
-    }
+                AlertType = alert.AlertType,
 
-).ToListAsync();
+                // Reassessment alerts store severity in AlertType.
+                // Original alerts store the condition in AlertType,
+                // so use the original vital-sign Status as fallback.
+                Severity =
+                    alert.AlertType == "Critical" ||
+                    alert.AlertType == "Warning"
+                        ? alert.AlertType
+                        : vital.Status,
+
+                Status = alert.Status,
+                CreatedAt = alert.CreatedAt
+            }
+        ).ToListAsync();
+
+        // Count active Critical alerts, including reassessment alerts.
         CriticalCount = await _context.Alerts
-    .Join(_context.VitalSignLogs,
-        a => a.VitalLogId,
-        v => v.VitalSignLogId,
-        (a, v) => new { Alert = a, Vital = v })
-    .CountAsync(x =>
-        x.Alert.Status == "Active" &&
-        x.Vital.Status == "Critical");
-
-        WarningCount = await _context.Alerts
-            .Join(_context.VitalSignLogs,
+            .Join(
+                _context.VitalSignLogs,
                 a => a.VitalLogId,
                 v => v.VitalSignLogId,
                 (a, v) => new { Alert = a, Vital = v })
             .CountAsync(x =>
                 x.Alert.Status == "Active" &&
-                x.Vital.Status == "Warning");
+                (
+                    x.Alert.AlertType == "Critical" ||
+                    (
+                        x.Alert.AlertType != "Warning" &&
+                        x.Vital.Status == "Critical"
+                    )
+                ));
+
+        // Count active Warning alerts, including reassessment alerts.
+        WarningCount = await _context.Alerts
+            .Join(
+                _context.VitalSignLogs,
+                a => a.VitalLogId,
+                v => v.VitalSignLogId,
+                (a, v) => new { Alert = a, Vital = v })
+            .CountAsync(x =>
+                x.Alert.Status == "Active" &&
+                (
+                    x.Alert.AlertType == "Warning" ||
+                    (
+                        x.Alert.AlertType != "Critical" &&
+                        x.Vital.Status == "Warning"
+                    )
+                ));
 
         AcknowledgedCount = await _context.Alerts
             .CountAsync(a => a.Status == "Acknowledged");
     }
+
     public async Task<IActionResult> OnPostAcknowledgeAsync(int id)
     {
         var alert = await _context.Alerts.FindAsync(id);
@@ -94,20 +118,15 @@ public class IndexModel : PageModel
 
         return RedirectToPage();
     }
+
     public class AlertViewModel
     {
         public int AlertId { get; set; }
-
         public string StudentNumber { get; set; } = "";
-
         public string StudentName { get; set; } = "";
-
         public string AlertType { get; set; } = "";
-
         public string Severity { get; set; } = "";
-
         public string Status { get; set; } = "";
-
         public DateTime CreatedAt { get; set; }
     }
 }

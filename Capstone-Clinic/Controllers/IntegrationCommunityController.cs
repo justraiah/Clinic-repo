@@ -40,9 +40,7 @@ public class IntegrationCommunityController : ControllerBase
     {
         return await _context.ClinicPatients
             .AsNoTracking()
-            .FirstOrDefaultAsync(p =>
-                p.Identifier == identifier &&
-                (p.PatientType == "Student" || p.PatientType == "Faculty"));
+            .FirstOrDefaultAsync(p => p.Identifier == identifier);
     }
 
     // MEDICAL RECORDS

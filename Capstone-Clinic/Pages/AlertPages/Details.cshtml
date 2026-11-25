@@ -4,14 +4,18 @@
 @{
     ViewData["Title"] = "Alert Details";
 
-    var severityClass = Model.VitalSign.Status switch
+    var severity = Model.Alert.AlertType is "Critical" or "Warning"
+    ? Model.Alert.AlertType
+    : Model.VitalSign.Status;
+
+    var severityClass = severity switch
     {
         "Critical" => "severity-critical",
         "Warning" => "severity-warning",
         _ => "severity-normal"
     };
 
-    var severityPanelClass = Model.VitalSign.Status switch
+    var severityPanelClass = severity switch
     {
         "Critical" => "severity-panel-critical",
         "Warning" => "severity-panel-warning",
@@ -366,7 +370,7 @@
                     </div>
 
                     <div class="severity-value @severityClass">
-                        @Model.VitalSign.Status
+                        @severity
                     </div>
 
                     <div class="mt-3">

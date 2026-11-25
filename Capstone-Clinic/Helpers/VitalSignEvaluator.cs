@@ -70,17 +70,17 @@ namespace Capstone_Clinic.Helpers
                     SetStatus(ref status, "Critical");
                     remarks.Add("Hyperpyrexia");
                 }
-                else if (temperature.Value > 37.5)
+                else if (temperature.Value > 38)
                 {
                     SetStatus(ref status, "Warning");
                     remarks.Add("Fever");
                 }
-                else if (temperature.Value < 35.0)
+                else if (temperature.Value < 34)
                 {
                     SetStatus(ref status, "Critical");
                     remarks.Add("Severe Hypothermia");
                 }
-                else if (temperature.Value < 36.1)
+                else if (temperature.Value < 35.5)
                 {
                     SetStatus(ref status, "Warning");
                     remarks.Add("Hypothermia");
@@ -95,7 +95,7 @@ namespace Capstone_Clinic.Helpers
                     SetStatus(ref status, "Critical");
                     remarks.Add("Severe Tachycardia");
                 }
-                else if (heartRate.Value > 100)
+                else if (heartRate.Value > 110)
                 {
                     SetStatus(ref status, "Warning");
                     remarks.Add("Tachycardia");
@@ -130,7 +130,7 @@ namespace Capstone_Clinic.Helpers
                     SetStatus(ref status, "Critical");
                     remarks.Add("Severe Tachypnea");
                 }
-                else if (respiratoryRate.Value > 20)
+                else if (respiratoryRate.Value > 25)
                 {
                     SetStatus(ref status, "Warning");
                     remarks.Add("Tachypnea");
@@ -155,12 +155,12 @@ namespace Capstone_Clinic.Helpers
             // Systolic Blood Pressure
             if (systolicBP.HasValue)
             {
-                if (systolicBP.Value >= 140)
+                if (systolicBP.Value >= 150)
                 {
                     SetStatus(ref status, "Critical");
                     remarks.Add("Severe Hypertension");
                 }
-                else if (systolicBP.Value > 120)
+                else if (systolicBP.Value > 130)
                 {
                     SetStatus(ref status, "Warning");
                     remarks.Add("Hypertension");
@@ -180,12 +180,12 @@ namespace Capstone_Clinic.Helpers
             // Diastolic Blood Pressure
             if (diastolicBP.HasValue)
             {
-                if (diastolicBP.Value >= 90)
+                if (diastolicBP.Value >= 100)
                 {
                     SetStatus(ref status, "Critical");
                     remarks.Add("Severe Hypertension");
                 }
-                else if (diastolicBP.Value > 80)
+                else if (diastolicBP.Value > 90)
                 {
                     SetStatus(ref status, "Warning");
                     remarks.Add("Hypertension");

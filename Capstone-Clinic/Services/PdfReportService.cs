@@ -45,7 +45,7 @@ namespace Capstone_Clinic.Services
         column.Item().LineHorizontal(1);
 
         column.Item().AlignRight()
-            .Text($"Generated: {DateTime.Now:MMMM dd, yyyy • hh:mm tt}")
+            .Text($"Generated: {Capstone_Clinic.Helpers.TimeHelper.Now:MMMM dd, yyyy • hh:mm tt}")
             .FontSize(10)
             .FontColor(Colors.Grey.Darken2);
     });

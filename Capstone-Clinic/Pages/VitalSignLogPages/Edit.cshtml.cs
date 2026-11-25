@@ -134,7 +134,7 @@ public class EditModel : PageModel
                     AlertType = firstRemark,
                     AlertMessage = existingVital.Remarks,
                     Status = "Active",
-                    CreatedAt = DateTime.Now
+                    CreatedAt = Capstone_Clinic.Helpers.TimeHelper.Now
                 };
 
                 _context.Alerts.Add(alert);

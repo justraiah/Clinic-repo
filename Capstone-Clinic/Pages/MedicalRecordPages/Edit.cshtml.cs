@@ -84,7 +84,7 @@ public class EditModel : PageModel
     existingMedicalRecord.StudentId;
 
         _context.Attach(MedicalRecord).State = EntityState.Modified;
-        MedicalRecord.UpdatedAt = DateTime.Now;
+        MedicalRecord.UpdatedAt = Capstone_Clinic.Helpers.TimeHelper.Now;
 
         try
         {

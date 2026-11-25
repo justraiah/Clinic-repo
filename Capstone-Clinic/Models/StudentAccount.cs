@@ -22,9 +22,9 @@ namespace Capstone_Clinic.Models
 
         public bool IsActive { get; set; } = true;
 
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = Capstone_Clinic.Helpers.TimeHelper.Now;
 
-        public DateTime UpdatedAt { get; set; } = DateTime.Now;
+        public DateTime UpdatedAt { get; set; } = Capstone_Clinic.Helpers.TimeHelper.Now;
 
         // Navigation property
         public Student? Student { get; set; }

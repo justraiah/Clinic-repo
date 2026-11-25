@@ -47,7 +47,7 @@ namespace Capstone_Clinic.Pages.ReferralPages
                 return Page();
             }
 
-            Referral.CreatedAt = DateTime.Now;
+            Referral.CreatedAt = Capstone_Clinic.Helpers.TimeHelper.Now;
             Referral.Status = "Pending";
 
             _context.Referrals.Add(Referral);

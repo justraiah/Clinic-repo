@@ -1,5 +1,4 @@
-﻿
-@page "{id:int}"
+﻿@page "{id:int}"
 @model Capstone_Clinic.Pages.VitalSignLogPages.ReassessmentModel
 
 @{
@@ -78,9 +77,9 @@
     }
 
     .reassessment-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 14px;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
     }
 
     .iot-vitals-section {
@@ -139,13 +138,6 @@
         font-weight: 600;
         color: #475569;
         margin-bottom: 12px;
-    }
-
-    @@media (max-width: 767.98px) {
-        .reassessment-grid,
-        .iot-vitals-grid {
-            grid-template-columns: 1fr;
-        }
     }
 
     .reassessment-field {
@@ -259,7 +251,8 @@
     }
 
     @@media (max-width: 767.98px) {
-        .reassessment-grid {
+        .reassessment-grid,
+        .iot-vitals-grid {
             grid-template-columns: 1fr;
         }
 
@@ -298,8 +291,9 @@
     </div>
 
     <div class="alert alert-info">
-        <strong>Reassessment:</strong> This updates the original vital-sign consultation.
-        It does not create a new consultation record.
+        <strong>Reassessment #@Model.ReassessmentNumber:</strong>
+        This records a new set of follow-up vital signs under the original visit.
+        Previous readings will remain unchanged.
     </div>
 
     <form method="post">
@@ -373,7 +367,7 @@
             </div>
         </div>
 
-        <!-- Post Readings -->
+        <!-- Reassessment Readings -->
         <div class="reassessment-panel post-section">
 
             <div class="reassessment-panel-header">
@@ -390,7 +384,9 @@
 
                 <p class="sensor-note">
                     Use the ESP32 MAX30102 sensor to read Pulse Rate and SpO₂.
-                    The remaining vital signs are entered manually. Sensor readings can still be edited before saving.
+                    The remaining vital signs are entered manually.
+                    Sensor readings can still be edited before saving.
+                </p>
 
                 <!-- Sensor -->
                 <div class="mb-3">
@@ -504,151 +500,165 @@
 
                 <hr />
 
-                    <!-- IoT Vital Signs -->
-                    <div class="iot-vitals-section">
+                <!-- IoT Vital Signs -->
+                <div class="iot-vitals-section">
 
-                        <h3 class="iot-vitals-header">
-                            IoT Vital Signs
-                        </h3>
-
-                        <p class="iot-vitals-description">
-                            Pulse Rate and oxygen saturation readings from the MAX30102 sensor.
-                            You may also manually edit these values.
-                        </p>
-
-                        <div class="iot-vitals-grid">
-
-                            <!-- Pulse Rate -->
-                            <div class="iot-vital-field">
-
-                                <label asp-for="PostHeartRate" class="form-label">
-                                    Pulse Rate (BPM)
-                                </label>
-
-                                <input asp-for="PostHeartRate"
-                                       type="number"
-                                       min="1"
-                                       max="300"
-                                       class="form-control"
-                                       placeholder="e.g. 75" />
-
-                                <span asp-validation-for="PostHeartRate"
-                                      class="text-danger small">
-                                </span>
-
-                            </div>
-
-                            <!-- SpO2 -->
-                            <div class="iot-vital-field">
-
-                                <label asp-for="PostOxygenSaturation" class="form-label">
-                                    SpO₂ (%)
-                                </label>
-
-                                <input asp-for="PostOxygenSaturation"
-                                       type="number"
-                                       min="1"
-                                       max="100"
-                                       class="form-control"
-                                       placeholder="e.g. 98" />
-
-                                <span asp-validation-for="PostOxygenSaturation"
-                                      class="text-danger small">
-                                </span>
-
-                            </div>
-
-                        </div>
-
-                    </div>
-
-                    <!-- Manual Vital Signs -->
-                    <h3 class="manual-vitals-header">
-                        Other Reassessment Vital Signs
+                    <h3 class="iot-vitals-header">
+                        IoT Vital Signs
                     </h3>
 
-                    <div class="reassessment-grid">
+                    <p class="iot-vitals-description">
+                        Pulse Rate and oxygen saturation readings from the MAX30102 sensor.
+                        You may also manually edit these values.
+                    </p>
 
-                        <!-- Temperature -->
-                        <div class="reassessment-field">
+                    <div class="iot-vitals-grid">
 
-                            <label asp-for="PostTemperature" class="form-label">
-                                Temperature (°C)
+                        <!-- Pulse Rate -->
+                        <div class="iot-vital-field">
+
+                            <label asp-for="Reassessment.HeartRate" class="form-label">
+                                Pulse Rate (BPM)
                             </label>
 
-                            <input asp-for="PostTemperature"
+                            <input asp-for="Reassessment.HeartRate"
                                    type="number"
-                                   step="0.1"
+                                   min="1"
+                                   max="300"
                                    class="form-control"
-                                   placeholder="e.g. 36.5" />
+                                   placeholder="e.g. 75" />
 
-                            <span asp-validation-for="PostTemperature"
+                            <span asp-validation-for="Reassessment.HeartRate"
                                   class="text-danger small">
                             </span>
 
                         </div>
 
-                        <!-- Respiratory Rate -->
-                        <div class="reassessment-field">
+                        <!-- SpO2 -->
+                        <div class="iot-vital-field">
 
-                            <label asp-for="PostRespiratoryRate" class="form-label">
-                                Respiratory Rate (breaths/min)
+                            <label asp-for="Reassessment.OxygenSaturation" class="form-label">
+                                SpO₂ (%)
                             </label>
 
-                            <input asp-for="PostRespiratoryRate"
+                            <input asp-for="Reassessment.OxygenSaturation"
                                    type="number"
                                    min="1"
                                    max="100"
                                    class="form-control"
-                                   placeholder="e.g. 16" />
+                                   placeholder="e.g. 98" />
 
-                            <span asp-validation-for="PostRespiratoryRate"
-                                  class="text-danger small">
-                            </span>
-
-                        </div>
-
-                        <!-- Systolic BP -->
-                        <div class="reassessment-field">
-
-                            <label asp-for="PostSystolicBP" class="form-label">
-                                Systolic BP (mmHg)
-                            </label>
-
-                            <input asp-for="PostSystolicBP"
-                                   type="number"
-                                   min="20"
-                                   max="300"
-                                   class="form-control"
-                                   placeholder="e.g. 120" />
-
-                            <span asp-validation-for="PostSystolicBP"
-                                  class="text-danger small">
-                            </span>
-
-                        </div>
-
-                        <!-- Diastolic BP -->
-                        <div class="reassessment-field">
-
-                            <label asp-for="PostDiastolicBP" class="form-label">
-                                Diastolic BP (mmHg)
-                            </label>
-
-                            <input asp-for="PostDiastolicBP"
-                                   type="number"
-                                   min="20"
-                                   max="200"
-                                   class="form-control"
-                                   placeholder="e.g. 80" />
-
-                            <span asp-validation-for="PostDiastolicBP"
+                            <span asp-validation-for="Reassessment.OxygenSaturation"
                                   class="text-danger small">
                             </span>
 
                         </div>
 
                     </div>
+
+                </div>
+
+                <!-- Manual Vital Signs -->
+                <h3 class="manual-vitals-header">
+                    Other Reassessment Vital Signs
+                </h3>
+
+                <div class="reassessment-grid">
+
+                    <!-- Temperature -->
+                    <div class="reassessment-field">
+
+                        <label asp-for="Reassessment.Temperature" class="form-label">
+                            Temperature (°C)
+                        </label>
+
+                        <input asp-for="Reassessment.Temperature"
+                               type="number"
+                               step="0.1"
+                               min="20"
+                               max="50"
+                               class="form-control"
+                               placeholder="e.g. 36.5" />
+
+                        <span asp-validation-for="Reassessment.Temperature"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+                    <!-- Respiratory Rate -->
+                    <div class="reassessment-field">
+
+                        <label asp-for="Reassessment.RespiratoryRate" class="form-label">
+                            Respiratory Rate (breaths/min)
+                        </label>
+
+                        <input asp-for="Reassessment.RespiratoryRate"
+                               type="number"
+                               min="1"
+                               max="100"
+                               class="form-control"
+                               placeholder="e.g. 16" />
+
+                        <span asp-validation-for="Reassessment.RespiratoryRate"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+                    <!-- Systolic BP -->
+                    <div class="reassessment-field">
+
+                        <label asp-for="Reassessment.SystolicBP" class="form-label">
+                            Systolic BP (mmHg)
+                        </label>
+
+                        <input asp-for="Reassessment.SystolicBP"
+                               type="number"
+                               min="20"
+                               max="300"
+                               class="form-control"
+                               placeholder="e.g. 120" />
+
+                        <span asp-validation-for="Reassessment.SystolicBP"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+                    <!-- Diastolic BP -->
+                    <div class="reassessment-field">
+
+                        <label asp-for="Reassessment.DiastolicBP" class="form-label">
+                            Diastolic BP (mmHg)
+                        </label>
+
+                        <input asp-for="Reassessment.DiastolicBP"
+                               type="number"
+                               min="20"
+                               max="200"
+                               class="form-control"
+                               placeholder="e.g. 80" />
+
+                        <span asp-validation-for="Reassessment.DiastolicBP"
+                              class="text-danger small">
+                        </span>
+
+                    </div>
+
+                </div>
+
+                <!-- Remarks -->
+                <div class="mt-3">
+                    <label asp-for="Reassessment.Remarks" class="form-label">
+                        Additional Remarks
+                    </label>
+
+                    <textarea asp-for="Reassessment.Remarks"
+                              class="form-control"
+                              rows="3"
+                              placeholder="Optional additional notes about the reassessment..."></textarea>
+                </div>
 
             </div>
         </div>
@@ -678,302 +688,195 @@
     <partial name="_ValidationScriptsPartial" />
 
     <script>
-    document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", function () {
 
-        const sensorButton = document.getElementById("readSensorBtn");
-        const sensorLoading = document.getElementById("sensorLoading");
-        const loadingTitle = document.getElementById("sensorLoadingTitle");
-        const loadingDetail = document.getElementById("sensorLoadingDetail");
+            const sensorButton = document.getElementById("readSensorBtn");
+            const sensorLoading = document.getElementById("sensorLoading");
+            const loadingTitle = document.getElementById("sensorLoadingTitle");
+            const loadingDetail = document.getElementById("sensorLoadingDetail");
 
-        // Existing backend property is HeartRate, but UI terminology is Pulse Rate
-        const pulseRateInput = document.getElementById("PostHeartRate");
-        const spo2Input = document.getElementById("PostOxygenSaturation");
+            // Nested reassessment model input IDs
+            const pulseRateInput = document.getElementById("Reassessment_HeartRate");
+            const spo2Input = document.getElementById("Reassessment_OxygenSaturation");
 
-        const measurementMonitor = document.getElementById("measurementMonitor");
-        const progressBar = document.getElementById("measurementProgressBar");
-        const progressCount = document.getElementById("measurementProgressCount");
-        const progressRows = document.getElementById("measurementProgressRows");
-        const acceptedCount = document.getElementById("acceptedCount");
-        const rejectedCount = document.getElementById("rejectedCount");
-        const finalResult = document.getElementById("measurementFinalResult");
+            const measurementMonitor = document.getElementById("measurementMonitor");
+            const progressBar = document.getElementById("measurementProgressBar");
+            const progressCount = document.getElementById("measurementProgressCount");
+            const progressRows = document.getElementById("measurementProgressRows");
+            const acceptedCount = document.getElementById("acceptedCount");
+            const rejectedCount = document.getElementById("rejectedCount");
 
-        const measurementModalElement = document.getElementById("measurementModal");
+            const finalResult = document.getElementById("measurementFinalResult");
+            const measurementModalElement = document.getElementById("measurementModal");
 
-        const measurementModal = measurementModalElement
-            ? bootstrap.Modal.getOrCreateInstance(measurementModalElement)
-            : null;
+            const measurementModal = measurementModalElement
+                ? bootstrap.Modal.getOrCreateInstance(measurementModalElement)
+                : null;
 
-        const useSensorReadingBtn = document.getElementById("useSensorReadingBtn");
-        const loadingSpinner = sensorLoading?.querySelector(".spinner-border");
+            const useSensorReadingBtn = document.getElementById("useSensorReadingBtn");
+            const loadingSpinner = sensorLoading?.querySelector(".spinner-border");
 
-        let completedReading = null;
+            let completedReading = null;
 
-        if (!sensorButton) return;
+            if (!sensorButton) return;
 
-        function setLoading(title, detail) {
-            if (loadingTitle) loadingTitle.textContent = title;
-            if (loadingDetail) loadingDetail.textContent = detail;
+            function setLoading(title, detail) {
+                if (loadingTitle) loadingTitle.textContent = title;
+                if (loadingDetail) loadingDetail.textContent = detail;
 
-            sensorLoading?.classList.remove("d-none");
-        }
-
-        function resetSensorButton() {
-            sensorButton.disabled = false;
-            sensorButton.textContent = "Read Post-Rest Pulse Rate & SpO₂";
-        }
-
-        function showSensorError(message) {
-            measurementModal?.hide();
-
-            sensorLoading?.classList.remove("d-none");
-            sensorLoading?.classList.remove("alert-success");
-            sensorLoading?.classList.add("alert-warning");
-
-            loadingSpinner?.classList.add("d-none");
-
-            setLoading("Sensor reading failed.", message);
-
-            resetSensorButton();
-
-            window.alert(message);
-        }
-
-        async function readJson(response) {
-            try {
-                return await response.json();
-            } catch {
-                return null;
-            }
-        }
-
-        // Apply the accepted IoT reading to the two isolated fields
-        useSensorReadingBtn?.addEventListener("click", function () {
-
-            if (!completedReading) return;
-
-            if (pulseRateInput) {
-                pulseRateInput.value = completedReading.heartRate;
+                sensorLoading?.classList.remove("d-none");
             }
 
-            if (spo2Input) {
-                spo2Input.value = completedReading.spo2;
+            function resetSensorButton() {
+                sensorButton.disabled = false;
+                sensorButton.textContent = "Read Post-Rest Pulse Rate & SpO₂";
             }
 
-            measurementModal?.hide();
+            function showSensorError(message) {
+                measurementModal?.hide();
 
-            resetSensorButton();
+                sensorLoading?.classList.remove("d-none");
+                sensorLoading?.classList.remove("alert-success");
+                sensorLoading?.classList.add("alert-warning");
 
-            loadingSpinner?.classList.add("d-none");
+                loadingSpinner?.classList.add("d-none");
 
-            sensorLoading?.classList.remove("alert-warning");
-            sensorLoading?.classList.add("alert-success");
+                setLoading("Sensor reading failed.", message);
 
-            setLoading(
-                "Sensor reading received.",
-                completedReading.heartRate +
-                " BPM Pulse Rate, SpO₂ " +
-                completedReading.spo2 +
-                "%. You can edit these values or continue entering the other readings."
-            );
-        });
+                resetSensorButton();
 
-        function renderMeasurementProgress(data) {
-
-            if (!data || !Array.isArray(data.updates)) return;
-
-            measurementMonitor?.classList.remove("d-none");
-
-            const updates = data.updates;
-
-            const total = updates.length > 0
-                ? updates[0].totalWindows
-                : 8;
-
-            const completed = updates.length;
-            const accepted = updates.filter(x => x.accepted).length;
-            const rejected = updates.filter(x => !x.accepted).length;
-
-            if (progressCount) {
-                progressCount.textContent = `${completed} / ${total} windows`;
+                window.alert(message);
             }
 
-            if (progressBar) {
-                progressBar.style.width =
-                    `${Math.min(100, completed / total * 100)}%`;
+            async function readJson(response) {
+                try {
+                    return await response.json();
+                } catch {
+                    return null;
+                }
             }
 
-            if (acceptedCount) {
-                acceptedCount.textContent = `Accepted: ${accepted}`;
-            }
+            // Apply the accepted IoT reading to the two reassessment fields
+            useSensorReadingBtn?.addEventListener("click", function () {
 
-            if (rejectedCount) {
-                rejectedCount.textContent = `Rejected: ${rejected}`;
-            }
+                if (!completedReading) return;
 
-            if (!progressRows) return;
-
-            progressRows.replaceChildren();
-
-            for (let i = 1; i <= total; i++) {
-
-                const reading = updates.find(x => x.windowNumber === i);
-
-                const row = document.createElement("div");
-                row.className = "measurement-window";
-
-                const windowLabel = document.createElement("strong");
-                windowLabel.textContent = `Window ${i}`;
-
-                const values = document.createElement("span");
-                const status = document.createElement("span");
-
-                if (!reading) {
-
-                    values.textContent = "Awaiting actual reading...";
-                    status.textContent = "Pending";
-                    status.className = "window-pending";
-
-                } else {
-
-                    const pulseRate = reading.validHeartRate
-                        ? `${reading.heartRate} BPM`
-                        : "Invalid Pulse Rate";
-
-                    const spo2 = reading.validSpO2
-                        ? `${reading.spo2}%`
-                        : "Invalid SpO₂";
-
-                    values.textContent = `${pulseRate} · ${spo2}`;
-
-                    status.textContent = reading.accepted
-                        ? "Accepted"
-                        : "Rejected";
-
-                    status.className = reading.accepted
-                        ? "window-accepted"
-                        : "window-rejected";
-
-                    row.title = reading.message || "";
+                if (pulseRateInput) {
+                    pulseRateInput.value = completedReading.heartRate;
                 }
 
-                row.append(windowLabel, values, status);
-                progressRows.appendChild(row);
-            }
-        }
+                if (spo2Input) {
+                    spo2Input.value = completedReading.spo2;
+                }
 
-        async function refreshMeasurementProgress(requestId) {
+                measurementModal?.hide();
 
-            try {
+                resetSensorButton();
 
-                const response = await fetch(
-                    `/api/iot/vital-signs/requests/${requestId}/progress`,
-                    {
-                        headers: {
-                            "Accept": "application/json"
-                        }
-                    }
+                loadingSpinner?.classList.add("d-none");
+
+                sensorLoading?.classList.remove("alert-warning");
+                sensorLoading?.classList.add("alert-success");
+
+                setLoading(
+                    "Sensor reading received.",
+                    completedReading.heartRate +
+                    " BPM Pulse Rate, SpO₂ " +
+                    completedReading.spo2 +
+                    "%. You can edit these values or continue entering the other readings."
                 );
-
-                if (!response.ok) {
-                    console.warn("Progress polling failed:", response.status);
-                    return;
-                }
-
-                const data = await readJson(response);
-                renderMeasurementProgress(data);
-
-            } catch (error) {
-
-                console.warn("Could not retrieve measurement progress:", error);
-            }
-        }
-
-        // Start sensor measurement
-        sensorButton.addEventListener("click", async function () {
-
-            sensorButton.disabled = true;
-            sensorButton.textContent = "Reading Sensor...";
-
-            completedReading = null;
-
-            if (useSensorReadingBtn) {
-                useSensorReadingBtn.disabled = true;
-            }
-
-            finalResult?.classList.add("d-none");
-
-            sensorLoading?.classList.remove("alert-warning");
-            sensorLoading?.classList.remove("alert-success");
-
-            loadingSpinner?.classList.remove("d-none");
-            sensorLoading?.classList.add("d-none");
-
-            renderMeasurementProgress({
-                updates: []
             });
 
-            measurementModal?.show();
+            function renderMeasurementProgress(data) {
 
-            setLoading(
-                "Requesting a measurement...",
-                "The clinic sensor will pick this up on its next poll."
-            );
+                if (!data || !Array.isArray(data.updates)) return;
 
-            let requestId = "";
+                measurementMonitor?.classList.remove("d-none");
 
-            try {
+                const updates = data.updates;
 
-                const created = await fetch(
-                    "/api/iot/vital-signs/requests",
-                    {
-                        method: "POST",
-                        headers: {
-                            "Accept": "application/json"
-                        }
-                    }
-                );
+                const total = updates.length > 0
+                    ? updates[0].totalWindows
+                    : 8;
 
-                const createdBody = await readJson(created);
+                const completed = updates.length;
+                const accepted = updates.filter(x => x.accepted).length;
+                const rejected = updates.filter(x => !x.accepted).length;
 
-                if (!created.ok || !createdBody?.requestId) {
-
-                    showSensorError(
-                        "The CMS could not create a sensor request. Sign in again and retry."
-                    );
-
-                    return;
+                if (progressCount) {
+                    progressCount.textContent = `${completed} / ${total} windows`;
                 }
 
-                requestId = createdBody.requestId;
+                if (progressBar) {
+                    progressBar.style.width =
+                        `${Math.min(100, completed / total * 100)}%`;
+                }
 
-            } catch {
+                if (acceptedCount) {
+                    acceptedCount.textContent = `Accepted: ${accepted}`;
+                }
 
-                showSensorError(
-                    "The CMS could not be reached. Check that this page is the live site, then retry."
-                );
+                if (rejectedCount) {
+                    rejectedCount.textContent = `Rejected: ${rejected}`;
+                }
 
-                return;
+                if (!progressRows) return;
+
+                progressRows.replaceChildren();
+
+                for (let i = 1; i <= total; i++) {
+
+                    const reading = updates.find(x => x.windowNumber === i);
+
+                    const row = document.createElement("div");
+                    row.className = "measurement-window";
+
+                    const windowLabel = document.createElement("strong");
+                    windowLabel.textContent = `Window ${i}`;
+
+                    const values = document.createElement("span");
+                    const status = document.createElement("span");
+
+                    if (!reading) {
+
+                        values.textContent = "Awaiting actual reading...";
+                        status.textContent = "Pending";
+                        status.className = "window-pending";
+
+                    } else {
+
+                        const pulseRate = reading.validHeartRate
+                            ? `${reading.heartRate} BPM`
+                            : "Invalid Pulse Rate";
+
+                        const spo2 = reading.validSpO2
+                            ? `${reading.spo2}%`
+                            : "Invalid SpO₂";
+
+                        values.textContent = `${pulseRate} · ${spo2}`;
+
+                        status.textContent = reading.accepted
+                            ? "Accepted"
+                            : "Rejected";
+
+                        status.className = reading.accepted
+                            ? "window-accepted"
+                            : "window-rejected";
+
+                        row.title = reading.message || "";
+                    }
+
+                    row.append(windowLabel, values, status);
+                    progressRows.appendChild(row);
+                }
             }
 
-            setLoading(
-                "Reading sensor...",
-                "Keep a finger still on the MAX30102 until the values appear."
-            );
-
-            const deadline = Date.now() + 150000;
-
-            while (Date.now() < deadline) {
-
-                await new Promise(function (resolve) {
-                    setTimeout(resolve, 2000);
-                });
-
-                await refreshMeasurementProgress(requestId);
+            async function refreshMeasurementProgress(requestId) {
 
                 try {
 
-                    const readingResponse = await fetch(
-                        "/api/iot/vital-signs/requests/" + requestId + "/reading",
+                    const response = await fetch(
+                        `/api/iot/vital-signs/requests/${requestId}/progress`,
                         {
                             headers: {
                                 "Accept": "application/json"
@@ -981,62 +884,169 @@
                         }
                     );
 
-                    const reading = await readJson(readingResponse);
-
-                    if (readingResponse.status === 200 && reading?.success) {
-
-                        completedReading = reading;
-
-                        await refreshMeasurementProgress(requestId);
-
-                        if (finalResult) {
-                            finalResult.textContent =
-                                `Final Average: Pulse Rate ${reading.heartRate} BPM · SpO₂ ${reading.spo2}%`;
-
-                            finalResult.classList.remove("d-none");
-                        }
-
-                        if (useSensorReadingBtn) {
-                            useSensorReadingBtn.disabled = false;
-                        }
-
+                    if (!response.ok) {
+                        console.warn("Progress polling failed:", response.status);
                         return;
                     }
 
-                    if (readingResponse.status === 409) {
+                    const data = await readJson(response);
+                    renderMeasurementProgress(data);
+
+                } catch (error) {
+
+                    console.warn("Could not retrieve measurement progress:", error);
+                }
+            }
+
+            // Start sensor measurement
+            sensorButton.addEventListener("click", async function () {
+
+                sensorButton.disabled = true;
+                sensorButton.textContent = "Reading Sensor...";
+
+                completedReading = null;
+
+                if (useSensorReadingBtn) {
+                    useSensorReadingBtn.disabled = true;
+                }
+
+                finalResult?.classList.add("d-none");
+
+                sensorLoading?.classList.remove("alert-warning");
+                sensorLoading?.classList.remove("alert-success");
+
+                loadingSpinner?.classList.remove("d-none");
+                sensorLoading?.classList.add("d-none");
+
+                renderMeasurementProgress({
+                    updates: []
+                });
+
+                measurementModal?.show();
+
+                setLoading(
+                    "Requesting a measurement...",
+                    "The clinic sensor will pick this up on its next poll."
+                );
+
+                let requestId = "";
+
+                try {
+
+                    const created = await fetch(
+                        "/api/iot/vital-signs/requests",
+                        {
+                            method: "POST",
+                            headers: {
+                                "Accept": "application/json"
+                            }
+                        }
+                    );
+
+                    const createdBody = await readJson(created);
+
+                    if (!created.ok || !createdBody?.requestId) {
 
                         showSensorError(
-                            reading?.message || "The sensor did not return a usable reading."
+                            "The CMS could not create a sensor request. Sign in again and retry."
                         );
 
                         return;
                     }
 
-                    if (readingResponse.status === 401) {
-
-                        showSensorError(
-                            "Your CMS session expired. Sign in again, then retry the reading."
-                        );
-
-                        return;
-                    }
+                    requestId = createdBody.requestId;
 
                 } catch {
 
                     showSensorError(
-                        "Lost contact with the CMS while waiting for the sensor."
+                        "The CMS could not be reached. Check that this page is the live site, then retry."
                     );
 
                     return;
                 }
-            }
 
-            showSensorError(
-                "The sensor did not return a reading in time. Confirm it is powered, on Wi-Fi, and pointed at this live CMS, then retry."
-            );
+                setLoading(
+                    "Reading sensor...",
+                    "Keep a finger still on the MAX30102 until the values appear."
+                );
+
+                const deadline = Date.now() + 150000;
+
+                while (Date.now() < deadline) {
+
+                    await new Promise(function (resolve) {
+                        setTimeout(resolve, 2000);
+                    });
+
+                    await refreshMeasurementProgress(requestId);
+
+                    try {
+
+                        const readingResponse = await fetch(
+                            "/api/iot/vital-signs/requests/" + requestId + "/reading",
+                            {
+                                headers: {
+                                    "Accept": "application/json"
+                                }
+                            }
+                        );
+
+                        const reading = await readJson(readingResponse);
+
+                        if (readingResponse.status === 200 && reading?.success) {
+
+                            completedReading = reading;
+
+                            await refreshMeasurementProgress(requestId);
+
+                            if (finalResult) {
+                                finalResult.textContent =
+                                    `Final Average: Pulse Rate ${reading.heartRate} BPM · SpO₂ ${reading.spo2}%`;
+
+                                finalResult.classList.remove("d-none");
+                            }
+
+                            if (useSensorReadingBtn) {
+                                useSensorReadingBtn.disabled = false;
+                            }
+
+                            return;
+                        }
+
+                        if (readingResponse.status === 409) {
+
+                            showSensorError(
+                                reading?.message || "The sensor did not return a usable reading."
+                            );
+
+                            return;
+                        }
+
+                        if (readingResponse.status === 401) {
+
+                            showSensorError(
+                                "Your CMS session expired. Sign in again, then retry the reading."
+                            );
+
+                            return;
+                        }
+
+                    } catch {
+
+                        showSensorError(
+                            "Lost contact with the CMS while waiting for the sensor."
+                        );
+
+                        return;
+                    }
+                }
+
+                showSensorError(
+                    "The sensor did not return a reading in time. Confirm it is powered, on Wi-Fi, and pointed at this live CMS, then retry."
+                );
+
+            });
 
         });
-
-    });
-</script>
+    </script>
 }

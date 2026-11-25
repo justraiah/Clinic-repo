@@ -34,7 +34,7 @@ namespace Capstone_Clinic.Pages
 
         public async Task OnGetAsync()
         {
-            LastUpdated = DateTime.Now;
+            LastUpdated = Capstone_Clinic.Helpers.TimeHelper.Now;
             IoTDeviceStatus = _devicePresence.IsOnline()
                 ? "Connected"
                 : "Offline";

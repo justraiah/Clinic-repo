@@ -70,7 +70,7 @@ public class CreateModel : PageModel
             VitalSignLog = new VitalSignLog
             {
                 MedicalRecordId = medicalRecordId.Value,
-                RecordedAt = DateTime.Now
+                RecordedAt = Capstone_Clinic.Helpers.TimeHelper.Now
             };
 
             LoadMedicalRecordStudent(medicalRecordId.Value);
@@ -93,7 +93,7 @@ public class CreateModel : PageModel
 
         VitalSignLog = new VitalSignLog
         {
-            RecordedAt = DateTime.Now
+            RecordedAt = Capstone_Clinic.Helpers.TimeHelper.Now
         };
         return Page();
     }
@@ -162,7 +162,16 @@ public class CreateModel : PageModel
 
         VitalSignLog.ClinicPatientId = medicalRecord.ClinicPatientId;
         VitalSignLog.StaffId = 1;
-        VitalSignLog.RecordedAt = DateTime.Now;
+        VitalSignLog.RecordedAt = Capstone_Clinic.Helpers.TimeHelper.Now;
+
+        if (VitalSignLog.TimeIn == null)
+        {
+            ModelState.AddModelError(string.Empty,
+                "Please start patient monitoring before saving vital signs.");
+
+            LoadMedicalRecordStudent(VitalSignLog.MedicalRecordId);
+            return Page();
+        }
 
         // Evaluate the vital-sign readings
         VitalSignEvaluator.Evaluate(VitalSignLog);
@@ -184,7 +193,7 @@ public class CreateModel : PageModel
                 AlertType = firstRemark,
                 AlertMessage = VitalSignLog.Remarks,
                 Status = "Active",
-                CreatedAt = DateTime.Now
+                CreatedAt = Capstone_Clinic.Helpers.TimeHelper.Now
             };
 
             _context.Alerts.Add(alert);

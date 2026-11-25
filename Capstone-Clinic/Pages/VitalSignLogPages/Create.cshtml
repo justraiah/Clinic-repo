@@ -412,6 +412,30 @@
          class="text-danger mb-3">
     </div>
 
+    <!-- Monitoring Time -->
+    <div class="form-panel">
+        <div class="form-panel-header">
+            <h2 class="form-panel-title">Patient Monitoring</h2>
+            <p class="form-panel-description">
+                Start monitoring before recording the patient's initial vital signs.
+            </p>
+        </div>
+
+        <div class="form-panel-body">
+            <div class="d-flex align-items-center gap-3 flex-wrap">
+                <button type="button"
+                        id="startMonitoringBtn"
+                        class="btn btn-success">
+                    <i class="bi bi-clock"></i> Start Monitoring (Time In)
+                </button>
+
+                <strong id="monitoringTimeDisplay" class="text-muted">
+                    Monitoring not started
+                </strong>
+            </div>
+        </div>
+    </div>
+
     <!-- Sensor Readings -->
 
     <div class="form-panel sensor-section">
@@ -717,7 +741,9 @@
     <input type="hidden"
            asp-for="VitalSignLog.StaffId"
            value="1" />
-
+    <input type="hidden"
+           asp-for="VitalSignLog.TimeIn"
+           id="timeInInput" />
 
     <!-- Actions -->
 
@@ -1022,7 +1048,46 @@
                 }
 
                 showSensorError("The sensor did not return a reading in time. Confirm it is powered, on Wi-Fi, and pointed at this live CMS, then retry.");
+                        });
+
+            // ---------------- MONITORING TIME IN ----------------
+
+            const startMonitoringBtn = document.getElementById("startMonitoringBtn");
+            const monitoringTimeDisplay = document.getElementById("monitoringTimeDisplay");
+
+            let monitoringStarted = false;
+
+            startMonitoringBtn.addEventListener("click", function () {
+                if (monitoringStarted) return;
+
+            const now = new Date();
+
+            const formattedTime = now.toLocaleTimeString("en-PH", {
+                hour: "2-digit",
+                minute: "2-digit",
+                second: "2-digit",
+                hour12: true
             });
+
+            document.getElementById("timeInInput").value =
+                now.getFullYear() + "-" +
+                String(now.getMonth() + 1).padStart(2, "0") + "-" +
+                String(now.getDate()).padStart(2, "0") + "T" +
+                String(now.getHours()).padStart(2, "0") + ":" +
+                String(now.getMinutes()).padStart(2, "0") + ":" +
+                String(now.getSeconds()).padStart(2, "0");
+
+                monitoringTimeDisplay.textContent = "Monitoring started at " + formattedTime;
+
+                monitoringTimeDisplay.classList.remove("text-muted");
+                monitoringTimeDisplay.classList.add("text-success");
+
+                startMonitoringBtn.disabled = true;
+                startMonitoringBtn.innerHTML = '<i class="bi bi-check-circle"></i> Monitoring Started';
+
+                monitoringStarted = true;
+            });
+
         });
     </script>
 }

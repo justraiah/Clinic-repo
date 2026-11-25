@@ -683,6 +683,11 @@ else
                                            asp-route-medicalRecordId="@Model.MedicalRecordId">
                                             Reassess
                                         </a>
+                                        <a class="btn btn-sm btn-outline-info"
+                                           asp-page="./ReassessmentHistory"
+                                           asp-route-id="@item.VitalSignLogId">
+                                            History
+                                        </a>
 
                                         <a class="btn btn-sm btn-outline-secondary"
                                            asp-page="./Edit"

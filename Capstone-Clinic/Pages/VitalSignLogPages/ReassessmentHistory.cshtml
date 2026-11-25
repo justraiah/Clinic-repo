@@ -1,0 +1,292 @@
+﻿@page "{id:int}"
+@model Capstone_Clinic.Pages.VitalSignLogPages.ReassessmentHistoryModel
+
+@{
+    ViewData["Title"] = "Reassessment History";
+}
+
+<style>
+    .history-header {
+        margin-bottom: 24px;
+    }
+
+    .history-title {
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: #1e3a5f;
+        margin-bottom: 5px;
+        padding-left: 14px;
+        position: relative;
+    }
+
+    .history-title::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 4px;
+        bottom: 4px;
+        width: 4px;
+        border-radius: 3px;
+        background: #2563eb;
+    }
+
+    .history-subtitle {
+        color: #64748b;
+        font-size: .85rem;
+    }
+
+    .history-panel {
+        background: #fff;
+        border: 1px solid #e2e6eb;
+        border-radius: 8px;
+        overflow: hidden;
+        margin-bottom: 20px;
+    }
+
+    .history-panel-header {
+        padding: 16px 20px;
+        background: #fbfcfe;
+        border-bottom: 1px solid #e2e6eb;
+        border-left: 3px solid #2563eb;
+    }
+
+    .history-panel-title {
+        margin: 0;
+        color: #1f2933;
+        font-size: .95rem;
+        font-weight: 600;
+    }
+
+    .history-panel-body {
+        padding: 20px;
+    }
+
+    .baseline-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+    }
+
+    .baseline-item {
+        padding: 12px;
+        background: #f8fafc;
+        border: 1px solid #e2e6eb;
+        border-radius: 6px;
+    }
+
+    .baseline-label {
+        color: #64748b;
+        font-size: .68rem;
+        font-weight: 600;
+        margin-bottom: 5px;
+    }
+
+    .baseline-value {
+        color: #1f2933;
+        font-size: .9rem;
+        font-weight: 600;
+    }
+
+    .history-table {
+        margin: 0;
+    }
+
+    .history-table thead th {
+        background: #f8fafc;
+        color: #64748b;
+        font-size: .68rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        padding: 11px 12px;
+        white-space: nowrap;
+    }
+
+    .history-table tbody td {
+        color: #475569;
+        font-size: .75rem;
+        padding: 12px;
+        vertical-align: middle;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-size: .65rem;
+        font-weight: 600;
+    }
+
+    .status-normal {
+        color: #166534;
+        background: #dcfce7;
+    }
+
+    .status-warning {
+        color: #92400e;
+        background: #fef3c7;
+    }
+
+    .status-critical {
+        color: #991b1b;
+        background: #fee2e2;
+    }
+
+    .empty-history {
+        padding: 35px 15px;
+        text-align: center;
+        color: #94a3b8;
+        font-size: .8rem;
+    }
+
+    .history-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-bottom: 20px;
+    }
+
+    @@media (max-width: 767.98px) {
+        .baseline-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .history-actions .btn {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="history-header">
+    <h1 class="history-title">Reassessment History</h1>
+    <p class="history-subtitle">
+        All follow-up vital-sign readings recorded under this original visit.
+    </p>
+</div>
+
+<div class="history-actions">
+    <a asp-page="./Reassessment"
+       asp-route-id="@Model.VitalSignLog.VitalSignLogId"
+       class="btn btn-success">
+        Add Reassessment
+    </a>
+
+    <a asp-page="./Index"
+       asp-route-medicalRecordId="@Model.VitalSignLog.MedicalRecordId"
+       class="btn btn-outline-secondary">
+        Back to Vital Sign History
+    </a>
+</div>
+
+<div class="history-panel">
+    <div class="history-panel-header">
+        <h2 class="history-panel-title">Original Vital-Sign Readings</h2>
+    </div>
+
+    <div class="history-panel-body">
+        <p class="text-muted small">
+            Original record: @Model.VitalSignLog.RecordedAt.ToString("MMMM dd, yyyy hh:mm tt")
+        </p>
+
+        <div class="baseline-grid">
+            <div class="baseline-item">
+                <div class="baseline-label">Temperature</div>
+                <div class="baseline-value">@Model.VitalSignLog.Temperature.ToString("F1") °C</div>
+            </div>
+
+            <div class="baseline-item">
+                <div class="baseline-label">Heart Rate</div>
+                <div class="baseline-value">@Model.VitalSignLog.HeartRate BPM</div>
+            </div>
+
+            <div class="baseline-item">
+                <div class="baseline-label">Respiratory Rate</div>
+                <div class="baseline-value">@Model.VitalSignLog.RespiratoryRate /min</div>
+            </div>
+
+            <div class="baseline-item">
+                <div class="baseline-label">Oxygen Saturation</div>
+                <div class="baseline-value">@Model.VitalSignLog.OxygenSaturation%</div>
+            </div>
+
+            <div class="baseline-item">
+                <div class="baseline-label">Blood Pressure</div>
+                <div class="baseline-value">
+                    @Model.VitalSignLog.SystolicBP/@Model.VitalSignLog.DiastolicBP mmHg
+                </div>
+            </div>
+
+            <div class="baseline-item">
+                <div class="baseline-label">Original Status</div>
+                <div class="baseline-value">@Model.VitalSignLog.Status</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="history-panel">
+    <div class="history-panel-header">
+        <h2 class="history-panel-title">Recorded Reassessments</h2>
+    </div>
+
+    @if (Model.Reassessments.Any())
+    {
+        <div class="table-responsive">
+            <table class="table history-table align-middle">
+                <thead>
+                    <tr>
+                        <th>Reassessment</th>
+                        <th>Date & Time</th>
+                        <th>Temp</th>
+                        <th>PR</th>
+                        <th>RR</th>
+                        <th>SpO₂</th>
+                        <th>Blood Pressure</th>
+                        <th>Status</th>
+                        <th>Remarks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var item in Model.Reassessments)
+                    {
+                        <tr>
+                            <td class="fw-semibold">#@item.ReassessmentNumber</td>
+
+                            <td>
+                                @item.RecordedAt.ToString("MMM dd, yyyy hh:mm tt")
+                            </td>
+
+                            <td>@item.Temperature.ToString("F1") °C</td>
+                            <td>@item.HeartRate BPM</td>
+                            <td>@item.RespiratoryRate /min</td>
+                            <td>@item.OxygenSaturation%</td>
+                            <td>@item.SystolicBP/@item.DiastolicBP</td>
+
+                            <td>
+                                @if (item.Status == "Critical")
+                                {
+                                    <span class="status-badge status-critical">Critical</span>
+                                }
+                                else if (item.Status == "Warning")
+                                {
+                                    <span class="status-badge status-warning">Warning</span>
+                                }
+                                else
+                                {
+                                    <span class="status-badge status-normal">Normal</span>
+                                }
+                            </td>
+
+                            <td>@item.Remarks</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+    else
+    {
+        <div class="empty-history">
+            No reassessments have been recorded for this vital-sign visit yet.
+        </div>
+    }
+</div>

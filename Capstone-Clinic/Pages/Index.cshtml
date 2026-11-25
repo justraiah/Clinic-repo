@@ -5,7 +5,7 @@
 
     string GetRelativeTime(DateTime date)
     {
-        var span = DateTime.Now - date;
+        var span = Capstone_Clinic.Helpers.TimeHelper.Now - date;
 
         if (span.TotalMinutes < 1)
             return "Just now";

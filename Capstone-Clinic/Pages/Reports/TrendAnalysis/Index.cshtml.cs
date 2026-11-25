@@ -169,7 +169,7 @@ namespace Capstone_Clinic.Pages.Reports.TrendAnalysis
             return File(
                 pdf,
                 "application/pdf",
-                $"TrendAnalysisReport_{DateTime.Now:yyyyMMdd}.pdf");
+                $"TrendAnalysisReport_{Capstone_Clinic.Helpers.TimeHelper.Now:yyyyMMdd}.pdf");
         }
     }
 }

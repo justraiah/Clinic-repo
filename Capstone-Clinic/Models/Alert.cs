@@ -18,6 +18,6 @@
         public string Status { get; set; } = "Active";
 
         // Date and time the alert was generated
-        public DateTime CreatedAt { get; set; } = DateTime.Now;
+        public DateTime CreatedAt { get; set; } = Capstone_Clinic.Helpers.TimeHelper.Now;
     }
 }

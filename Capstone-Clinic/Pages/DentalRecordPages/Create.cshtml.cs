@@ -69,7 +69,7 @@ namespace Capstone_Clinic.Pages.DentalRecordPages
                 return Page();
             }
 
-            DentalRecord.CreatedAt = DateTime.Now;
+            DentalRecord.CreatedAt = Capstone_Clinic.Helpers.TimeHelper.Now;
 
             _context.DentalRecords.Add(DentalRecord);
             await _context.SaveChangesAsync();
