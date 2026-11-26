@@ -46,16 +46,31 @@ public class DeleteModel : PageModel
     int? medicalRecordId)
     {
         MedicalRecordId = medicalRecordId;
+
         if (id == null)
         {
             return NotFound();
         }
 
-        var vitalsignlog = await _context.VitalSignLogs.FindAsync(id);
+        var vitalsignlog = await _context.VitalSignLogs
+            .FindAsync(id);
+
         if (vitalsignlog != null)
         {
             VitalSignLog = vitalsignlog;
 
+            // Remove related reassessments first
+            var relatedReassessments = await _context.VitalSignReassessments
+                .Where(r => r.VitalSignLogId == vitalsignlog.VitalSignLogId)
+                .ToListAsync();
+
+            if (relatedReassessments.Count > 0)
+            {
+                _context.VitalSignReassessments
+                    .RemoveRange(relatedReassessments);
+            }
+
+            // Remove related alerts
             var relatedAlerts = await _context.Alerts
                 .Where(a => a.VitalLogId == vitalsignlog.VitalSignLogId)
                 .ToListAsync();
@@ -65,7 +80,8 @@ public class DeleteModel : PageModel
                 _context.Alerts.RemoveRange(relatedAlerts);
             }
 
-            _context.VitalSignLogs.Remove(VitalSignLog);
+            // Remove the original vital-sign log last
+            _context.VitalSignLogs.Remove(vitalsignlog);
 
             await _context.SaveChangesAsync();
         }
