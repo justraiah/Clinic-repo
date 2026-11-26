@@ -6,7 +6,7 @@ namespace Capstone_Clinic.Models
     {
         public int VitalSignLogId { get; set; }
 
-        public int MedicalRecordId { get; set; }
+        public int? MedicalRecordId { get; set; }
         public MedicalRecord? MedicalRecord { get; set; }
 
         public int ClinicPatientId { get; set; }

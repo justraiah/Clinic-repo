@@ -52,7 +52,7 @@ public class DetailsModel : PageModel
 
         MedicalRecord = medicalRecord;
 
-        // Student/Patient consultation
+        // Student consultation
         if (MedicalRecord.StudentId.HasValue)
         {
             Student = await _context.Students
@@ -85,29 +85,25 @@ public class DetailsModel : PageModel
                 .ToListAsync();
         }
 
-        // Get all medical record IDs belonging to this patient
-        var medicalRecordIds = ConsultationHistory
-            .Select(m => m.MedicalRecordId)
-            .ToList();
+        // Patient-wide vital signs (includes standalone and consultation-linked)
+        var clinicPatientId = MedicalRecord.ClinicPatientId;
 
-        // Patient-wide recent vital signs
-        RecentVitalSigns = await _context.VitalSignLogs
-            .Where(v => medicalRecordIds.Contains(v.MedicalRecordId))
+        var vitalSignsQuery = _context.VitalSignLogs
+            .Where(v => v.ClinicPatientId == clinicPatientId);
+
+        // Recent patient-wide vital signs
+        RecentVitalSigns = await vitalSignsQuery
             .OrderByDescending(v => v.RecordedAt)
             .Take(5)
             .ToListAsync();
 
         // Patient-wide statistics
-        TotalVisits = await _context.VitalSignLogs
-            .CountAsync(v => medicalRecordIds.Contains(v.MedicalRecordId));
+        TotalVisits = await vitalSignsQuery.CountAsync();
 
-        CriticalVisits = await _context.VitalSignLogs
-            .CountAsync(v =>
-                medicalRecordIds.Contains(v.MedicalRecordId) &&
-                v.Status == "Critical");
+        CriticalVisits = await vitalSignsQuery
+            .CountAsync(v => v.Status == "Critical");
 
-        LatestStatus = await _context.VitalSignLogs
-            .Where(v => medicalRecordIds.Contains(v.MedicalRecordId))
+        LatestStatus = await vitalSignsQuery
             .OrderByDescending(v => v.RecordedAt)
             .Select(v => v.Status)
             .FirstOrDefaultAsync() ?? "No Records";

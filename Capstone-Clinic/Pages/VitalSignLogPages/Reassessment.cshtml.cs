@@ -125,7 +125,7 @@ public class ReassessmentModel : PageModel
     private async Task LoadPageDataAsync(VitalSignLog vital)
     {
         VitalSignLogId = vital.VitalSignLogId;
-        MedicalRecordId = vital.MedicalRecordId;
+        MedicalRecordId = vital.MedicalRecordId ?? 0;
 
         Temperature = vital.Temperature;
         HeartRate = vital.HeartRate;

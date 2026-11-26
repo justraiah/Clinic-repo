@@ -189,17 +189,24 @@
 
     .clinic-action-grid {
         display: grid;
-        grid-template-columns: repeat(3, 1fr);
+        grid-template-columns: repeat(3, minmax(0, 1fr));
         gap: 10px;
+    }
+
+    .clinic-action-grid form {
+        margin: 0;
+        min-width: 0;
     }
 
     .clinic-action {
         min-height: 76px;
+        width: 100%;
         display: flex;
         flex-direction: column;
         align-items: flex-start;
         justify-content: center;
         padding: 12px 14px;
+        text-align: left;
         text-decoration: none;
         border: 1px solid #d9dee5;
         border-radius: 7px;
@@ -213,26 +220,31 @@
         box-shadow: 0 1px 3px rgba(15, 23, 42, .05);
     }
 
-    .clinic-action-title {
-    display: inline-block;
-    padding: 6px 10px;
-    border-radius: 5px;
-    background: #1e3a5f;
-    color: #ffffff;
-    font-size: .78rem;
-    font-weight: 600;
-    line-height: 1.2;
-    transition: background .15s ease;
-}
+    button.clinic-action {
+        cursor: pointer;
+        font-family: inherit;
+    }
 
-.clinic-action:hover .clinic-action-title {
-    background: #2563eb;
-}
+    .clinic-action-title {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 5px;
+        background: #1e3a5f;
+        color: #ffffff;
+        font-size: .78rem;
+        font-weight: 600;
+        line-height: 1.2;
+        transition: background .15s ease;
+    }
+
+    .clinic-action:hover .clinic-action-title {
+        background: #2563eb;
+    }
 
     .clinic-action-description {
-        margin-top: 3px;
+        margin-top: 5px;
         font-size: .68rem;
-        color: #94a3b8;
+        color: #64748b;
     }
 
     .not-found {
@@ -262,7 +274,6 @@
     }
 
     @@media (max-width: 767.98px) {
-
         .student-result-header {
             display: block;
         }
@@ -281,21 +292,16 @@
     }
 </style>
 
-
 <!-- Page Header -->
-
 <div class="lookup-header">
-
     <h1 class="lookup-title">
-    Patient Lookup
+        Patient Lookup
     </h1>
 
     <p class="lookup-subtitle">
         Find a patient and access their clinic records.
     </p>
-
 </div>
-
 
 @if (TempData["SuccessMessage"] != null)
 {
@@ -308,17 +314,13 @@
                 class="btn-close"
                 data-bs-dismiss="alert">
         </button>
-
     </div>
 }
 
-
 <!-- Search Panel -->
-
 <div class="lookup-panel">
 
     <div class="lookup-panel-header">
-
         <h2 class="lookup-panel-title">
             Find Patient
         </h2>
@@ -326,18 +328,15 @@
         <p class="lookup-panel-description">
             Search using a name, Student Number, or patient identifier.
         </p>
-
     </div>
-
 
     <div class="lookup-panel-body">
 
+        <!-- Search Form -->
         <form method="post">
-
             <div class="row g-2 align-items-end">
 
                 <div class="col-md-9">
-
                     <label class="search-label">
                         Name, Student Number, or Identifier
                     </label>
@@ -349,23 +348,19 @@
                     <span asp-validation-for="SearchStudentNumber"
                           class="text-danger small">
                     </span>
-
                 </div>
 
-
                 <div class="col-md-3">
-
                     <button type="submit"
                             class="btn btn-primary search-button w-100">
                         Search Patient
                     </button>
-
                 </div>
 
             </div>
-
         </form>
 
+        <!-- Community / Non-Student Patients -->
         @if (Model.PatientResults.Any(p => p.PatientType != "Student"))
         {
             <div class="student-result">
@@ -384,115 +379,147 @@
 
                 @foreach (var patient in Model.PatientResults.Where(p => p.PatientType != "Student"))
                 {
-                    <div class="table-responsive mb-4">
+                    <div class="mb-4">
 
-                        <table class="table student-info-table">
-                            <tbody>
-                                <tr>
-                                    <th>Patient Type</th>
-                                    <td>@patient.PatientType</td>
-                                </tr>
+                        <!-- Patient Information -->
+                        <div class="table-responsive">
+                            <table class="table student-info-table">
+                                <tbody>
+                                    <tr>
+                                        <th>Patient Type</th>
+                                        <td>@patient.PatientType</td>
+                                    </tr>
 
-                                <tr>
-                                    <th>Full Name</th>
-                                    <td>
-                                        @(string.IsNullOrWhiteSpace(patient.FullName)
-                                            ? "—"
-                                            : patient.FullName)
-                                    </td>
-                                </tr>
+                                    <tr>
+                                        <th>Full Name</th>
+                                        <td>
+                                            @(string.IsNullOrWhiteSpace(patient.FullName)
+                                                ? "—"
+                                                : patient.FullName)
+                                        </td>
+                                    </tr>
 
-                                <tr>
-                                    <th>Identifier</th>
-                                    <td>
-                                        @(string.IsNullOrWhiteSpace(patient.Identifier)
-                                            ? "—"
-                                            : patient.Identifier)
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                                    <tr>
+                                        <th>Identifier</th>
+                                        <td>
+                                            @(string.IsNullOrWhiteSpace(patient.Identifier)
+                                                ? "—"
+                                                : patient.Identifier)
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
 
+                        <!-- Dental History -->
                         <div class="clinic-actions">
                             <div class="clinic-actions-title">
-                                Clinic Actions
-                            </div>
-                            <div class="clinic-actions">
-                                <div class="clinic-actions-title">
-                                    Dental History
-                                </div>
-
-                                @if (patient.ClinicPatientId.HasValue &&
-                                     Model.DentalHistory.TryGetValue(
-                                         patient.ClinicPatientId.Value,
-                                         out var dentalRecords) &&
-                                     dentalRecords.Any())
-                                {
-                                    <div class="table-responsive">
-                                        <table class="table student-info-table">
-                                            <thead>
-                                                <tr>
-                                                    <th>Visit Date</th>
-                                                    <th>Chief Complaint</th>
-                                                    <th>Diagnosis</th>
-                                                    <th>Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                @foreach (var dentalRecord in dentalRecords)
-                                                {
-                                                    <tr>
-                                                        <td>
-                                                            @dentalRecord.VisitDate.ToString("MMM dd, yyyy")
-                                                        </td>
-                                                        <td>@dentalRecord.ChiefComplaint</td>
-                                                        <td>
-                                                            @(string.IsNullOrWhiteSpace(dentalRecord.Diagnosis)
-                                                                ? "—"
-                                                                : dentalRecord.Diagnosis)
-                                                        </td>
-                                                        <td>
-                                                            <a asp-page="/DentalRecordPages/Details"
-                                                               asp-route-id="@dentalRecord.DentalRecordId"
-                                                               class="btn btn-sm btn-outline-primary">
-                                                                View
-                                                            </a>
-                                                        </td>
-                                                    </tr>
-                                                }
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                }
-                                else
-                                {
-                                    <div class="requirement-note">
-                                        No dental records have been recorded for this patient.
-                                    </div>
-                                }
+                                Dental History
                             </div>
 
-                            @if (patient.MedicalRecordId.HasValue)
+                            @if (patient.ClinicPatientId.HasValue &&
+                                 Model.DentalHistory.TryGetValue(
+                                     patient.ClinicPatientId.Value,
+                                     out var dentalRecords) &&
+                                 dentalRecords.Any())
                             {
-                                <a class="clinic-action"
-                                   asp-page="/MedicalRecordPages/Details"
-                                   asp-route-id="@patient.MedicalRecordId.Value">
-
-                                    <span class="clinic-action-title">
-                                        Open Medical Record
-                                    </span>
-
-                                    <span class="clinic-action-description">
-                                        View consultation history
-                                    </span>
-                                </a>
+                                <div class="table-responsive">
+                                    <table class="table student-info-table">
+                                        <thead>
+                                            <tr>
+                                                <th>Visit Date</th>
+                                                <th>Chief Complaint</th>
+                                                <th>Diagnosis</th>
+                                                <th>Action</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            @foreach (var dentalRecord in dentalRecords)
+                                            {
+                                                <tr>
+                                                    <td>
+                                                        @dentalRecord.VisitDate.ToString("MMM dd, yyyy")
+                                                    </td>
+                                                    <td>
+                                                        @dentalRecord.ChiefComplaint
+                                                    </td>
+                                                    <td>
+                                                        @(string.IsNullOrWhiteSpace(dentalRecord.Diagnosis)
+                                                            ? "—"
+                                                            : dentalRecord.Diagnosis)
+                                                    </td>
+                                                    <td>
+                                                        <a asp-page="/DentalRecordPages/Details"
+                                                           asp-route-id="@dentalRecord.DentalRecordId"
+                                                           class="btn btn-sm btn-outline-primary">
+                                                            View
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            }
+                                        </tbody>
+                                    </table>
+                                </div>
                             }
                             else
                             {
                                 <div class="requirement-note">
-                                    No medical record is linked to this patient yet.
+                                    No dental records have been recorded for this patient.
                                 </div>
                             }
+                        </div>
+
+                        <!-- Clinic Actions -->
+                        <div class="clinic-actions">
+                            <div class="clinic-actions-title">
+                                Clinic Actions
+                            </div>
+
+                            <div class="clinic-action-grid">
+
+                                <!-- Open Medical Record -->
+                                <form method="post" asp-page-handler="OpenMedicalRecord">
+                                    <input type="hidden"
+                                           name="clinicPatientId"
+                                           value="@patient.ClinicPatientId" />
+
+                                    <button type="submit" class="clinic-action">
+                                        <span class="clinic-action-title">
+                                            Open Medical Record
+                                        </span>
+                                        <span class="clinic-action-description">
+                                            Open existing or create patient record
+                                        </span>
+                                    </button>
+                                </form>
+
+                                <!-- Record Vital Signs -->
+                                <a class="clinic-action"
+                                   asp-page="/VitalSignLogPages/Create"
+                                   asp-route-selectedClinicPatientId="@patient.ClinicPatientId">
+
+                                    <span class="clinic-action-title">
+                                        Record Vital Signs
+                                    </span>
+                                    <span class="clinic-action-description">
+                                        Measure without consultation
+                                    </span>
+                                </a>
+
+                                <!-- Start Consultation -->
+                                <a class="clinic-action"
+                                   asp-page="/MedicalRecordPages/Create"
+                                   asp-route-clinicPatientId="@patient.ClinicPatientId">
+
+                                    <span class="clinic-action-title">
+                                        Start Consultation
+                                    </span>
+                                    <span class="clinic-action-description">
+                                        Begin a clinic consultation
+                                    </span>
+                                </a>
+
+                            </div>
                         </div>
 
                     </div>
@@ -500,14 +527,13 @@
             </div>
         }
 
+        <!-- Student Patient -->
         @if (Model.Student != null)
         {
             <div class="student-result">
 
                 <div class="student-result-header">
-
                     <div>
-
                         <h2 class="student-result-title">
                             Student Information
                         </h2>
@@ -515,161 +541,117 @@
                         <p class="student-result-subtitle">
                             Patient information registered in the system.
                         </p>
-
                     </div>
-
 
                     <a asp-page="/StudentPages/Edit"
                        asp-route-id="@Model.Student.StudentId"
                        class="btn btn-sm btn-outline-primary">
                         Edit Student
                     </a>
-
                 </div>
 
-
+                <!-- Student Information -->
                 <div class="table-responsive">
-
                     <table class="table student-info-table">
-
                         <tbody>
 
                             <tr>
-
-                                <th>
-                                    Student Number
-                                </th>
-
-                                <td>
-                                    @Model.Student.StudentNumber
-                                </td>
-
+                                <th>Student Number</th>
+                                <td>@Model.Student.StudentNumber</td>
                             </tr>
 
-
                             <tr>
-
-                                <th>
-                                    Full Name
-                                </th>
-
-                                <td>
-                                    @Model.Student.FullName
-                                </td>
-
+                                <th>Full Name</th>
+                                <td>@Model.Student.FullName</td>
                             </tr>
 
-
                             <tr>
-
-                                <th>
-                                    Course
-                                </th>
-
-                                <td>
-                                    @Model.Student.Course
-                                </td>
-
+                                <th>Course</th>
+                                <td>@Model.Student.Course</td>
                             </tr>
 
-
                             <tr>
-
-                                <th>
-                                    Year Level
-                                </th>
-
-                                <td>
-                                    @Model.Student.YearLevel
-                                </td>
-
+                                <th>Year Level</th>
+                                <td>@Model.Student.YearLevel</td>
                             </tr>
 
-
                             <tr>
+                                <th>Medical Requirements</th>
+                                <td>
+                                    @if (Model.MedicalRequirements.Any())
+                                    {
+                                        <table class="table table-sm align-middle mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Requirement</th>
+                                                    <th>Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @foreach (var requirement in Model.MedicalRequirements)
+                                                {
+                                                    <tr>
+                                                        <td>
+                                                            @requirement.RequirementName
+                                                        </td>
+                                                        <td>
+                                                            <form method="post"
+                                                                  asp-page-handler="UpdateRequirement"
+                                                                  class="d-inline">
 
-                                <th>
-                                    Medical Requirements
-                                </th>
+                                                                <input type="hidden"
+                                                                       name="medicalRequirementId"
+                                                                       value="@requirement.MedicalRequirementId" />
 
-                               <td>
-    @if (Model.MedicalRequirements.Any())
-    {
-        <table class="table table-sm align-middle mb-0">
-            <thead>
-                <tr>
-                    <th>Requirement</th>
-                    <th>Status</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var requirement in Model.MedicalRequirements)
-                {
-                    <tr>
-                        <td>@requirement.RequirementName</td>
-                        <td>
-    <form method="post"
-          asp-page-handler="UpdateRequirement"
-          class="d-inline">
+                                                                @if (requirement.Status == "Complete")
+                                                                {
+                                                                    <input type="hidden"
+                                                                           name="status"
+                                                                           value="Not Submitted" />
 
-        <input type="hidden"
-               name="medicalRequirementId"
-               value="@requirement.MedicalRequirementId" />
+                                                                    <button type="submit"
+                                                                            class="requirement-status requirement-complete border-0">
+                                                                        Complete
+                                                                    </button>
+                                                                }
+                                                                else
+                                                                {
+                                                                    <input type="hidden"
+                                                                           name="status"
+                                                                           value="Complete" />
 
-        @if (requirement.Status == "Complete")
-        {
-            <input type="hidden"
-                   name="status"
-                   value="Not Submitted" />
-
-            <button type="submit"
-                    class="requirement-status requirement-complete border-0">
-                Complete
-            </button>
-        }
-        else
-        {
-            <input type="hidden"
-                   name="status"
-                   value="Complete" />
-
-            <button type="submit"
-                    class="requirement-status requirement-none border-0">
-                Not Submitted
-            </button>
-        }
-    </form>
-</td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-    }
-    else
-    {
-        <div class="requirement-note">
-            No medical requirements have been recorded.
-        </div>
-    }
-</td>
-
+                                                                    <button type="submit"
+                                                                            class="requirement-status requirement-none border-0">
+                                                                        Not Submitted
+                                                                    </button>
+                                                                }
+                                                            </form>
+                                                        </td>
+                                                    </tr>
+                                                }
+                                            </tbody>
+                                        </table>
+                                    }
+                                    else
+                                    {
+                                        <div class="requirement-note">
+                                            No medical requirements have been recorded.
+                                        </div>
+                                    }
+                                </td>
                             </tr>
 
                         </tbody>
-
                     </table>
-
                 </div>
 
-                <!-- Dental History -->
-
+                <!-- Student Dental History -->
                 <div class="clinic-actions">
                     <div class="clinic-actions-title">
                         Dental History
                     </div>
 
-                    @if (Model.Student != null &&
-                         Model.StudentClinicPatientIds.TryGetValue(
+                    @if (Model.StudentClinicPatientIds.TryGetValue(
                              Model.Student.StudentId,
                              out var studentClinicPatientId) &&
                          Model.DentalHistory.TryGetValue(
@@ -694,7 +676,9 @@
                                             <td>
                                                 @dentalRecord.VisitDate.ToString("MMM dd, yyyy")
                                             </td>
-                                            <td>@dentalRecord.ChiefComplaint</td>
+                                            <td>
+                                                @dentalRecord.ChiefComplaint
+                                            </td>
                                             <td>
                                                 @(string.IsNullOrWhiteSpace(dentalRecord.Diagnosis)
                                                     ? "—"
@@ -721,67 +705,44 @@
                     }
                 </div>
 
-                <!-- Clinic Actions -->
-
+                <!-- Student Clinic Actions -->
                 <div class="clinic-actions">
-
                     <div class="clinic-actions-title">
                         Clinic Actions
                     </div>
 
+                    <div class="clinic-action-grid">
 
-                    @if (Model.HasMedicalRecord)
-                    {
-                        <div class="clinic-action-grid">
+                        <!-- Open Medical Record -->
+                        <form method="post" asp-page-handler="OpenMedicalRecord">
+                            <input type="hidden"
+                                   name="studentId"
+                                   value="@Model.Student.StudentId" />
 
-                            <a class="clinic-action"
-                               asp-page="/MedicalRecordPages/Details"
-                               asp-route-id="@Model.MedicalRecordId">
-
+                            <button type="submit" class="clinic-action">
                                 <span class="clinic-action-title">
                                     Open Medical Record
                                 </span>
-
                                 <span class="clinic-action-description">
-                                    View consultation history
+                                    Open existing or create patient record
                                 </span>
+                            </button>
+                        </form>
 
-                            </a>
+                        <!-- Record Vital Signs -->
+                        <a class="clinic-action"
+                           asp-page="/VitalSignLogPages/Create"
+                           asp-route-selectedClinicPatientId="@(Model.StudentClinicPatientIds.ContainsKey(Model.Student.StudentId) ? Model.StudentClinicPatientIds[Model.Student.StudentId] : (int?)null)">
 
+                            <span class="clinic-action-title">
+                                Record Vital Signs
+                            </span>
+                            <span class="clinic-action-description">
+                                Measure without consultation
+                            </span>
+                        </a>
 
-                            <a class="clinic-action"
-                               asp-page="/VitalSignLogPages/Create"
-                               asp-route-medicalRecordId="@Model.MedicalRecordId">
-
-                                <span class="clinic-action-title">
-                                    Record Vital Signs
-                                </span>
-
-                                <span class="clinic-action-description">
-                                    Add a new measurement
-                                </span>
-
-                            </a>
-
-
-                            <a class="clinic-action"
-                               asp-page="/VitalSignLogPages/Index"
-                               asp-route-medicalRecordId="@Model.MedicalRecordId">
-
-                                <span class="clinic-action-title">
-                                    View Vital History
-                                </span>
-
-                                <span class="clinic-action-description">
-                                    Review previous readings
-                                </span>
-
-                            </a>
-
-                        </div>
-                    }
-                    else
-                    {
+                        <!-- Start Consultation -->
                         <a class="clinic-action"
                            asp-page="/MedicalRecordPages/Create"
                            asp-route-studentId="@Model.Student.StudentId">
@@ -789,24 +750,21 @@
                             <span class="clinic-action-title">
                                 Start Consultation
                             </span>
-
                             <span class="clinic-action-description">
-                                Create the student's first clinic record
+                                Begin a clinic consultation
                             </span>
-
                         </a>
-                    }
 
+                    </div>
                 </div>
 
             </div>
         }
 
-
+        <!-- Patient Not Found -->
         @if (Model.StudentNotFound)
         {
             <div class="not-found">
-
                 <div class="not-found-title">
                     Patient Not Found
                 </div>
@@ -820,10 +778,8 @@
                    class="btn btn-sm btn-outline-warning">
                     Add New Patient
                 </a>
-
             </div>
         }
 
     </div>
-
 </div>

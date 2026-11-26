@@ -11,7 +11,6 @@ namespace Capstone_Clinic.Pages.VitalSignLogPages;
 
 public class CreateModel : PageModel
 {
-
     private readonly AppDbContext _context;
     private readonly IoTDevicePresence _devicePresence;
 
@@ -29,7 +28,15 @@ public class CreateModel : PageModel
 
     public string IoTDeviceStatus { get; set; } = "Checking...";
 
-    private void LoadMedicalRecordStudent(int medicalRecordId)
+    [BindProperty]
+    public VitalSignLog VitalSignLog { get; set; } = default!;
+
+    [BindProperty]
+    public int SelectedClinicPatientId { get; set; }
+
+    public SelectList ClinicPatientList { get; set; } = default!;
+
+    private void LoadMedicalRecordPatient(int medicalRecordId)
     {
         var medicalRecord = _context.MedicalRecords
             .FirstOrDefault(m => m.MedicalRecordId == medicalRecordId);
@@ -37,21 +44,6 @@ public class CreateModel : PageModel
         if (medicalRecord == null)
             return;
 
-        // Student medical record
-        if (medicalRecord.StudentId.HasValue)
-        {
-            var student = _context.Students
-                .FirstOrDefault(s => s.StudentId == medicalRecord.StudentId.Value);
-
-            if (student == null)
-                return;
-
-            StudentNumber = student.StudentNumber;
-            StudentName = student.FullName;
-            return;
-        }
-
-        // Community patient medical record
         var clinicPatient = _context.ClinicPatients
             .FirstOrDefault(cp => cp.ClinicPatientId == medicalRecord.ClinicPatientId);
 
@@ -62,114 +54,161 @@ public class CreateModel : PageModel
         StudentName = clinicPatient.FullName ?? "";
     }
 
+    private void LoadClinicPatientList()
+    {
+        var patients = _context.ClinicPatients
+            .AsEnumerable()
+            .OrderBy(cp => cp.FullName)
+            .Select(cp => new
+            {
+                cp.ClinicPatientId,
+                Display = $"{cp.Identifier ?? "No ID"} - " +
+                          $"{cp.FullName ?? "Unnamed Patient"} " +
+                          $"({cp.PatientType ?? "Patient"})"
+            })
+            .ToList();
+
+        ClinicPatientList = new SelectList(
+            patients,
+            nameof(ClinicPatient.ClinicPatientId),
+            "Display"
+        );
+    }
+
+    private void PrepareStandaloneForm()
+    {
+        LoadClinicPatientList();
+    }
+
     public async Task<IActionResult> OnGetAsync(int? medicalRecordId)
     {
         await CheckIoTDeviceStatusAsync();
-        if (medicalRecordId.HasValue)
-        {
-            VitalSignLog = new VitalSignLog
-            {
-                MedicalRecordId = medicalRecordId.Value,
-                RecordedAt = Capstone_Clinic.Helpers.TimeHelper.Now
-            };
-
-            LoadMedicalRecordStudent(medicalRecordId.Value);
-
-            return Page();
-        }
-
-        // Fallback if opened directly
-        StudentList = new SelectList(
-            _context.Students
-                .Select(s => new
-                {
-                    s.StudentId,
-                    Display = s.StudentNumber + " - " + s.FullName
-                })
-                .ToList(),
-            "StudentId",
-            "Display"
-        );
 
         VitalSignLog = new VitalSignLog
         {
-            RecordedAt = Capstone_Clinic.Helpers.TimeHelper.Now
+            MedicalRecordId = medicalRecordId,
+            RecordedAt = TimeHelper.Now
         };
+
+        if (medicalRecordId.HasValue)
+        {
+            LoadMedicalRecordPatient(medicalRecordId.Value);
+            return Page();
+        }
+
+        // Standalone vital-sign recording
+        PrepareStandaloneForm();
+
         return Page();
     }
 
-    [BindProperty]
-    public VitalSignLog VitalSignLog { get; set; } = default!;
-    [BindProperty]
-    public int SelectedStudentId { get; set; }
-    public SelectList StudentList { get; set; } = default!;
-
     public async Task<IActionResult> OnPostAsync()
     {
-        if (!ModelState.IsValid)
+        await CheckIoTDeviceStatusAsync();
+
+        MedicalRecord? medicalRecord = null;
+        ClinicPatient? clinicPatient = null;
+
+        // Consultation-linked recording
+        if (VitalSignLog.MedicalRecordId.HasValue)
         {
-            if (VitalSignLog.MedicalRecordId > 0)
+            medicalRecord = await _context.MedicalRecords
+                .FirstOrDefaultAsync(m =>
+                    m.MedicalRecordId == VitalSignLog.MedicalRecordId.Value);
+
+            if (medicalRecord == null)
             {
-                LoadMedicalRecordStudent(VitalSignLog.MedicalRecordId);
+                ModelState.AddModelError(
+                    "",
+                    "Medical Record not found.");
+
+                VitalSignLog.MedicalRecordId = null;
             }
             else
             {
-                StudentList = new SelectList(
-                    _context.Students
-                        .Select(s => new
-                        {
-                            s.StudentId,
-                            Display = s.StudentNumber + " - " + s.FullName
-                        })
-                        .ToList(),
-                    "StudentId",
-                    "Display"
-                );
+                clinicPatient = await _context.ClinicPatients
+                    .FirstOrDefaultAsync(cp =>
+                        cp.ClinicPatientId == medicalRecord.ClinicPatientId);
+
+                if (clinicPatient == null)
+                {
+                    ModelState.AddModelError(
+                        "",
+                        "The patient associated with this Medical Record could not be found.");
+                }
+            }
+        }
+        // Standalone recording
+        else
+        {
+            if (SelectedClinicPatientId <= 0)
+            {
+                ModelState.AddModelError(
+                    nameof(SelectedClinicPatientId),
+                    "Please select a patient.");
+            }
+            else
+            {
+                clinicPatient = await _context.ClinicPatients
+                    .FirstOrDefaultAsync(cp =>
+                        cp.ClinicPatientId == SelectedClinicPatientId);
+
+                if (clinicPatient == null)
+                {
+                    ModelState.AddModelError(
+                        nameof(SelectedClinicPatientId),
+                        "Selected patient not found.");
+                }
+            }
+        }
+
+        // Return the form if validation failed
+        if (!ModelState.IsValid)
+        {
+            if (VitalSignLog.MedicalRecordId.HasValue)
+            {
+                LoadMedicalRecordPatient(
+                    VitalSignLog.MedicalRecordId.Value);
+            }
+            else
+            {
+                PrepareStandaloneForm();
             }
 
             return Page();
         }
 
-        if (VitalSignLog.MedicalRecordId == 0)
+        // Assign the patient directly, regardless of whether
+        // the vital-sign record is consultation-linked.
+        if (clinicPatient == null)
         {
-            ModelState.AddModelError("", "Medical Record not found.");
+            ModelState.AddModelError("", "Patient could not be identified.");
 
-            StudentList = new SelectList(
-                _context.Students
-                    .Select(s => new
-                    {
-                        s.StudentId,
-                        Display = s.StudentNumber + " - " + s.FullName
-                    })
-                    .ToList(),
-                "StudentId",
-                "Display"
-            );
-
+            PrepareStandaloneForm();
             return Page();
         }
 
-        var medicalRecord = await _context.MedicalRecords
-            .FirstOrDefaultAsync(m =>
-                m.MedicalRecordId == VitalSignLog.MedicalRecordId);
-
-        if (medicalRecord == null)
-        {
-            ModelState.AddModelError("", "Medical Record not found.");
-            LoadMedicalRecordStudent(VitalSignLog.MedicalRecordId);
-            return Page();
-        }
-
-        VitalSignLog.ClinicPatientId = medicalRecord.ClinicPatientId;
+        VitalSignLog.ClinicPatientId = clinicPatient.ClinicPatientId;
         VitalSignLog.StaffId = 1;
-        VitalSignLog.RecordedAt = Capstone_Clinic.Helpers.TimeHelper.Now;
+        VitalSignLog.RecordedAt = TimeHelper.Now;
 
+        // Monitoring is still required
         if (VitalSignLog.TimeIn == null)
         {
-            ModelState.AddModelError(string.Empty,
+            ModelState.AddModelError(
+                string.Empty,
                 "Please start patient monitoring before saving vital signs.");
 
-            LoadMedicalRecordStudent(VitalSignLog.MedicalRecordId);
+            if (VitalSignLog.MedicalRecordId.HasValue)
+            {
+                LoadMedicalRecordPatient(
+                    VitalSignLog.MedicalRecordId.Value);
+            }
+            else
+            {
+                PrepareStandaloneForm();
+            }
+
             return Page();
         }
 
@@ -179,7 +218,7 @@ public class CreateModel : PageModel
         // Add the vital-sign record
         _context.VitalSignLogs.Add(VitalSignLog);
 
-        // Create the alert in the same EF save operation
+        // Create an alert in the same save operation
         if (VitalSignLog.Status == "Warning" ||
             VitalSignLog.Status == "Critical")
         {
@@ -193,50 +232,44 @@ public class CreateModel : PageModel
                 AlertType = firstRemark,
                 AlertMessage = VitalSignLog.Remarks,
                 Status = "Active",
-                CreatedAt = Capstone_Clinic.Helpers.TimeHelper.Now
+                CreatedAt = TimeHelper.Now
             };
 
             _context.Alerts.Add(alert);
         }
 
-        // VitalSignLog and Alert are committed together.
         await _context.SaveChangesAsync();
 
-        // Show an immediate popup after a Critical vital-sign record is completed.
+        // Immediate Critical alert message
         if (VitalSignLog.Status == "Critical")
         {
-            var patientName = "patient";
-
-            if (medicalRecord.StudentId.HasValue)
-            {
-                patientName = await _context.Students
-                    .Where(s => s.StudentId == medicalRecord.StudentId.Value)
-                    .Select(s => s.FullName)
-                    .FirstOrDefaultAsync() ?? "patient";
-            }
-            else
-            {
-                patientName = await _context.ClinicPatients
-                    .Where(cp => cp.ClinicPatientId == medicalRecord.ClinicPatientId)
-                    .Select(cp => cp.FullName)
-                    .FirstOrDefaultAsync() ?? "patient";
-            }
+            var patientName = clinicPatient.FullName ?? "patient";
 
             TempData["CriticalAlertMessage"] =
-                $"Critical vital signs detected for {patientName}. {VitalSignLog.Remarks}";
+                $"Critical vital signs detected for {patientName}. " +
+                VitalSignLog.Remarks;
         }
 
-        Console.WriteLine("===== SAVE HANDLER END =====");
+        // Return to consultation details if consultation-linked;
+        // otherwise return to the general Vital Signs page.
+        if (VitalSignLog.MedicalRecordId.HasValue)
+        {
+            return RedirectToPage(
+                "/MedicalRecordPages/Details",
+                new { id = VitalSignLog.MedicalRecordId.Value });
+        }
 
-        return RedirectToPage(
-            "/MedicalRecordPages/Details",
-            new { id = VitalSignLog.MedicalRecordId });
+        TempData["SuccessMessage"] = "Vital signs recorded successfully.";
+
+        return RedirectToPage("/VitalSignLogPages/Index");
     }
+
     private Task CheckIoTDeviceStatusAsync()
     {
         IoTDeviceStatus = _devicePresence.IsOnline()
             ? "Connected"
             : "Offline";
+
         return Task.CompletedTask;
     }
 }

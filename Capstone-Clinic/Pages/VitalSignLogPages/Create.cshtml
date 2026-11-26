@@ -291,11 +291,21 @@
 
         </div>
 
-        <a asp-page="/MedicalRecordPages/Details"
-           asp-route-id="@Model.VitalSignLog.MedicalRecordId"
-           class="btn btn-outline-secondary">
-            Back to Medical Record
-        </a>
+        @if (Model.VitalSignLog.MedicalRecordId.HasValue)
+        {
+            <a asp-page="/MedicalRecordPages/Details"
+               asp-route-id="@Model.VitalSignLog.MedicalRecordId.Value"
+               class="btn btn-outline-secondary">
+                Back to Medical Record
+            </a>
+        }
+        else
+        {
+            <a asp-page="/VitalSignLogPages/Index"
+               class="btn btn-outline-secondary">
+                Back to Vital Signs
+            </a>
+        }
 
     </div>
 
@@ -305,92 +315,70 @@
 <form method="post"
       asp-page="/VitalSignLogPages/Create">
 
-
     <!-- Patient Information -->
 
     <div class="form-panel">
 
         <div class="form-panel-header">
-
-            <h2 class="form-panel-title">
-                Patient Information
-            </h2>
-
+            <h2 class="form-panel-title">Patient Information</h2>
             <p class="form-panel-description">
                 Patient associated with this vital-sign record.
             </p>
-
         </div>
 
         <div class="form-panel-body">
 
-            @if (!string.IsNullOrEmpty(Model.StudentName))
+            @if (Model.VitalSignLog.MedicalRecordId.HasValue)
             {
                 <div class="patient-panel">
-
                     <div class="row g-3">
-
                         <div class="col-md-5">
-
-                            <div class="patient-label">
-                                Patient Identifier
-                            </div>
-
-                            <div class="patient-value">
-                                @Model.StudentNumber
-                            </div>
-
+                            <div class="patient-label">Patient Identifier</div>
+                            <div class="patient-value">@Model.StudentNumber</div>
                         </div>
 
                         <div class="col-md-7">
-
-                            <div class="patient-label">
-                                Patient Name
-                            </div>
-
-                            <div class="patient-value">
-                                @Model.StudentName
-                            </div>
-
+                            <div class="patient-label">Patient Name</div>
+                            <div class="patient-value">@Model.StudentName</div>
                         </div>
-
                     </div>
-
                 </div>
 
                 <input type="hidden"
-                       asp-for="VitalSignLog.MedicalRecordId" />
+                       name="VitalSignLog.MedicalRecordId"
+                       value="@Model.VitalSignLog.MedicalRecordId.Value" />
             }
             else
             {
                 <div class="mb-0">
-
-                    <label asp-for="SelectedStudentId"
-                           class="form-label">
-                        Student
+                    <label for="SelectedClinicPatientId" class="form-label">
+                        Select Patient
                     </label>
 
-                    <select asp-for="SelectedStudentId"
-                            asp-items="Model.StudentList"
+                    <select id="SelectedClinicPatientId"
+                            name="SelectedClinicPatientId"
                             class="form-select">
+                        <option value="">-- Select Patient --</option>
 
-                        <option value="">
-                            -- Select Student --
-                        </option>
-
+                        @if (Model.ClinicPatientList != null)
+                        {
+                            foreach (var patient in Model.ClinicPatientList)
+                            {
+                                <option value="@patient.Value"
+                                        selected="@(patient.Value == Model.SelectedClinicPatientId.ToString())">
+                                    @patient.Text
+                                </option>
+                            }
+                        }
                     </select>
 
-                    <span asp-validation-for="SelectedStudentId"
-                          class="text-danger">
-                    </span>
-
+                    <span asp-validation-for="SelectedClinicPatientId"
+                          class="text-danger"></span>
                 </div>
             }
 
         </div>
-
     </div>
-
 
     <!-- Messages -->
 
@@ -754,11 +742,21 @@
             Save Vital Signs
         </button>
 
-        <a asp-page="/MedicalRecordPages/Details"
-           asp-route-id="@Model.VitalSignLog.MedicalRecordId"
-           class="btn btn-outline-secondary">
-            Cancel
-        </a>
+        @if (Model.VitalSignLog.MedicalRecordId.HasValue)
+        {
+            <a asp-page="/MedicalRecordPages/Details"
+               asp-route-id="@Model.VitalSignLog.MedicalRecordId.Value"
+               class="btn btn-outline-secondary">
+                Cancel
+            </a>
+        }
+        else
+        {
+            <a asp-page="/VitalSignLogPages/Index"
+               class="btn btn-outline-secondary">
+                Cancel
+            </a>
+        }
 
     </div>
 

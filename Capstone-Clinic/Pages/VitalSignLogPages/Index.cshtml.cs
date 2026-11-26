@@ -75,7 +75,8 @@ public class IndexModel : PageModel
                     .ToListAsync();
 
                 query = query.Where(x =>
-                    medicalRecordIds.Contains(x.Vital.MedicalRecordId));
+                    x.Vital.MedicalRecordId.HasValue &&
+                    medicalRecordIds.Contains(x.Vital.MedicalRecordId.Value));
             }
             else
             {

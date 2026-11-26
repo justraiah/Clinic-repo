@@ -351,4 +351,86 @@ public class SearchModel : PageModel
             }
         }
     }
+
+    public async Task<IActionResult> OnPostOpenMedicalRecordAsync(
+        int? studentId,
+        int? clinicPatientId)
+    {
+        Models.MedicalRecord? record = null;
+
+        if (studentId.HasValue)
+        {
+            record = await _context.MedicalRecords
+                .Where(m => m.StudentId == studentId.Value)
+                .OrderByDescending(m => m.MedicalRecordId)
+                .FirstOrDefaultAsync();
+
+            if (record == null)
+            {
+                var clinicPatient = await _context.ClinicPatients
+                    .FirstOrDefaultAsync(p => p.StudentId == studentId.Value);
+
+                if (clinicPatient == null)
+                {
+                    return NotFound("Patient profile not found.");
+                }
+
+                record = new Models.MedicalRecord
+                {
+                    StudentId = studentId.Value,
+                    ClinicPatientId = clinicPatient.ClinicPatientId,
+                    VisitDate = DateTime.Today,
+                    Medications = "",
+                    Allergies = "",
+                    ClinicalNotes = "",
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                };
+
+                _context.MedicalRecords.Add(record);
+                await _context.SaveChangesAsync();
+            }
+        }
+        else if (clinicPatientId.HasValue)
+        {
+            record = await _context.MedicalRecords
+                .Where(m => m.ClinicPatientId == clinicPatientId.Value)
+                .OrderByDescending(m => m.MedicalRecordId)
+                .FirstOrDefaultAsync();
+
+            if (record == null)
+            {
+                var patient = await _context.ClinicPatients
+                    .FirstOrDefaultAsync(p => p.ClinicPatientId == clinicPatientId.Value);
+
+                if (patient == null)
+                {
+                    return NotFound("Patient not found.");
+                }
+
+                record = new Models.MedicalRecord
+                {
+                    ClinicPatientId = patient.ClinicPatientId,
+                    VisitDate = DateTime.Today,
+                    Medications = "",
+                    Allergies = "",
+                    ClinicalNotes = "",
+                    CreatedAt = DateTime.Now,
+                    UpdatedAt = DateTime.Now
+                };
+
+                _context.MedicalRecords.Add(record);
+                await _context.SaveChangesAsync();
+            }
+        }
+        else
+        {
+            return BadRequest();
+        }
+
+        return RedirectToPage(
+            "/MedicalRecordPages/Details",
+            new { id = record!.MedicalRecordId });
+    }
+
 }
