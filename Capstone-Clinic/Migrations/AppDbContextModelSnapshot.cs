@@ -357,6 +357,9 @@ namespace Capstone_Clinic.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("StudentId"));
 
+                    b.Property<int?>("Age")
+                        .HasColumnType("int");
+
                     b.Property<string>("Course")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -367,6 +370,10 @@ namespace Capstone_Clinic.Migrations
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Gender")
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<string>("MedicalRequirementStatus")
                         .IsRequired()

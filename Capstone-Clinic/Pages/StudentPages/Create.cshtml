@@ -2,7 +2,7 @@
 @model Capstone_Clinic.Pages.StudentPages.CreateModel
 
 @{
-    ViewData["Title"] = "Add Student";
+    ViewData["Title"] = "Register Patient";
 }
 
 <style>
@@ -154,11 +154,11 @@
         <div>
 
             <h1 class="student-title">
-                Add New Student
+                Register New Patient
             </h1>
 
             <p class="student-subtitle">
-                Register a student in the clinic monitoring system.
+                Register a patient in the clinic monitoring system.
             </p>
 
         </div>
@@ -167,7 +167,7 @@
 
             <a asp-page="./Index"
                class="btn btn-outline-secondary">
-                Back to Students
+                Back to Patients
             </a>
 
         </div>
@@ -184,18 +184,18 @@
     </div>
 
 
-    <!-- Student Information -->
+    <!-- Patient Information -->
 
     <div class="record-panel">
 
         <div class="record-panel-header">
 
             <h2 class="record-panel-title">
-                Student Information
+                Patient Information
             </h2>
 
             <p class="record-panel-description">
-                Enter the student's basic academic and identification details.
+                Enter the patient's basic academic and identification details.
             </p>
 
         </div>
@@ -258,12 +258,54 @@
 
                 </div>
 
+                <div class="col-md-6">
+
+                    <label asp-for="Student.Age"
+                           class="form-label">
+                        Age
+                    </label>
+
+                    <input asp-for="Student.Age"
+                           type="number"
+                           min="0"
+                           max="150"
+                           class="form-control"
+                           placeholder="Enter age in years" />
+
+                    <span asp-validation-for="Student.Age"
+                          class="text-danger small">
+                    </span>
+
+                </div>
+
+                <div class="col-md-6">
+
+                    <label asp-for="Student.Gender"
+                           class="form-label">
+                        Gender
+                    </label>
+
+                    <select asp-for="Student.Gender"
+                            class="form-select">
+
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+
+                    </select>
+
+                    <span asp-validation-for="Student.Gender"
+                          class="text-danger small">
+                    </span>
+
+                </div>
+
 
                 <div class="col-md-6">
 
                     <label asp-for="Student.Course"
                            class="form-label">
-                        Course
+                        Course (Leave Blank if not applicable)
                     </label>
 
                     <input asp-for="Student.Course"
@@ -281,7 +323,7 @@
 
                     <label asp-for="Student.YearLevel"
                            class="form-label">
-                        Year Level
+                        Year Level (Leave Blank if not applicable)
                     </label>
 
                     <input asp-for="Student.YearLevel"
@@ -312,7 +354,7 @@
             </h2>
 
             <p class="record-panel-description">
-                Record the current status of the student's medical requirements.
+                Record the current status of the patient's medical requirements.
             </p>
 
         </div>
@@ -373,7 +415,7 @@
 
         <button type="submit"
                 class="btn btn-primary">
-            Add Student
+            Register Patient
         </button>
 
         <a asp-page="./Index"

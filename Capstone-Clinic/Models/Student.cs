@@ -16,6 +16,10 @@ namespace Capstone_Clinic.Models
         
         [DataType(DataType.Date)]
         public DateTime? DateOfBirth { get; set; }
+        public int? Age { get; set; }
+
+        [StringLength(20)]
+        public string? Gender { get; set; }
 
         public string Course { get; set; } = "";
 

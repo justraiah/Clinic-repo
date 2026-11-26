@@ -2,7 +2,7 @@
 @model Capstone_Clinic.Pages.StudentPages.DetailsModel
 
 @{
-    ViewData["Title"] = "Student Details";
+    ViewData["Title"] = "Patient Details";
 }
 
 <style>
@@ -204,11 +204,11 @@
         <div>
 
             <h1 class="student-title">
-                Student Details
+                Patient Details
             </h1>
 
             <p class="student-subtitle">
-                View student information and portal account status.
+                View patient information and portal account status.
             </p>
 
         </div>
@@ -235,11 +235,11 @@
     <div class="record-panel-header">
 
         <h2 class="record-panel-title">
-            Student Information
+            Patient Information
         </h2>
 
         <p class="record-panel-description">
-            Basic academic information for this student.
+            Basic personal and identification information for this patient.
         </p>
 
     </div>
@@ -274,6 +274,34 @@
 
             </div>
 
+            <div class="student-summary-item">
+
+                <div class="student-summary-label">
+                    Age
+                </div>
+
+                <div class="student-summary-value">
+                    @(Model.Student.Age.HasValue
+                        ? $"{Model.Student.Age} years old"
+                        : "Not recorded")
+                </div>
+
+            </div>
+
+
+            <div class="student-summary-item">
+
+                <div class="student-summary-label">
+                    Gender
+                </div>
+
+                <div class="student-summary-value">
+                    @(string.IsNullOrWhiteSpace(Model.Student.Gender)
+                        ? "Not recorded"
+                        : Model.Student.Gender)
+                </div>
+
+            </div>
 
             <div class="student-summary-item">
 
@@ -314,7 +342,7 @@
     <div class="record-panel-header account">
 
         <h2 class="record-panel-title">
-            Student Account
+            Portal Account
         </h2>
 
         <p class="record-panel-description">
@@ -330,8 +358,8 @@
         {
             <div class="alert no-account">
 
-                <strong>No student account.</strong>
-                This student does not have a portal account yet.
+                <strong>No portal account.</strong>
+                This patient does not have a portal account yet.
 
             </div>
         }
