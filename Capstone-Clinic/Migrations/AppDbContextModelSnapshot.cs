@@ -385,7 +385,6 @@ namespace Capstone_Clinic.Migrations
                         .HasColumnType("nvarchar(30)");
 
                     b.Property<string>("YearLevel")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.HasKey("StudentId");
