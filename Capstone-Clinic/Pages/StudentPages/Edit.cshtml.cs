@@ -21,31 +21,43 @@ public class EditModel : PageModel
     public async Task<IActionResult> OnGetAsync(int? id)
     {
         if (id == null)
-        {
             return NotFound();
-        }
 
-        var student = await _context.Students.FirstOrDefaultAsync(m => m.StudentId == id);
+        var student = await _context.Students
+            .FirstOrDefaultAsync(s => s.StudentId == id);
 
         if (student == null)
-        {
             return NotFound();
-        }
 
         Student = student;
+
         return Page();
     }
 
-    // To protect from overposting attacks, enable the specific properties you want to bind to.
-    // For more details, see https://aka.ms/RazorPagesCRUD.
     public async Task<IActionResult> OnPostAsync()
     {
         if (!ModelState.IsValid)
-        {
             return Page();
-        }
 
-        _context.Attach(Student).State = EntityState.Modified;
+        // Load the existing student as a tracked entity.
+        // This prevents accidentally overwriting database fields
+        // that are not included in the Edit form.
+        var existingStudent = await _context.Students
+            .FirstOrDefaultAsync(s => s.StudentId == Student.StudentId);
+
+        if (existingStudent == null)
+            return NotFound();
+
+        // Update only the fields intentionally editable here.
+        existingStudent.StudentNumber = Student.StudentNumber;
+        existingStudent.FullName = Student.FullName;
+        existingStudent.DateOfBirth = Student.DateOfBirth;
+        existingStudent.Age = Student.Age;
+        existingStudent.Gender = Student.Gender;
+        existingStudent.Course = Student.Course;
+        existingStudent.YearLevel = Student.YearLevel;
+        existingStudent.MedicalRequirementStatus =
+            Student.MedicalRequirementStatus;
 
         try
         {
@@ -54,25 +66,21 @@ public class EditModel : PageModel
         catch (DbUpdateConcurrencyException)
         {
             if (!StudentExists(Student.StudentId))
-            {
                 return NotFound();
-            }
-            else
-            {
-                throw;
-            }
+
+            throw;
         }
 
         return RedirectToPage(
-    "/Student/Search",
-    new
-    {
-        studentNumber = Student.StudentNumber
-    });
+            "/Student/Search",
+            new
+            {
+                studentNumber = existingStudent.StudentNumber
+            });
     }
 
     private bool StudentExists(int id)
     {
-        return _context.Students.Any(e => e.StudentId == id);
+        return _context.Students.Any(s => s.StudentId == id);
     }
 }

@@ -1,8 +1,9 @@
+
+using Capstone_Clinic.Data;
+using Capstone_Clinic.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
-using Capstone_Clinic.Models;
-using Capstone_Clinic.Data;
 
 namespace Capstone_Clinic.Pages.MedicalRecordPages;
 
@@ -26,6 +27,7 @@ public class DetailsModel : PageModel
     public string LatestStatus { get; set; } = "";
 
     public Capstone_Clinic.Models.Student? Student { get; set; }
+
     public List<MedicalRequirement> MedicalRequirements { get; set; } = new();
 
     public int? StudentAge { get; set; }
@@ -50,25 +52,15 @@ public class DetailsModel : PageModel
 
         MedicalRecord = medicalRecord;
 
-        // Student consultation
+        // Student/Patient consultation
         if (MedicalRecord.StudentId.HasValue)
         {
             Student = await _context.Students
                 .FirstOrDefaultAsync(s => s.StudentId == MedicalRecord.StudentId);
 
-            if (Student?.DateOfBirth.HasValue == true)
-            {
-                StudentAge = DateTime.Today.Year - Student.DateOfBirth.Value.Year;
+            // Use the manually saved age from the Patient Profile
+            StudentAge = Student?.Age;
 
-                if (Student.DateOfBirth.Value.Date > DateTime.Today.AddYears(-StudentAge.Value))
-                {
-                    StudentAge--;
-                }
-            }
-            else
-            {
-                StudentAge = null;
-            }
             if (Student != null)
             {
                 MedicalRequirements = await _context.MedicalRequirements
@@ -122,10 +114,11 @@ public class DetailsModel : PageModel
 
         return Page();
     }
+
     public async Task<IActionResult> OnPostUpdateRequirementAsync(
-    int medicalRequirementId,
-    string status,
-    int medicalRecordId)
+        int medicalRequirementId,
+        string status,
+        int medicalRecordId)
     {
         if (status != "Not Submitted" && status != "Complete")
         {

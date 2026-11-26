@@ -523,6 +523,20 @@
                 <div class="info-item">
 
                     <div class="info-label">
+                        Gender
+                    </div>
+
+                    <div class="info-value">
+                        @(string.IsNullOrWhiteSpace(Model.Student.Gender)
+                            ? "Not provided"
+                            : Model.Student.Gender)
+                    </div>
+
+                </div>
+
+                <div class="info-item">
+
+                    <div class="info-label">
                         Date of Birth
                     </div>
 

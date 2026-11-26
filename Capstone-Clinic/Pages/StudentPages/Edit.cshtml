@@ -2,7 +2,7 @@
 @model Capstone_Clinic.Pages.StudentPages.EditModel
 
 @{
-    ViewData["Title"] = "Edit Student";
+    ViewData["Title"] = "Edit Patient";
 }
 
 <style>
@@ -19,16 +19,16 @@
         padding-left: 14px;
     }
 
-    .student-title::before {
-        content: "";
-        position: absolute;
-        left: 0;
-        top: 4px;
-        bottom: 4px;
-        width: 4px;
-        border-radius: 3px;
-        background: #2563eb;
-    }
+        .student-title::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 4px;
+            bottom: 4px;
+            width: 4px;
+            border-radius: 3px;
+            background: #2563eb;
+        }
 
     .student-subtitle {
         color: #64748b;
@@ -42,9 +42,9 @@
         gap: 8px;
     }
 
-    .student-actions .btn {
-        font-size: .78rem;
-    }
+        .student-actions .btn {
+            font-size: .78rem;
+        }
 
     .record-panel {
         background: #ffffff;
@@ -62,9 +62,9 @@
         border-left: 3px solid #2563eb;
     }
 
-    .record-panel-header.requirements {
-        border-left-color: #64748b;
-    }
+        .record-panel-header.requirements {
+            border-left-color: #64748b;
+        }
 
     .record-panel-title {
         margin: 0;
@@ -96,11 +96,11 @@
         border-color: #d9dee5;
     }
 
-    .form-control:focus,
-    .form-select:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 .15rem rgba(37, 99, 235, .10);
-    }
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 .15rem rgba(37, 99, 235, .10);
+        }
 
     .form-text {
         color: #94a3b8;
@@ -120,62 +120,50 @@
         margin-bottom: 30px;
     }
 
-    .student-footer .btn {
-        font-size: .78rem;
-    }
+        .student-footer .btn {
+            font-size: .78rem;
+        }
 
     @@media (max-width: 767.98px) {
-
         .student-actions {
             width: 100%;
         }
 
-        .student-actions .btn {
-            width: 100%;
-        }
+            .student-actions .btn {
+                width: 100%;
+            }
 
         .student-footer {
             flex-direction: column;
         }
 
-        .student-footer .btn {
-            width: 100%;
-        }
+            .student-footer .btn {
+                width: 100%;
+            }
     }
 </style>
 
-
 <!-- Header -->
-
 <div class="student-header">
-
     <div class="d-flex justify-content-between align-items-start gap-3 flex-wrap">
-
         <div>
-
             <h1 class="student-title">
-                Edit Student
+                Edit Patient
             </h1>
 
             <p class="student-subtitle">
-                Update the student's information and medical requirements status.
+                Update the patient's information and medical requirements status.
             </p>
-
         </div>
 
         <div class="student-actions">
-
             <a asp-page="./Index"
                class="btn btn-outline-secondary">
-                Back to Students
+                Back to Patients
             </a>
-
         </div>
-
     </div>
-
 </div>
-
 
 <form method="post">
 
@@ -183,37 +171,30 @@
          class="text-danger validation-summary">
     </div>
 
-
     <input type="hidden"
            asp-for="Student.StudentId" />
 
-
-    <!-- Student Information -->
-
+    <!-- Patient Information -->
     <div class="record-panel">
 
         <div class="record-panel-header">
-
             <h2 class="record-panel-title">
-                Student Information
+                Patient Information
             </h2>
 
             <p class="record-panel-description">
-                Update the student's identification and academic information.
+                Update the patient's personal information and identification details.
             </p>
-
         </div>
-
 
         <div class="record-panel-body">
 
             <div class="row g-3">
 
                 <div class="col-md-6">
-
                     <label asp-for="Student.StudentNumber"
                            class="form-label">
-                        Student Number
+                        Patient Identifier
                     </label>
 
                     <input asp-for="Student.StudentNumber"
@@ -222,15 +203,12 @@
                     <span asp-validation-for="Student.StudentNumber"
                           class="text-danger small">
                     </span>
-
                 </div>
 
-
                 <div class="col-md-6">
-
                     <label asp-for="Student.FullName"
                            class="form-label">
-                        Full Name
+                        Patient Name
                     </label>
 
                     <input asp-for="Student.FullName"
@@ -239,12 +217,9 @@
                     <span asp-validation-for="Student.FullName"
                           class="text-danger small">
                     </span>
-
                 </div>
 
-
                 <div class="col-md-6">
-
                     <label asp-for="Student.DateOfBirth"
                            class="form-label">
                         Date of Birth
@@ -257,12 +232,75 @@
                     <span asp-validation-for="Student.DateOfBirth"
                           class="text-danger small">
                     </span>
+                </div>
 
+                <!-- Patient Age -->
+                <div class="col-md-6">
+                    <label asp-for="Student.Age"
+                           class="form-label">
+                        Age
+                    </label>
+
+                    <input asp-for="Student.Age"
+                           type="number"
+                           min="1"
+                           max="120"
+                           class="form-control"
+                           placeholder="Enter patient's age" />
+
+                    <span asp-validation-for="Student.Age"
+                          class="text-danger small">
+                    </span>
+
+                    <div class="form-text">
+                        Manually recorded patient age.
+                    </div>
+                </div>
+
+                <!-- Patient Gender -->
+                <div class="col-md-6">
+                    <label asp-for="Student.Gender"
+                           class="form-label">
+                        Gender
+                    </label>
+
+                    <select asp-for="Student.Gender"
+                            class="form-select">
+                        <option value="">Select Gender</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Other">Other</option>
+                    </select>
+
+                    <span asp-validation-for="Student.Gender"
+                          class="text-danger small">
+                    </span>
                 </div>
 
 
-                <div class="col-md-6">
+            </div>
 
+        </div>
+    </div>
+
+    <!-- Academic Information -->
+    <div class="record-panel">
+
+        <div class="record-panel-header requirements">
+            <h2 class="record-panel-title">
+                Academic Information
+            </h2>
+
+            <p class="record-panel-description">
+                Update academic details when applicable to the patient.
+            </p>
+        </div>
+
+        <div class="record-panel-body">
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
                     <label asp-for="Student.Course"
                            class="form-label">
                         Course
@@ -274,12 +312,9 @@
                     <span asp-validation-for="Student.Course"
                           class="text-danger small">
                     </span>
-
                 </div>
 
-
                 <div class="col-md-6">
-
                     <label asp-for="Student.YearLevel"
                            class="form-label">
                         Year Level
@@ -291,39 +326,31 @@
                     <span asp-validation-for="Student.YearLevel"
                           class="text-danger small">
                     </span>
-
                 </div>
 
             </div>
 
         </div>
-
     </div>
 
-
     <!-- Medical Requirements -->
-
     <div class="record-panel">
 
         <div class="record-panel-header requirements">
-
             <h2 class="record-panel-title">
                 Medical Requirements
             </h2>
 
             <p class="record-panel-description">
-                Update the current status of the student's medical requirements.
+                Update the current status of the patient's medical requirements.
             </p>
-
         </div>
-
 
         <div class="record-panel-body">
 
-            <div class="row">
+            <div class="row g-3">
 
                 <div class="col-md-6">
-
                     <label asp-for="Student.MedicalRequirementStatus"
                            class="form-label">
                         Medical Requirements Status
@@ -357,18 +384,14 @@
                     <span asp-validation-for="Student.MedicalRequirementStatus"
                           class="text-danger small">
                     </span>
-
                 </div>
 
             </div>
 
         </div>
-
     </div>
 
-
     <!-- Actions -->
-
     <div class="student-footer">
 
         <button type="submit"
@@ -385,11 +408,8 @@
 
 </form>
 
-
 @section Scripts {
-
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-
 }
