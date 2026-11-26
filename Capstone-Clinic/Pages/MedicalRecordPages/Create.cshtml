@@ -274,7 +274,7 @@
                     <div class="patient-summary-item">
 
                         <div class="patient-summary-label">
-                            Student Number
+                            Patient Identifier/Student Number
                         </div>
 
                         <div class="patient-summary-value">
@@ -286,15 +286,22 @@
 
                     <div class="patient-summary-item">
 
-                        <div class="patient-summary-label">
-                            Age
-                        </div>
-
-                        <div class="patient-summary-value">
-                            @Model.StudentAge years old
-                        </div>
-
+                    <div class="patient-summary-label">
+                        Age
                     </div>
+
+                    <div class="patient-summary-value">
+                        @if (Model.StudentAge.HasValue)
+                        {
+                            @($"{Model.StudentAge} years old")
+                        }
+                        else
+                        {
+                            @("Not recorded")
+                        }
+                    </div>
+
+                </div>
 
 
                     <div class="patient-summary-item">

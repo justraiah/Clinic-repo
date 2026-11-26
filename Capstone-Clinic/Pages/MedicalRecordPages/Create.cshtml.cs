@@ -1,3 +1,4 @@
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -18,6 +19,8 @@ public class CreateModel : PageModel
     public async Task<IActionResult> OnGetAsync(int? studentId, int? clinicPatientId)
     {
         IsExistingPatient = studentId.HasValue || clinicPatientId.HasValue;
+
+        // Existing community patient
         if (studentId == null && clinicPatientId.HasValue)
         {
             var clinicPatient = await _context.ClinicPatients
@@ -25,9 +28,7 @@ public class CreateModel : PageModel
                     cp.ClinicPatientId == clinicPatientId.Value);
 
             if (clinicPatient == null)
-            {
                 return NotFound();
-            }
 
             CommunityPatientType = clinicPatient.PatientType;
             CommunityFullName = clinicPatient.FullName;
@@ -45,9 +46,9 @@ public class CreateModel : PageModel
             return Page();
         }
 
+        // New community patient
         if (studentId == null)
         {
-            // Global/community consultation
             MedicalRecord = new MedicalRecord
             {
                 VisitDate = DateTime.Today,
@@ -58,23 +59,19 @@ public class CreateModel : PageModel
             return Page();
         }
 
+        // Existing student patient
         Student = await _context.Students
             .FirstOrDefaultAsync(s => s.StudentId == studentId);
 
         if (Student == null)
-        {
             return NotFound();
-        }
 
-        StudentAge = Student.DateOfBirth.HasValue
-        ? DateTime.Today.Year - Student.DateOfBirth.Value.Year
-        : null;
-
-        if (Student.DateOfBirth.HasValue &&
-            Student.DateOfBirth.Value.Date > DateTime.Today.AddYears(-StudentAge!.Value))
-        {
-            StudentAge--;
-        }
+        // Use manually recorded age first, then Date of Birth.
+        StudentAge = Student.Age ?? (
+            Student.DateOfBirth.HasValue
+                ? CalculateAge(Student.DateOfBirth.Value)
+                : null
+        );
 
         MedicalRecord = new MedicalRecord
         {
@@ -87,9 +84,21 @@ public class CreateModel : PageModel
         return Page();
     }
 
+    private static int CalculateAge(DateTime dateOfBirth)
+    {
+        var today = DateTime.Today;
+        var age = today.Year - dateOfBirth.Year;
+
+        if (dateOfBirth.Date > today.AddYears(-age))
+            age--;
+
+        return age;
+    }
+
     public Capstone_Clinic.Models.Student? Student { get; set; }
 
     public int? StudentAge { get; set; }
+
     [BindProperty]
     public string? CommunityPatientType { get; set; }
 
@@ -104,41 +113,40 @@ public class CreateModel : PageModel
 
     [BindProperty]
     public MedicalRecord MedicalRecord { get; set; } = default!;
+
     public bool IsExistingPatient { get; set; }
 
-    // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD.
     public async Task<IActionResult> OnPostAsync()
     {
-        // Optional consultation fields should be stored as empty strings
-        // because the existing database columns do not allow NULL.
+        // Optional fields must not be null.
         MedicalRecord.Medications ??= "";
         MedicalRecord.Allergies ??= "";
         MedicalRecord.ClinicalNotes ??= "";
 
-        // Remove implicit validation errors for optional fields.
         ModelState.Remove("MedicalRecord.Medications");
         ModelState.Remove("MedicalRecord.Allergies");
         ModelState.Remove("MedicalRecord.ClinicalNotes");
 
-        // Student consultation
+        // Student patient consultation
         if (MedicalRecord.StudentId.HasValue)
         {
             var clinicPatient = await _context.ClinicPatients
-                .FirstOrDefaultAsync(cp => cp.StudentId == MedicalRecord.StudentId);
+                .FirstOrDefaultAsync(cp =>
+                    cp.StudentId == MedicalRecord.StudentId);
 
             if (clinicPatient == null)
             {
                 ModelState.AddModelError(
                     "",
-                    "No clinic patient record exists for this student."
-                );
+                    "No clinic patient record exists for this patient.");
             }
             else
             {
-                MedicalRecord.ClinicPatientId = clinicPatient.ClinicPatientId;
+                MedicalRecord.ClinicPatientId =
+                    clinicPatient.ClinicPatientId;
             }
         }
-        // Community consultation
+        // Community patient consultation
         else
         {
             // Existing community patient
@@ -152,8 +160,7 @@ public class CreateModel : PageModel
                 {
                     ModelState.AddModelError(
                         "",
-                        "The selected community patient could not be found."
-                    );
+                        "The selected patient could not be found.");
                 }
             }
             // New community patient
@@ -163,16 +170,14 @@ public class CreateModel : PageModel
                 {
                     ModelState.AddModelError(
                         nameof(CommunityFullName),
-                        "Full name is required."
-                    );
+                        "Full name is required.");
                 }
 
                 if (string.IsNullOrWhiteSpace(CommunityPatientType))
                 {
                     ModelState.AddModelError(
                         nameof(CommunityPatientType),
-                        "Patient type is required."
-                    );
+                        "Patient type is required.");
                 }
 
                 if (ModelState.IsValid)
@@ -188,42 +193,45 @@ public class CreateModel : PageModel
                     _context.ClinicPatients.Add(clinicPatient);
                     await _context.SaveChangesAsync();
 
-                    MedicalRecord.ClinicPatientId = clinicPatient.ClinicPatientId;
+                    MedicalRecord.ClinicPatientId =
+                        clinicPatient.ClinicPatientId;
                 }
             }
         }
 
+        // Reload patient information if validation fails.
         if (!ModelState.IsValid)
         {
             if (MedicalRecord.StudentId.HasValue)
             {
                 Student = await _context.Students
-                    .FirstOrDefaultAsync(s => s.StudentId == MedicalRecord.StudentId);
+                    .FirstOrDefaultAsync(s =>
+                        s.StudentId == MedicalRecord.StudentId);
 
                 if (Student != null)
                 {
-                    StudentAge = Student.DateOfBirth.HasValue
-                    ? DateTime.Today.Year - Student.DateOfBirth.Value.Year
-                    : null;
-
-                    if (Student.DateOfBirth.HasValue &&
-                        Student.DateOfBirth.Value.Date > DateTime.Today.AddYears(-StudentAge!.Value))
-                    {
-                        StudentAge--;
-                    }
+                    StudentAge = Student.Age ?? (
+                        Student.DateOfBirth.HasValue
+                            ? CalculateAge(Student.DateOfBirth.Value)
+                            : null
+                    );
                 }
             }
 
             return Page();
         }
 
-        MedicalRecord.CreatedAt = Capstone_Clinic.Helpers.TimeHelper.Now;
-        MedicalRecord.UpdatedAt = Capstone_Clinic.Helpers.TimeHelper.Now;
+        MedicalRecord.CreatedAt =
+            Capstone_Clinic.Helpers.TimeHelper.Now;
+
+        MedicalRecord.UpdatedAt =
+            Capstone_Clinic.Helpers.TimeHelper.Now;
 
         _context.MedicalRecords.Add(MedicalRecord);
         await _context.SaveChangesAsync();
 
-        TempData["SuccessMessage"] = "✅ Consultation saved successfully.";
+        TempData["SuccessMessage"] =
+            "✅ Consultation saved successfully.";
 
         return RedirectToPage(
             "./Details",
