@@ -19,16 +19,16 @@
         padding-left: 14px;
     }
 
-    .vital-create-title::before {
-        content: "";
-        position: absolute;
-        left: 0;
-        top: 4px;
-        bottom: 4px;
-        width: 4px;
-        border-radius: 3px;
-        background: #2563eb;
-    }
+        .vital-create-title::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 4px;
+            bottom: 4px;
+            width: 4px;
+            border-radius: 3px;
+            background: #2563eb;
+        }
 
     .vital-create-subtitle {
         color: #64748b;
@@ -104,22 +104,22 @@
         border-radius: 7px;
     }
 
-    .measurement-field label {
-        color: #475569;
-        font-size: .76rem;
-        font-weight: 600;
-        margin-bottom: 7px;
-    }
+        .measurement-field label {
+            color: #475569;
+            font-size: .76rem;
+            font-weight: 600;
+            margin-bottom: 7px;
+        }
 
-    .measurement-field .form-control {
-        font-size: .82rem;
-        border-color: #d8dee6;
-    }
+        .measurement-field .form-control {
+            font-size: .82rem;
+            border-color: #d8dee6;
+        }
 
-    .measurement-field .form-control:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 .15rem rgba(37, 99, 235, .10);
-    }
+            .measurement-field .form-control:focus {
+                border-color: #2563eb;
+                box-shadow: 0 0 0 .15rem rgba(37, 99, 235, .10);
+            }
 
     .sensor-section {
         border-top: 3px solid #2563eb;
@@ -139,9 +139,9 @@
         margin-top: 14px;
     }
 
-    .sensor-action .btn {
-        font-size: .78rem;
-    }
+        .sensor-action .btn {
+            font-size: .78rem;
+        }
 
     .manual-grid {
         display: grid;
@@ -149,9 +149,9 @@
         gap: 14px;
     }
 
-    .manual-grid .full-width {
-        grid-column: 1 / -1;
-    }
+        .manual-grid .full-width {
+            grid-column: 1 / -1;
+        }
 
     .form-label {
         color: #475569;
@@ -164,10 +164,10 @@
         border-color: #d8dee6;
     }
 
-    .form-control:focus {
-        border-color: #2563eb;
-        box-shadow: 0 0 0 .15rem rgba(37, 99, 235, .10);
-    }
+        .form-control:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 .15rem rgba(37, 99, 235, .10);
+        }
 
     .text-danger.field-validation-error,
     .validation-summary-errors {
@@ -181,9 +181,9 @@
         margin-top: 20px;
     }
 
-    .form-actions .btn {
-        font-size: .75rem;
-    }
+        .form-actions .btn {
+            font-size: .75rem;
+        }
 
     .sensor-loading {
         border: 1px solid #bfdbfe;
@@ -191,6 +191,7 @@
         color: #1e40af;
         font-size: .76rem;
     }
+
     .measurement-monitor {
         margin-top: 18px;
         padding: 16px;
@@ -247,13 +248,14 @@
             grid-template-columns: 1fr;
         }
 
-        .manual-grid .full-width {
-            grid-column: auto;
-        }
+            .manual-grid .full-width {
+                grid-column: auto;
+            }
 
         .form-actions .btn {
             width: 100%;
         }
+
         .status-dot {
             display: inline-block;
             width: 9px;
@@ -381,7 +383,6 @@
     </div>
 
     <!-- Messages -->
-
     @if (TempData["SuccessMessage"] != null)
     {
         <div class="alert alert-success">
@@ -859,9 +860,16 @@
 
                     const updates = data.updates;
 
+        // Once the measurement is finished, show only the windows that were
+        // actually run (it can stop early, or run extra windows).
+        const isFinished =
+            data.status === "Completed" || data.status === "Failed";
+
         const total = updates.length > 0
-            ? updates[0].totalWindows
-            : 5;
+            ? (isFinished
+                ? Math.max(...updates.map(x => x.windowNumber))
+                : updates[0].totalWindows)
+            : 8;
 
         const completed = updates.length;
             const accepted = updates.filter(x => x.accepted).length;

@@ -1,4 +1,3 @@
-
 using Capstone_Clinic.Data;
 using Capstone_Clinic.Models.IoT;
 using Capstone_Clinic.Services;
@@ -6,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Cryptography;
-using System.Collections.Concurrent;    
+using System.Collections.Concurrent;
 using System.Text;
 using System.Data;
 
@@ -59,6 +58,82 @@ public class IoTVitalSignController : ControllerBase
         return CryptographicOperations.FixedTimeEquals(
             providedBytes,
             configuredBytes);
+    }
+
+    private const int MaxStoredWindows = 20;
+
+    // Stores the per-window readings that the ESP32 sends together with its
+    // final result, so the CMS progress panel can display every window.
+    private void StoreWindowResults(IoTVitalSignRequest request)
+    {
+        if (request.Windows == null || request.Windows.Count == 0)
+        {
+            return;
+        }
+
+        var windows = request.Windows
+            .Where(w => w != null &&
+                        w.WindowNumber >= 1 &&
+                        w.WindowNumber <= MaxStoredWindows)
+            .GroupBy(w => w.WindowNumber)
+            .Select(g => g.Last())
+            .OrderBy(w => w.WindowNumber)
+            .ToList();
+
+        if (windows.Count == 0)
+        {
+            return;
+        }
+
+        var totalWindows = Math.Max(
+            request.TotalWindows,
+            windows.Max(w => w.WindowNumber));
+
+        var bucket = _measurementProgress.GetOrAdd(
+            request.RequestId,
+            _ => new ProgressBucket());
+
+        var receivedAt = DateTime.UtcNow;
+
+        lock (bucket.Lock)
+        {
+            bucket.Updates.Clear();
+
+            foreach (var w in windows)
+            {
+                var message = w.Message ?? "";
+
+                if (message.Length > 200)
+                {
+                    message = message.Substring(0, 200);
+                }
+
+                bucket.Updates.Add(new IoTMeasurementProgressUpdate
+                {
+                    WindowNumber = w.WindowNumber,
+                    TotalWindows = totalWindows,
+                    HeartRate = Math.Clamp(w.HeartRate, -999, 300),
+                    Spo2 = Math.Clamp(w.Spo2, -999, 100),
+                    ValidHeartRate = w.ValidHeartRate,
+                    ValidSpO2 = w.ValidSpO2,
+                    Accepted = w.Accepted,
+                    Message = message,
+                    ReceivedAt = receivedAt
+                });
+            }
+
+            bucket.LastUpdatedUtc = receivedAt;
+        }
+
+        // Remove stale progress sessions.
+        foreach (var item in _measurementProgress)
+        {
+            if (DateTime.UtcNow - item.Value.LastUpdatedUtc >
+                TimeSpan.FromMinutes(10))
+            {
+                _measurementProgress.TryRemove(item.Key, out _);
+            }
+        }
     }
 
     // CMS: Create a measurement request.
@@ -425,6 +500,19 @@ public class IoTVitalSignController : ControllerBase
             });
         }
 
+        // Publish the per-window readings sent with this result BEFORE the
+        // request is marked Completed/Failed, so the browser never receives
+        // the final reading without its windows.
+        try
+        {
+            StoreWindowResults(request);
+        }
+        catch
+        {
+            // The per-window display is optional. It must never prevent the
+            // final reading from being saved.
+        }
+
         if (!readingIsValid)
         {
             measurementRequest.Status = "Failed";
@@ -661,6 +749,32 @@ public class IoTVitalSignRequest
     public int Spo2 { get; set; }
 
     public bool FingerDetected { get; set; }
+
+    // Sent by newer firmware together with the final result.
+    public int TotalWindows { get; set; }
+
+    public int WindowsRun { get; set; }
+
+    public string? FirmwareVersion { get; set; }
+
+    public List<IoTWindowResult>? Windows { get; set; }
+}
+
+public class IoTWindowResult
+{
+    public int WindowNumber { get; set; }
+
+    public int HeartRate { get; set; }
+
+    public int Spo2 { get; set; }
+
+    public bool ValidHeartRate { get; set; }
+
+    public bool ValidSpO2 { get; set; }
+
+    public bool Accepted { get; set; }
+
+    public string? Message { get; set; }
 }
 
 public class IoTMeasurementProgressRequest
